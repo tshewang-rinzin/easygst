@@ -17,6 +17,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { DollarSign } from 'lucide-react';
 import { recordPayment } from '@/lib/payments/actions';
+import useSWR from 'swr';
+import type { PaymentMethod } from '@/lib/db/schema';
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 interface RecordPaymentDialogProps {
   invoiceId: number;
@@ -35,6 +39,10 @@ export function RecordPaymentDialog({
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [state, formAction] = useActionState(recordPayment, { error: '' });
+  const { data: paymentMethods } = useSWR<PaymentMethod[]>(
+    '/api/payment-methods/enabled',
+    fetcher
+  );
 
   if (state.success) {
     setOpen(false);
@@ -109,13 +117,28 @@ export function RecordPaymentDialog({
                 name="paymentMethod"
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                defaultValue="cash"
+                defaultValue={paymentMethods && paymentMethods.length > 0 ? paymentMethods[0].code : 'cash'}
               >
-                <option value="cash">Cash</option>
-                <option value="bank_transfer">Bank Transfer</option>
-                <option value="online">Online Payment</option>
-                <option value="cheque">Cheque</option>
+                {paymentMethods && paymentMethods.length > 0 ? (
+                  paymentMethods.map((method) => (
+                    <option key={method.id} value={method.code}>
+                      {method.name}
+                    </option>
+                  ))
+                ) : (
+                  <>
+                    <option value="cash">Cash</option>
+                    <option value="bank_transfer">Bank Transfer</option>
+                    <option value="online_payment">Online Payment</option>
+                    <option value="cheque">Cheque</option>
+                  </>
+                )}
               </select>
+              {(!paymentMethods || paymentMethods.length === 0) && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Using default payment methods. Configure payment methods in settings.
+                </p>
+              )}
             </div>
 
             <div>

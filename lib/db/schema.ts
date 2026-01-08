@@ -137,6 +137,30 @@ export const bankAccounts = pgTable('bank_accounts', {
   teamDefaultBankIdx: index('team_default_bank_idx').on(table.teamId, table.isDefault),
 }));
 
+// Payment Methods - Dynamic payment methods per team
+export const paymentMethods = pgTable('payment_methods', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+
+  // Payment Method Details
+  code: varchar('code', { length: 50 }).notNull(), // mbob, mpay, epay, cash, cheque, bank_transfer, etc.
+  name: varchar('name', { length: 100 }).notNull(), // Display name
+  description: text('description'),
+
+  // Settings
+  isEnabled: boolean('is_enabled').notNull().default(true),
+  sortOrder: integer('sort_order').default(0),
+
+  // Metadata
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamMethodIdx: index('team_method_idx').on(table.teamId),
+  teamCodeIdx: index('team_code_idx').on(table.teamId, table.code),
+}));
+
 // ============================================================
 // INVOICE SYSTEM
 // ============================================================
@@ -661,6 +685,14 @@ export type NewActivityLog = typeof activityLogs.$inferInsert;
 export type Invitation = typeof invitations.$inferSelect;
 export type NewInvitation = typeof invitations.$inferInsert;
 
+// Bank Account types
+export type BankAccount = typeof bankAccounts.$inferSelect;
+export type NewBankAccount = typeof bankAccounts.$inferInsert;
+
+// Payment Method types
+export type PaymentMethod = typeof paymentMethods.$inferSelect;
+export type NewPaymentMethod = typeof paymentMethods.$inferInsert;
+
 // Customer types
 export type Customer = typeof customers.$inferSelect;
 export type NewCustomer = typeof customers.$inferInsert;
@@ -757,4 +789,9 @@ export enum ActivityType {
   CREATE_BANK_ACCOUNT = 'CREATE_BANK_ACCOUNT',
   UPDATE_BANK_ACCOUNT = 'UPDATE_BANK_ACCOUNT',
   DELETE_BANK_ACCOUNT = 'DELETE_BANK_ACCOUNT',
+
+  // Payment Method Operations
+  CREATE_PAYMENT_METHOD = 'CREATE_PAYMENT_METHOD',
+  UPDATE_PAYMENT_METHOD = 'UPDATE_PAYMENT_METHOD',
+  DELETE_PAYMENT_METHOD = 'DELETE_PAYMENT_METHOD',
 }

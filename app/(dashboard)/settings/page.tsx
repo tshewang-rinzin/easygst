@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Building2, Receipt, CreditCard } from 'lucide-react';
+import { Building2, Receipt, CreditCard, Wallet } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function SettingsPage() {
@@ -15,6 +15,12 @@ export default function SettingsPage() {
       description: 'Manage your bank accounts, payment methods, and QR codes for receiving payments',
       href: '/settings/bank-accounts',
       icon: CreditCard,
+    },
+    {
+      title: 'Payment Methods',
+      description: 'Configure available payment methods for recording invoice payments (mBoB, mPay, Cash, etc.)',
+      href: '/settings/payment-methods',
+      icon: Wallet,
     },
     {
       title: 'GST Configuration',
