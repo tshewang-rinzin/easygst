@@ -5,8 +5,71 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1726443359662,
-      "tag": "0000_soft_the_anarchist",
+      "when": 1767597048806,
+      "tag": "0000_absent_dazzler",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1767599763997,
+      "tag": "0001_brief_shocker",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1767604310373,
+      "tag": "0002_closed_miek",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1767614528740,
+      "tag": "0003_tough_nightcrawler",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1767614915410,
+      "tag": "0004_common_amazoness",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1767615710517,
+      "tag": "0005_lame_iron_lad",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1767679205416,
+      "tag": "0006_sour_tag",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1767873888883,
+      "tag": "0007_watery_union_jack",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1767875396777,
+      "tag": "0008_regular_peter_parker",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1767879925046,
+      "tag": "0009_cute_william_stryker",
       "breakpoints": true
     }
   ]

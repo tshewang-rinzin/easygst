@@ -5,8 +5,8 @@ import { getUser, getTeamForUser } from '@/lib/db/queries';
 import { SWRConfig } from 'swr';
 
 export const metadata: Metadata = {
-  title: 'Next.js SaaS Starter',
-  description: 'Get started quickly with Next.js, Postgres, and Stripe.'
+  title: 'EasyGST - GST Compliance Made Easy for Bhutan',
+  description: 'Complete GST management solution for Bhutanese businesses. Handle invoices, cash sales, payments, and tax returns with confidence.'
 };
 
 export const viewport: Viewport = {
