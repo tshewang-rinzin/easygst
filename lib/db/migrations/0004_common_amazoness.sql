@@ -1,0 +1,1 @@
+ALTER TABLE "products" ADD COLUMN "gst_classification" varchar(20) DEFAULT 'STANDARD' NOT NULL;

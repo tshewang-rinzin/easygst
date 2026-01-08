@@ -19,12 +19,13 @@ import {
 import { comparePasswords, hashPassword, setSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
-import { createCheckoutSession } from '@/lib/payments/stripe';
 import { getUser, getUserWithTeam } from '@/lib/db/queries';
 import {
   validatedAction,
   validatedActionWithUser
 } from '@/lib/auth/middleware';
+import { seedDefaultUnits } from '@/lib/units/actions';
+import { seedDefaultTaxClassifications } from '@/lib/tax-classifications/actions';
 
 async function logActivity(
   teamId: number | null | undefined,
@@ -90,12 +91,6 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     setSession(foundUser),
     logActivity(foundTeam?.id, foundUser.id, ActivityType.SIGN_IN)
   ]);
-
-  const redirectTo = formData.get('redirect') as string | null;
-  if (redirectTo === 'checkout') {
-    const priceId = formData.get('priceId') as string;
-    return createCheckoutSession({ team: foundTeam, priceId });
-  }
 
   redirect('/dashboard');
 });
@@ -198,6 +193,12 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     userRole = 'owner';
 
     await logActivity(teamId, createdUser.id, ActivityType.CREATE_TEAM);
+
+    // Seed default configurations for new team
+    await Promise.all([
+      seedDefaultUnits(teamId, createdUser.id),
+      seedDefaultTaxClassifications(teamId, createdUser.id)
+    ]);
   }
 
   const newTeamMember: NewTeamMember = {
@@ -211,12 +212,6 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     logActivity(teamId, createdUser.id, ActivityType.SIGN_UP),
     setSession(createdUser)
   ]);
-
-  const redirectTo = formData.get('redirect') as string | null;
-  if (redirectTo === 'checkout') {
-    const priceId = formData.get('priceId') as string;
-    return createCheckoutSession({ team: createdTeam, priceId });
-  }
 
   redirect('/dashboard');
 });
