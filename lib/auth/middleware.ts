@@ -30,7 +30,7 @@ export function validatedAction<S extends z.ZodType<any, any>, T>(
 
 type ValidatedActionWithUserFunction<S extends z.ZodType<any, any>, T> = (
   data: z.infer<S>,
-  formData: FormData,
+  formData: FormData | z.infer<S>,
   user: User
 ) => Promise<T>;
 
@@ -38,13 +38,25 @@ export function validatedActionWithUser<S extends z.ZodType<any, any>, T>(
   schema: S,
   action: ValidatedActionWithUserFunction<S, T>
 ) {
-  return async (prevState: ActionState, formData: FormData) => {
+  return async (prevState: ActionState | z.infer<S>, formData?: FormData) => {
     const user = await getUser();
     if (!user) {
       throw new Error('User is not authenticated');
     }
 
-    const result = schema.safeParse(Object.fromEntries(formData));
+    // Handle direct object calls (no FormData)
+    let result;
+    if (!formData) {
+      // prevState is actually the data object in this case
+      result = schema.safeParse(prevState);
+      if (!result.success) {
+        return { error: result.error.errors[0].message };
+      }
+      return action(result.data, result.data, user);
+    }
+
+    // Handle FormData calls (traditional form submissions)
+    result = schema.safeParse(Object.fromEntries(formData));
     if (!result.success) {
       return { error: result.error.errors[0].message };
     }

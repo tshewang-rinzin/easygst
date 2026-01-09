@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,11 +20,11 @@ export default function DocumentNumberingPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Set initial values when team data loads
-  useState(() => {
-    if (team?.invoicePrefix && !invoicePrefix) {
+  useEffect(() => {
+    if (team?.invoicePrefix) {
       setInvoicePrefix(team.invoicePrefix);
     }
-  });
+  }, [team]);
 
   const handleSave = async () => {
     setIsSaving(true);
