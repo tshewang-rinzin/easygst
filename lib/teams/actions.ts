@@ -42,6 +42,72 @@ const businessSettingsSchema = z.object({
 
 export type BusinessSettingsFormData = z.infer<typeof businessSettingsSchema>;
 
+// Partial Team Update Schema (for simple settings updates)
+const partialTeamUpdateSchema = z.object({
+  invoicePrefix: z.string().max(20).optional(),
+  invoiceTerms: z.string().max(5000).optional(),
+  invoiceFooter: z.string().max(1000).optional(),
+  logoUrl: z.string().optional(),
+  defaultCurrency: z.enum(['BTN', 'INR', 'USD']).optional(),
+});
+
+export type PartialTeamUpdateData = z.infer<typeof partialTeamUpdateSchema>;
+
+/**
+ * Update team settings (partial updates allowed)
+ * Use for simple settings like invoice prefix
+ */
+export const updateTeam = validatedActionWithUser(
+  partialTeamUpdateSchema,
+  async (data, _, user) => {
+    try {
+      const team = await getTeamForUser();
+      if (!team) {
+        return { success: false, message: 'Team not found' };
+      }
+
+      // Build update object with only provided fields
+      const updateData: any = {
+        updatedAt: new Date(),
+      };
+
+      if (data.invoicePrefix !== undefined) {
+        updateData.invoicePrefix = data.invoicePrefix;
+      }
+      if (data.invoiceTerms !== undefined) {
+        updateData.invoiceTerms = data.invoiceTerms || null;
+      }
+      if (data.invoiceFooter !== undefined) {
+        updateData.invoiceFooter = data.invoiceFooter || null;
+      }
+      if (data.logoUrl !== undefined) {
+        updateData.logoUrl = data.logoUrl || null;
+      }
+      if (data.defaultCurrency !== undefined) {
+        updateData.defaultCurrency = data.defaultCurrency;
+      }
+
+      await db.update(teams).set(updateData).where(eq(teams.id, team.id));
+
+      // Log activity
+      await db.insert(activityLogs).values({
+        teamId: team.id,
+        userId: user.id,
+        action: ActivityType.UPDATE_ACCOUNT,
+        timestamp: new Date(),
+      });
+
+      revalidatePath('/settings');
+      revalidatePath('/settings/numbering');
+
+      return { success: true, message: 'Settings updated successfully' };
+    } catch (error) {
+      console.error('Error updating team settings:', error);
+      return { success: false, message: 'Failed to update settings' };
+    }
+  }
+);
+
 /**
  * Update business settings for DRC compliance
  * Includes TPN, banking details, invoice configuration
