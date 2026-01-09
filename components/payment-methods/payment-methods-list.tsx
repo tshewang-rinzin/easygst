@@ -42,7 +42,10 @@ export function PaymentMethodsList({ initialMethods, hasAnyMethods: initialHasAn
   const hasAnyMethods = methods && methods.length > 0;
 
   const handleToggle = async (id: number, currentStatus: boolean) => {
-    const result = await togglePaymentMethod({ id, isEnabled: !currentStatus });
+    const formData = new FormData();
+    formData.append('id', id.toString());
+    formData.append('isEnabled', (!currentStatus).toString());
+    const result = await togglePaymentMethod(formData);
     if (result.success) {
       mutate();
     } else {
@@ -51,7 +54,9 @@ export function PaymentMethodsList({ initialMethods, hasAnyMethods: initialHasAn
   };
 
   const handleDelete = async (id: number) => {
-    const result = await deletePaymentMethod({ id });
+    const formData = new FormData();
+    formData.append('id', id.toString());
+    const result = await deletePaymentMethod(formData);
     if (result.success) {
       mutate();
     } else {
@@ -61,7 +66,7 @@ export function PaymentMethodsList({ initialMethods, hasAnyMethods: initialHasAn
 
   const handleSeedDefaults = async () => {
     setIsSeeding(true);
-    const result = await seedDefaultPaymentMethods({});
+    const result = await seedDefaultPaymentMethods();
     if (result.success) {
       mutate();
     } else {
@@ -100,7 +105,7 @@ export function PaymentMethodsList({ initialMethods, hasAnyMethods: initialHasAn
               )}
             </Button>
             <p className="text-xs text-gray-600 mt-3">
-              This will add: mBoB, mPay, ePay, Mobile Transfer, Bank Transfer, Cash, Cheque, and Online Payment
+              This will add: mBoB, mPay, ePay, DK Mobile Bank, Bank Transfer, Cash, Cheque, and Online Payment
             </p>
           </CardContent>
         </Card>

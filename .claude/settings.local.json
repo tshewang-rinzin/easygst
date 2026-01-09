@@ -14,7 +14,8 @@
       "Bash(PGPASSWORD=postgres psql:*)",
       "Bash(npx shadcn@latest add:*)",
       "Bash(curl:*)",
-      "Bash(pnpm db:generate:*)"
+      "Bash(pnpm db:generate:*)",
+      "Bash(pnpm build:*)"
     ]
   }
 }

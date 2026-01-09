@@ -1,0 +1,1 @@
+ALTER TABLE "supplier_payments" ADD COLUMN "payment_gateway" varchar(100);

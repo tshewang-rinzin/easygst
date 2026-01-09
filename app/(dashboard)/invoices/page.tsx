@@ -2,8 +2,17 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, Search, FileText } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { PlusCircle, Search, FileText, Eye, Edit } from 'lucide-react';
 import { getInvoices } from '@/lib/invoices/queries';
+import { Badge } from '@/components/ui/badge';
 
 async function InvoiceList({
   searchTerm,
@@ -37,85 +46,150 @@ async function InvoiceList({
   }
 
   return (
-    <div className="space-y-4">
-      {invoices.map(({ invoice, customer }) => (
-        <Link key={invoice.id} href={`/invoices/${invoice.id}`}>
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardContent className="pt-6">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {invoice.invoiceNumber}
-                    </h3>
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        invoice.status === 'paid'
-                          ? 'bg-green-100 text-green-700'
-                          : invoice.status === 'sent'
-                          ? 'bg-blue-100 text-blue-700'
-                          : invoice.status === 'overdue'
-                          ? 'bg-red-100 text-red-700'
-                          : invoice.status === 'draft'
-                          ? 'bg-gray-100 text-gray-700'
-                          : 'bg-yellow-100 text-yellow-700'
-                      }`}
-                    >
-                      {invoice.status.charAt(0).toUpperCase() +
-                        invoice.status.slice(1)}
-                    </span>
+    <Card>
+      <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Invoice #</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Due Date</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
+              <TableHead className="text-right">Amount Due</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {invoices.map(({ invoice, customer }) => (
+              <TableRow key={invoice.id}>
+                <TableCell className="font-medium">
+                  {invoice.invoiceNumber}
+                </TableCell>
+                <TableCell>{customer?.name || 'N/A'}</TableCell>
+                <TableCell>
+                  {new Date(invoice.invoiceDate).toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+                  {invoice.dueDate
+                    ? new Date(invoice.dueDate).toLocaleDateString()
+                    : '-'}
+                </TableCell>
+                <TableCell className="text-right">
+                  {invoice.currency} {parseFloat(invoice.totalAmount).toFixed(2)}
+                </TableCell>
+                <TableCell className="text-right">
+                  <span
+                    className={
+                      parseFloat(invoice.amountDue) > 0
+                        ? 'text-red-600 font-medium'
+                        : 'text-gray-600'
+                    }
+                  >
+                    {invoice.currency} {parseFloat(invoice.amountDue).toFixed(2)}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={
+                      invoice.status === 'paid'
+                        ? 'default'
+                        : invoice.status === 'draft'
+                        ? 'secondary'
+                        : invoice.status === 'overdue'
+                        ? 'destructive'
+                        : 'outline'
+                    }
+                    className={
+                      invoice.status === 'sent'
+                        ? 'bg-blue-100 text-blue-700 hover:bg-blue-100'
+                        : invoice.status === 'viewed'
+                        ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100'
+                        : invoice.status === 'paid'
+                        ? 'bg-green-100 text-green-700 hover:bg-green-100'
+                        : ''
+                    }
+                  >
+                    {invoice.status.charAt(0).toUpperCase() +
+                      invoice.status.slice(1)}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Link href={`/invoices/${invoice.id}`}>
+                      <Button variant="ghost" size="sm">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                    {invoice.status === 'draft' && (
+                      <Link href={`/invoices/${invoice.id}/edit`}>
+                        <Button variant="ghost" size="sm">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    )}
                   </div>
-                  <p className="text-sm text-gray-600 mb-1">
-                    Customer: {customer?.name || 'N/A'}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Date: {new Date(invoice.invoiceDate).toLocaleDateString()}
-                    {invoice.dueDate &&
-                      ` • Due: ${new Date(invoice.dueDate).toLocaleDateString()}`}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-gray-500 mb-1">Total Amount</p>
-                  <p className="text-xl font-bold text-gray-900">
-                    {invoice.currency} {parseFloat(invoice.totalAmount).toFixed(2)}
-                  </p>
-                  {parseFloat(invoice.amountDue) > 0 && (
-                    <p className="text-xs text-red-600 mt-1">
-                      Due: {invoice.currency}{' '}
-                      {parseFloat(invoice.amountDue).toFixed(2)}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-      ))}
-    </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 }
 
 function InvoiceListSkeleton() {
   return (
-    <div className="space-y-4">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Card key={i} className="animate-pulse">
-          <CardContent className="pt-6">
-            <div className="flex justify-between">
-              <div className="flex-1 space-y-2">
-                <div className="h-6 bg-gray-200 rounded w-1/4"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-              </div>
-              <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-16"></div>
-                <div className="h-6 bg-gray-200 rounded w-24"></div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+    <Card>
+      <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Invoice #</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Due Date</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
+              <TableHead className="text-right">Amount Due</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <TableRow key={i} className="animate-pulse">
+                <TableCell>
+                  <div className="h-4 bg-gray-200 rounded w-24"></div>
+                </TableCell>
+                <TableCell>
+                  <div className="h-4 bg-gray-200 rounded w-32"></div>
+                </TableCell>
+                <TableCell>
+                  <div className="h-4 bg-gray-200 rounded w-20"></div>
+                </TableCell>
+                <TableCell>
+                  <div className="h-4 bg-gray-200 rounded w-20"></div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="h-4 bg-gray-200 rounded w-20 ml-auto"></div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="h-4 bg-gray-200 rounded w-20 ml-auto"></div>
+                </TableCell>
+                <TableCell>
+                  <div className="h-6 bg-gray-200 rounded w-16"></div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="h-8 bg-gray-200 rounded w-16 ml-auto"></div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 }
 

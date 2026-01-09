@@ -2,7 +2,15 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, Search, Mail, Phone } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { PlusCircle, Search, Mail, Phone, Eye, Edit } from 'lucide-react';
 import { getCustomers } from '@/lib/customers/queries';
 
 async function CustomerList({ searchTerm }: { searchTerm?: string }) {
@@ -31,63 +39,122 @@ async function CustomerList({ searchTerm }: { searchTerm?: string }) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {customers.map((customer) => (
-        <Link key={customer.id} href={`/customers/${customer.id}`}>
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader>
-              <CardTitle className="text-lg">{customer.name}</CardTitle>
-              {customer.contactPerson && (
-                <p className="text-sm text-gray-500">{customer.contactPerson}</p>
-              )}
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {customer.email && (
-                <div className="flex items-center text-sm text-gray-600">
-                  <Mail className="h-4 w-4 mr-2" />
-                  {customer.email}
-                </div>
-              )}
-              {customer.mobile && (
-                <div className="flex items-center text-sm text-gray-600">
-                  <Phone className="h-4 w-4 mr-2" />
-                  {customer.mobile}
-                </div>
-              )}
-              {customer.tpn && (
-                <div className="text-sm text-gray-500">
-                  TPN: {customer.tpn}
-                </div>
-              )}
-              {customer.city && customer.dzongkhag && (
-                <div className="text-sm text-gray-500">
-                  {customer.city}, {customer.dzongkhag}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </Link>
-      ))}
-    </div>
+    <Card>
+      <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Contact Person</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Mobile</TableHead>
+              <TableHead>TPN</TableHead>
+              <TableHead>Location</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {customers.map((customer) => (
+              <TableRow key={customer.id}>
+                <TableCell className="font-medium">{customer.name}</TableCell>
+                <TableCell>{customer.contactPerson || '-'}</TableCell>
+                <TableCell>
+                  {customer.email ? (
+                    <div className="flex items-center gap-1">
+                      <Mail className="h-3 w-3 text-gray-400" />
+                      <span className="text-sm">{customer.email}</span>
+                    </div>
+                  ) : (
+                    '-'
+                  )}
+                </TableCell>
+                <TableCell>
+                  {customer.mobile ? (
+                    <div className="flex items-center gap-1">
+                      <Phone className="h-3 w-3 text-gray-400" />
+                      <span className="text-sm">{customer.mobile}</span>
+                    </div>
+                  ) : (
+                    '-'
+                  )}
+                </TableCell>
+                <TableCell className="text-sm text-gray-600">
+                  {customer.tpn || '-'}
+                </TableCell>
+                <TableCell className="text-sm text-gray-600">
+                  {customer.city && customer.dzongkhag
+                    ? `${customer.city}, ${customer.dzongkhag}`
+                    : customer.city || customer.dzongkhag || '-'}
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Link href={`/customers/${customer.id}`}>
+                      <Button variant="ghost" size="sm">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                    <Link href={`/customers/${customer.id}/edit`}>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 }
 
 function CustomerListSkeleton() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {[1, 2, 3, 4, 5, 6].map((i) => (
-        <Card key={i} className="animate-pulse">
-          <CardHeader>
-            <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="h-4 bg-gray-200 rounded w-full"></div>
-            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+    <Card>
+      <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Contact Person</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Mobile</TableHead>
+              <TableHead>TPN</TableHead>
+              <TableHead>Location</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <TableRow key={i} className="animate-pulse">
+                <TableCell>
+                  <div className="h-4 bg-gray-200 rounded w-32"></div>
+                </TableCell>
+                <TableCell>
+                  <div className="h-4 bg-gray-200 rounded w-24"></div>
+                </TableCell>
+                <TableCell>
+                  <div className="h-4 bg-gray-200 rounded w-40"></div>
+                </TableCell>
+                <TableCell>
+                  <div className="h-4 bg-gray-200 rounded w-28"></div>
+                </TableCell>
+                <TableCell>
+                  <div className="h-4 bg-gray-200 rounded w-20"></div>
+                </TableCell>
+                <TableCell>
+                  <div className="h-4 bg-gray-200 rounded w-36"></div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="h-8 bg-gray-200 rounded w-16 ml-auto"></div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 }
 

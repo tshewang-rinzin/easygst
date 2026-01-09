@@ -15,6 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { DatePicker } from '@/components/ui/date-picker';
 import { DollarSign } from 'lucide-react';
 import { recordPayment } from '@/lib/payments/actions';
 import useSWR from 'swr';
@@ -38,6 +39,7 @@ export function RecordPaymentDialog({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [paymentDate, setPaymentDate] = useState<Date>(new Date());
   const [state, formAction] = useActionState(recordPayment, { error: '' });
   const { data: paymentMethods } = useSWR<PaymentMethod[]>(
     '/api/payment-methods/enabled',
@@ -67,7 +69,7 @@ export function RecordPaymentDialog({
           Record Payment
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Record Payment</DialogTitle>
@@ -99,12 +101,13 @@ export function RecordPaymentDialog({
               <Label htmlFor="paymentDate" className="text-sm font-medium mb-2 block">
                 Payment Date <span className="text-red-500">*</span>
               </Label>
-              <Input
+              <DatePicker
                 id="paymentDate"
                 name="paymentDate"
-                type="date"
+                date={paymentDate}
+                onDateChange={(date) => setPaymentDate(date || new Date())}
+                placeholder="Select payment date"
                 required
-                defaultValue={new Date().toISOString().split('T')[0]}
               />
             </div>
 
