@@ -5,10 +5,12 @@ import {
   getTotalOutstanding,
 } from '@/lib/invoices/queries';
 import { getCashSales } from '@/lib/invoices/cash-sales-queries';
+import { getCustomerAdvances } from '@/lib/customer-payments/queries';
+import { getSupplierAdvances } from '@/lib/supplier-payments/queries';
 import { getTeamForUser } from '@/lib/db/queries';
 import { db } from '@/lib/db/drizzle';
-import { invoices } from '@/lib/db/schema';
-import { eq, and, lt } from 'drizzle-orm';
+import { invoices, supplierBills } from '@/lib/db/schema';
+import { eq, and, lt, ne } from 'drizzle-orm';
 import Decimal from 'decimal.js';
 
 export async function GET() {
@@ -18,22 +20,26 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    console.log('[Dashboard] Team ID:', team.id);
+
     // Get all invoices
     const allInvoices = await getInvoices();
+    console.log('[Dashboard] Found', allInvoices.length, 'invoices');
 
     // Get cash sales
     const cashSales = await getCashSales();
+    console.log('[Dashboard] Found', cashSales.length, 'cash sales');
 
     // Separate tax invoices (credit sales) from cash sales
     const taxInvoices = allInvoices.filter(
-      (inv) => !inv.paymentTerms?.includes('Cash Sale')
+      (item) => !item.invoice.paymentTerms?.includes('Cash Sale')
     );
 
     // Calculate tax invoice metrics
     const taxInvoiceCount = taxInvoices.length;
     const taxInvoiceRevenue = taxInvoices
-      .filter((inv) => inv.status === 'paid')
-      .reduce((sum, inv) => sum.plus(inv.totalAmount), new Decimal(0));
+      .filter((item) => item.invoice.status === 'paid')
+      .reduce((sum, item) => sum.plus(item.invoice.totalAmount), new Decimal(0));
 
     // Calculate cash sale metrics
     const cashSaleCount = cashSales.length;
@@ -49,7 +55,7 @@ export async function GET() {
     // Outstanding metrics
     const totalOutstanding = await getTotalOutstanding();
     const unpaidInvoices = allInvoices.filter(
-      (inv) => inv.paymentStatus === 'unpaid' || inv.paymentStatus === 'partial'
+      (item) => item.invoice.paymentStatus === 'unpaid' || item.invoice.paymentStatus === 'partial'
     );
     const unpaidCount = unpaidInvoices.length;
 
@@ -71,17 +77,67 @@ export async function GET() {
       new Decimal(0)
     );
 
-    // GST Summary - Output GST from all invoices
-    const outputGST = allInvoices.reduce(
-      (sum, inv) => sum.plus(inv.totalTax),
+    // GST Summary - Output GST from all paid invoices
+    const outputGST = allInvoices
+      .filter((item) => item.invoice.status === 'paid')
+      .reduce(
+        (sum, item) => sum.plus(item.invoice.totalTax),
+        new Decimal(0)
+      );
+
+    // Input GST (from supplier bills - paid purchases)
+    const paidBills = await db
+      .select()
+      .from(supplierBills)
+      .where(
+        and(
+          eq(supplierBills.teamId, team.id),
+          ne(supplierBills.status, 'cancelled'),
+          ne(supplierBills.status, 'draft')
+        )
+      );
+
+    console.log('[Dashboard] Found', paidBills.length, 'supplier bills');
+
+    const inputGST = paidBills.reduce(
+      (sum, bill) => sum.plus(bill.totalTax),
       new Decimal(0)
     );
 
-    // Input GST (from purchases - placeholder for now)
-    const inputGST = new Decimal(0);
+    console.log('[Dashboard] Output GST:', outputGST.toFixed(2));
+    console.log('[Dashboard] Input GST:', inputGST.toFixed(2));
 
-    // Net GST Payable
+    // Net GST Payable (Output GST - Input GST)
     const netGST = outputGST.minus(inputGST);
+    console.log('[Dashboard] Net GST:', netGST.toFixed(2));
+
+    // Customer Advances
+    const customerAdvances = await getCustomerAdvances();
+    const customerAdvanceCount = customerAdvances.length;
+    const customerAdvanceTotal = customerAdvances.reduce(
+      (sum, adv) => sum.plus(adv.amount),
+      new Decimal(0)
+    );
+    const customerAdvanceUnallocated = customerAdvances.reduce(
+      (sum, adv) => sum.plus(adv.unallocatedAmount),
+      new Decimal(0)
+    );
+
+    console.log('[Dashboard] Customer Advances:', customerAdvanceCount);
+
+    // Supplier Advances
+    const supplierAdvances = await getSupplierAdvances();
+    const supplierAdvanceCount = supplierAdvances.length;
+    const supplierAdvanceTotal = supplierAdvances.reduce(
+      (sum, adv) => sum.plus(adv.amount),
+      new Decimal(0)
+    );
+    const supplierAdvanceUnallocated = supplierAdvances.reduce(
+      (sum, adv) => sum.plus(adv.unallocatedAmount),
+      new Decimal(0)
+    );
+
+    console.log('[Dashboard] Supplier Advances:', supplierAdvanceCount);
 
     // Get default currency from team settings
     const currency = team.defaultCurrency || 'BTN';
@@ -116,6 +172,18 @@ export async function GET() {
         output: outputGST.toFixed(2),
         input: inputGST.toFixed(2),
         net: netGST.toFixed(2),
+      },
+
+      // Advances
+      customerAdvances: {
+        count: customerAdvanceCount,
+        total: customerAdvanceTotal.toFixed(2),
+        unallocated: customerAdvanceUnallocated.toFixed(2),
+      },
+      supplierAdvances: {
+        count: supplierAdvanceCount,
+        total: supplierAdvanceTotal.toFixed(2),
+        unallocated: supplierAdvanceUnallocated.toFixed(2),
       },
 
       // Legacy fields for compatibility

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { DatePicker } from '@/components/ui/date-picker';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { createAdjustment } from '@/lib/adjustments/actions';
@@ -19,6 +20,7 @@ export default function NewAdjustmentPage() {
   const [isPending, startTransition] = useTransition();
   const [state, formAction] = useActionState(createAdjustment, { error: '' });
   const [adjustmentType, setAdjustmentType] = useState<string>('discount');
+  const [adjustmentDate, setAdjustmentDate] = useState<Date>(new Date());
 
   const { data: invoices } = useSWR('/api/invoices', fetcher);
 
@@ -154,12 +156,13 @@ export default function NewAdjustmentPage() {
               <Label htmlFor="adjustmentDate" className="mb-2">
                 Adjustment Date <span className="text-red-500">*</span>
               </Label>
-              <Input
+              <DatePicker
                 id="adjustmentDate"
                 name="adjustmentDate"
-                type="date"
+                date={adjustmentDate}
+                onDateChange={(date) => setAdjustmentDate(date || new Date())}
+                placeholder="Select adjustment date"
                 required
-                defaultValue={new Date().toISOString().split('T')[0]}
               />
             </div>
 

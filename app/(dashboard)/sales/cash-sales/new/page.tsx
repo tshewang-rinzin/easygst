@@ -7,12 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { DatePicker } from '@/components/ui/date-picker';
 import { ArrowLeft, Plus, Trash2, Banknote } from 'lucide-react';
 import Link from 'next/link';
 import { createCashSale } from '@/lib/invoices/cash-sales-actions';
 import { CustomerSearch } from '@/components/customers/customer-search';
 import { ProductSearchInline } from '@/components/products/product-search-inline';
-import { Customer, Product } from '@/lib/db/schema';
+import { Customer, Product, TaxClassification, PaymentMethod } from '@/lib/db/schema';
 import useSWR from 'swr';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -33,9 +34,12 @@ export default function NewCashSalePage() {
   const [isPending, startTransition] = useTransition();
   const [state, formAction] = useActionState(createCashSale, { error: '' });
   const { data: team } = useSWR('/api/team', fetcher);
+  const { data: taxClassifications } = useSWR<TaxClassification[]>('/api/tax-classifications', fetcher);
+  const { data: paymentMethods } = useSWR<PaymentMethod[]>('/api/payment-methods/enabled', fetcher);
   const defaultGstRate = team?.defaultGstRate || '0';
 
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [saleDate, setSaleDate] = useState<Date>(new Date());
   const [lineItems, setLineItems] = useState<LineItem[]>([
     {
       id: crypto.randomUUID(),
@@ -298,12 +302,13 @@ export default function NewCashSalePage() {
                 <Label htmlFor="invoiceDate" className="text-sm font-medium mb-2 block">
                   Sale Date <span className="text-red-500">*</span>
                 </Label>
-                <Input
+                <DatePicker
                   id="invoiceDate"
                   name="invoiceDate"
-                  type="date"
+                  date={saleDate}
+                  onDateChange={(date) => setSaleDate(date || new Date())}
+                  placeholder="Select sale date"
                   required
-                  defaultValue={new Date().toISOString().split('T')[0]}
                 />
               </div>
 
@@ -445,12 +450,28 @@ export default function NewCashSalePage() {
                         disabled={item.isTaxExempt}
                         className="w-full h-9 px-2 py-1 border border-gray-300 rounded-md text-sm bg-white disabled:bg-gray-100 disabled:text-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
                       >
-                        <option value="0">0%</option>
-                        <option value="5">5%</option>
-                        <option value="10">10%</option>
-                        <option value="20">20%</option>
-                        <option value="30">30%</option>
-                        <option value="50">50%</option>
+                        {taxClassifications && taxClassifications.length > 0 ? (
+                          taxClassifications
+                            .sort((a, b) => a.sortOrder - b.sortOrder)
+                            .filter((tc) => tc.isActive)
+                            .map((classification) => (
+                              <option
+                                key={classification.id}
+                                value={parseFloat(classification.taxRate).toString()}
+                              >
+                                {classification.name} ({parseFloat(classification.taxRate)}%)
+                              </option>
+                            ))
+                        ) : (
+                          <>
+                            <option value="0">0%</option>
+                            <option value="5">5%</option>
+                            <option value="10">10%</option>
+                            <option value="20">20%</option>
+                            <option value="30">30%</option>
+                            <option value="50">50%</option>
+                          </>
+                        )}
                       </select>
                     </td>
                     <td className="py-3 px-2 text-center">
@@ -528,14 +549,29 @@ export default function NewCashSalePage() {
                 id="paymentMethod"
                 name="paymentMethod"
                 required
-                defaultValue="cash"
+                defaultValue={paymentMethods && paymentMethods.length > 0 ? paymentMethods[0].code : 'cash'}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
               >
-                <option value="cash">Cash</option>
-                <option value="bank_transfer">Bank Transfer</option>
-                <option value="online">Online Payment</option>
-                <option value="cheque">Cheque</option>
+                {paymentMethods && paymentMethods.length > 0 ? (
+                  paymentMethods.map((method) => (
+                    <option key={method.id} value={method.code}>
+                      {method.name}
+                    </option>
+                  ))
+                ) : (
+                  <>
+                    <option value="cash">Cash</option>
+                    <option value="bank_transfer">Bank Transfer</option>
+                    <option value="online">Online Payment</option>
+                    <option value="cheque">Cheque</option>
+                  </>
+                )}
               </select>
+              {(!paymentMethods || paymentMethods.length === 0) && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Using default payment methods. Configure in settings.
+                </p>
+              )}
             </div>
 
             <div>

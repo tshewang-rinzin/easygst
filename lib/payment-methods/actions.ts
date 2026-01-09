@@ -12,53 +12,55 @@ import { paymentMethodSchema, DEFAULT_BHUTAN_PAYMENT_METHODS } from './validatio
 /**
  * Seed default payment methods for a team
  */
-export const seedDefaultPaymentMethods = validatedActionWithUser(
-  z.object({}),
-  async (data, _, user) => {
-    try {
-      const team = await getTeamForUser();
-      if (!team) {
-        return { error: 'Team not found' };
-      }
-
-      // Check if already seeded
-      const existing = await db
-        .select({ id: paymentMethods.id })
-        .from(paymentMethods)
-        .where(eq(paymentMethods.teamId, team.id))
-        .limit(1);
-
-      if (existing.length > 0) {
-        return { error: 'Payment methods already exist for this team' };
-      }
-
-      // Insert default methods
-      const methods = DEFAULT_BHUTAN_PAYMENT_METHODS.map((method) => ({
-        teamId: team.id,
-        ...method,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }));
-
-      await db.insert(paymentMethods).values(methods);
-
-      // Log activity
-      await db.insert(activityLogs).values({
-        teamId: team.id,
-        userId: user.id,
-        action: ActivityType.CREATE_PAYMENT_METHOD,
-        timestamp: new Date(),
-      });
-
-      revalidatePath('/settings/payment-methods');
-
-      return { success: 'Default payment methods added successfully' };
-    } catch (error) {
-      console.error('Error seeding payment methods:', error);
-      return { error: 'Failed to seed payment methods' };
+export async function seedDefaultPaymentMethods() {
+  try {
+    const user = await getUser();
+    if (!user) {
+      return { error: 'User not authenticated' };
     }
+
+    const team = await getTeamForUser();
+    if (!team) {
+      return { error: 'Team not found' };
+    }
+
+    // Check if already seeded
+    const existing = await db
+      .select({ id: paymentMethods.id })
+      .from(paymentMethods)
+      .where(eq(paymentMethods.teamId, team.id))
+      .limit(1);
+
+    if (existing.length > 0) {
+      return { error: 'Payment methods already exist for this team' };
+    }
+
+    // Insert default methods
+    const methods = DEFAULT_BHUTAN_PAYMENT_METHODS.map((method) => ({
+      teamId: team.id,
+      ...method,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }));
+
+    await db.insert(paymentMethods).values(methods);
+
+    // Log activity
+    await db.insert(activityLogs).values({
+      teamId: team.id,
+      userId: user.id,
+      action: ActivityType.CREATE_PAYMENT_METHOD,
+      timestamp: new Date(),
+    });
+
+    revalidatePath('/settings/payment-methods');
+
+    return { success: 'Default payment methods added successfully' };
+  } catch (error) {
+    console.error('Error seeding payment methods:', error);
+    return { error: 'Failed to seed payment methods' };
   }
-);
+}
 
 /**
  * Create a new payment method
@@ -169,7 +171,7 @@ export const updatePaymentMethod = validatedActionWithUser(
  * Delete a payment method
  */
 export const deletePaymentMethod = validatedActionWithUser(
-  z.object({ id: z.number().int().positive() }),
+  z.object({ id: z.coerce.number().int().positive() }),
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();
@@ -221,8 +223,8 @@ export const deletePaymentMethod = validatedActionWithUser(
  */
 export const togglePaymentMethod = validatedActionWithUser(
   z.object({
-    id: z.number().int().positive(),
-    isEnabled: z.boolean(),
+    id: z.coerce.number().int().positive(),
+    isEnabled: z.coerce.boolean(),
   }),
   async (data, _, user) => {
     try {

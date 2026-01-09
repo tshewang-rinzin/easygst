@@ -197,6 +197,44 @@ export const customers = pgTable('customers', {
   customerEmailIdx: index('customer_email_idx').on(table.email),
 }));
 
+// Suppliers/Vendors
+export const suppliers = pgTable('suppliers', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+
+  // Supplier Details
+  name: varchar('name', { length: 255 }).notNull(),
+  contactPerson: varchar('contact_person', { length: 255 }),
+  email: varchar('email', { length: 255 }),
+  phone: varchar('phone', { length: 20 }),
+  mobile: varchar('mobile', { length: 20 }),
+  tpn: varchar('tpn', { length: 20 }), // Tax Payer Number
+  gstNumber: varchar('gst_number', { length: 20 }), // Supplier's GST Number
+
+  // Address
+  address: text('address'),
+  city: varchar('city', { length: 100 }),
+  dzongkhag: varchar('dzongkhag', { length: 100 }),
+  postalCode: varchar('postal_code', { length: 10 }),
+
+  // Banking (for payments)
+  bankName: varchar('bank_name', { length: 100 }),
+  bankAccountNumber: varchar('bank_account_number', { length: 50 }),
+  bankAccountName: varchar('bank_account_name', { length: 100 }),
+
+  // Metadata
+  notes: text('notes'),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdBy: integer('created_by').references(() => users.id),
+}, (table) => ({
+  teamSupplierIdx: index('team_supplier_idx').on(table.teamId),
+  supplierEmailIdx: index('supplier_email_idx').on(table.email),
+}));
+
 // Product Categories (Master Data per Team)
 export const productCategories = pgTable('product_categories', {
   id: serial('id').primaryKey(),
@@ -547,6 +585,420 @@ export const invoiceSequences = pgTable('invoice_sequences', {
 }));
 
 // ============================================================
+// PURCHASE SYSTEM (Supplier Bills)
+// ============================================================
+
+// Supplier Bills (Purchase Invoices)
+export const supplierBills = pgTable('supplier_bills', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  supplierId: integer('supplier_id')
+    .notNull()
+    .references(() => suppliers.id),
+
+  // Bill Identification
+  billNumber: varchar('bill_number', { length: 50 }).notNull(), // BILL-2026-0001 or Supplier's invoice number
+  billDate: timestamp('bill_date').notNull().defaultNow(),
+  dueDate: timestamp('due_date'),
+
+  // Financial
+  currency: varchar('currency', { length: 3 }).notNull().default('BTN'),
+  subtotal: numeric('subtotal', { precision: 15, scale: 2 }).notNull(),
+  totalTax: numeric('total_tax', { precision: 15, scale: 2 }).notNull().default('0'),
+  totalDiscount: numeric('total_discount', { precision: 15, scale: 2 }).notNull().default('0'),
+  totalAmount: numeric('total_amount', { precision: 15, scale: 2 }).notNull(),
+
+  // Payment Tracking
+  amountPaid: numeric('amount_paid', { precision: 15, scale: 2 }).notNull().default('0'),
+  amountDue: numeric('amount_due', { precision: 15, scale: 2 }).notNull(),
+
+  // Status
+  status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, received, partial, paid, overdue, cancelled
+  paymentStatus: varchar('payment_status', { length: 20 }).notNull().default('unpaid'), // unpaid, partial, paid
+
+  // Terms & Notes
+  paymentTerms: text('payment_terms'),
+  notes: text('notes'),
+  termsAndConditions: text('terms_and_conditions'),
+
+  // Compliance & Audit
+  isLocked: boolean('is_locked').notNull().default(false),
+  lockedAt: timestamp('locked_at'),
+  lockedBy: integer('locked_by').references(() => users.id),
+
+  // Metadata
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdBy: integer('created_by')
+    .notNull()
+    .references(() => users.id),
+}, (table) => ({
+  teamBillIdx: index('team_bill_idx').on(table.teamId),
+  billNumberIdx: uniqueIndex('bill_number_idx').on(table.teamId, table.billNumber),
+  supplierBillIdx: index('supplier_bill_idx').on(table.supplierId),
+  billStatusIdx: index('bill_status_idx').on(table.status),
+  billDateIdx: index('bill_date_idx').on(table.billDate),
+}));
+
+// Supplier Bill Items (Line Items for purchases)
+export const supplierBillItems = pgTable('supplier_bill_items', {
+  id: serial('id').primaryKey(),
+  billId: integer('bill_id')
+    .notNull()
+    .references(() => supplierBills.id, { onDelete: 'cascade' }),
+  productId: integer('product_id').references(() => products.id),
+
+  // Item Details
+  description: text('description').notNull(),
+  quantity: numeric('quantity', { precision: 15, scale: 4 }).notNull().default('1'),
+  unit: varchar('unit', { length: 50 }),
+  unitPrice: numeric('unit_price', { precision: 15, scale: 2 }).notNull(),
+
+  // Pricing Breakdown
+  lineTotal: numeric('line_total', { precision: 15, scale: 2 }).notNull(),
+  discountPercent: numeric('discount_percent', { precision: 5, scale: 2 }).default('0'),
+  discountAmount: numeric('discount_amount', { precision: 15, scale: 2 }).default('0'),
+
+  // Tax Configuration (Input GST - can be claimed)
+  taxRate: numeric('tax_rate', { precision: 5, scale: 2 }).notNull().default('0'),
+  taxAmount: numeric('tax_amount', { precision: 15, scale: 2 }).notNull().default('0'),
+  isTaxExempt: boolean('is_tax_exempt').notNull().default(false),
+  gstClassification: varchar('gst_classification', { length: 20 }).notNull().default('STANDARD'),
+
+  // Final
+  itemTotal: numeric('item_total', { precision: 15, scale: 2 }).notNull(),
+
+  // Display Order
+  sortOrder: integer('sort_order').notNull().default(0),
+
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  billItemIdx: index('bill_item_idx').on(table.billId),
+}));
+
+// Supplier Bill Sequence (for gap-free sequential numbering)
+export const supplierBillSequences = pgTable('supplier_bill_sequences', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' })
+    .unique(),
+
+  // Sequence Control
+  year: integer('year').notNull(),
+  lastNumber: integer('last_number').notNull().default(0),
+
+  // Locking for concurrency
+  lockedAt: timestamp('locked_at'),
+  lockedBy: varchar('locked_by', { length: 100 }),
+
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamBillYearIdx: uniqueIndex('team_bill_year_idx').on(table.teamId, table.year),
+}));
+
+// Supplier Bill Adjustments (discounts, late fees, credits, debits)
+export const supplierBillAdjustments = pgTable('supplier_bill_adjustments', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  billId: integer('bill_id')
+    .notNull()
+    .references(() => supplierBills.id, { onDelete: 'cascade' }),
+
+  // Adjustment Details
+  adjustmentType: varchar('adjustment_type', { length: 50 }).notNull(), // discount, late_fee, credit_note, debit_note, bank_charges, other
+  amount: numeric('amount', { precision: 15, scale: 2 }).notNull(), // Positive for charges/debits, negative for discounts/credits
+  description: text('description').notNull(),
+
+  // Reference
+  referenceNumber: varchar('reference_number', { length: 100 }),
+  adjustmentDate: timestamp('adjustment_date').notNull().defaultNow(),
+
+  // Notes
+  notes: text('notes'),
+
+  // Metadata
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdBy: integer('created_by')
+    .notNull()
+    .references(() => users.id),
+}, (table) => ({
+  teamBillAdjustmentIdx: index('team_bill_adjustment_idx').on(table.teamId),
+  billAdjustmentIdx: index('bill_adjustment_idx').on(table.billId),
+  billAdjustmentDateIdx: index('bill_adjustment_date_idx').on(table.adjustmentDate),
+}));
+
+// Supplier Payments
+export const supplierPayments = pgTable('supplier_payments', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  billId: integer('bill_id')
+    .references(() => supplierBills.id), // Nullable for advances
+
+  // Payment Details
+  amount: numeric('amount', { precision: 15, scale: 2 }).notNull(),
+  currency: varchar('currency', { length: 3 }).notNull(),
+  paymentDate: timestamp('payment_date').notNull().defaultNow(),
+
+  // Allocation tracking (for advances)
+  allocatedAmount: numeric('allocated_amount', { precision: 15, scale: 2 }).notNull().default('0.00'),
+  unallocatedAmount: numeric('unallocated_amount', { precision: 15, scale: 2 }).notNull().default('0.00'),
+
+  // Payment Type & Advance Support
+  paymentType: varchar('payment_type', { length: 20 }).notNull().default('payment'), // 'payment' or 'advance'
+  advanceNumber: varchar('advance_number', { length: 50 }), // For advance-type payments: ADV-S-YYYY-NNNN
+
+  // Payment Method
+  paymentMethod: varchar('payment_method', { length: 50 }).notNull(),
+  paymentGateway: varchar('payment_gateway', { length: 100 }),
+  transactionId: varchar('transaction_id', { length: 255 }),
+
+  // Banking Details
+  bankName: varchar('bank_name', { length: 100 }),
+  chequeNumber: varchar('cheque_number', { length: 50 }),
+
+  // Notes
+  notes: text('notes'),
+  receiptNumber: varchar('receipt_number', { length: 50 }),
+
+  // Metadata
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdBy: integer('created_by')
+    .notNull()
+    .references(() => users.id),
+}, (table) => ({
+  teamSupplierPaymentIdx: index('team_supplier_payment_idx').on(table.teamId),
+  billPaymentIdx: index('bill_payment_idx').on(table.billId),
+  supplierPaymentDateIdx: index('supplier_payment_date_idx').on(table.paymentDate),
+  advanceNumberSupplierIdx: index('advance_number_supplier_idx').on(table.advanceNumber),
+  paymentTypeSupplierIdx: index('payment_type_supplier_idx').on(table.paymentType),
+}));
+
+// Supplier Payment Allocations (linking payments to bills)
+export const supplierPaymentAllocations = pgTable('supplier_payment_allocations', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  supplierPaymentId: integer('supplier_payment_id')
+    .notNull()
+    .references(() => supplierPayments.id, { onDelete: 'cascade' }),
+  billId: integer('bill_id')
+    .notNull()
+    .references(() => supplierBills.id),
+
+  // Allocation amount
+  allocatedAmount: numeric('allocated_amount', { precision: 15, scale: 2 }).notNull(),
+
+  // Metadata
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdBy: integer('created_by')
+    .notNull()
+    .references(() => users.id),
+}, (table) => ({
+  teamSupplierPaymentAllocationIdx: index('team_supplier_payment_allocation_idx').on(table.teamId),
+  supplierPaymentAllocationIdx: index('supplier_payment_allocation_idx').on(table.supplierPaymentId),
+  billAllocationIdx: index('bill_allocation_idx').on(table.billId),
+}));
+
+// Supplier Advance Sequences (for gap-free advance numbering)
+export const supplierAdvanceSequences = pgTable('supplier_advance_sequences', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' })
+    .unique(),
+  year: integer('year').notNull(),
+  lastNumber: integer('last_number').notNull().default(0),
+  lockedAt: timestamp('locked_at'),
+  lockedBy: varchar('locked_by', { length: 100 }),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamSupplierAdvanceYearIdx: uniqueIndex('team_supplier_advance_year_idx').on(table.teamId, table.year),
+}));
+
+// ============================================================
+// GST RETURNS & PERIOD LOCKS
+// ============================================================
+
+export const gstReturns = pgTable('gst_returns', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+
+  // Return identification
+  returnNumber: varchar('return_number', { length: 50 }).notNull(),
+  periodStart: timestamp('period_start').notNull(),
+  periodEnd: timestamp('period_end').notNull(),
+  returnType: varchar('return_type', { length: 20 }).notNull(), // 'monthly', 'quarterly', 'annual'
+
+  // Status tracking
+  status: varchar('status', { length: 20 }).notNull().default('draft'), // 'draft', 'filed', 'approved', 'amended'
+
+  // GST amounts (all in default currency)
+  outputGst: numeric('output_gst', { precision: 15, scale: 2 }).notNull().default('0.00'),
+  inputGst: numeric('input_gst', { precision: 15, scale: 2 }).notNull().default('0.00'),
+  netGstPayable: numeric('net_gst_payable', { precision: 15, scale: 2 }).notNull().default('0.00'),
+
+  // Adjustments
+  adjustments: numeric('adjustments', { precision: 15, scale: 2 }).default('0.00'),
+  previousPeriodBalance: numeric('previous_period_balance', { precision: 15, scale: 2 }).default('0.00'),
+  penalties: numeric('penalties', { precision: 15, scale: 2 }).default('0.00'),
+  interest: numeric('interest', { precision: 15, scale: 2 }).default('0.00'),
+  totalPayable: numeric('total_payable', { precision: 15, scale: 2 }).notNull().default('0.00'),
+
+  // Filing details
+  filingDate: timestamp('filing_date'),
+  dueDate: timestamp('due_date').notNull(),
+  filedBy: integer('filed_by').references(() => users.id),
+
+  // Breakdown details (stored as JSON)
+  salesBreakdown: jsonb('sales_breakdown'), // { standard: {...}, zeroRated: {...}, exempt: {...} }
+  purchasesBreakdown: jsonb('purchases_breakdown'),
+
+  // Notes and metadata
+  notes: text('notes'),
+  amendments: jsonb('amendments'), // Track amendment history
+
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdBy: integer('created_by').references(() => users.id),
+}, (table) => ({
+  teamPeriodIdx: index('gst_returns_team_period_idx').on(table.teamId, table.periodStart, table.periodEnd),
+  returnNumberIdx: uniqueIndex('gst_returns_return_number_idx').on(table.teamId, table.returnNumber),
+}));
+
+export const gstPeriodLocks = pgTable('gst_period_locks', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+
+  // Period information
+  periodStart: timestamp('period_start').notNull(),
+  periodEnd: timestamp('period_end').notNull(),
+  periodType: varchar('period_type', { length: 20 }).notNull(), // 'monthly', 'quarterly', 'annual'
+
+  // Lock details
+  lockedAt: timestamp('locked_at').notNull().defaultNow(),
+  lockedBy: integer('locked_by')
+    .notNull()
+    .references(() => users.id),
+  reason: text('reason'),
+
+  // Associated return (optional)
+  gstReturnId: integer('gst_return_id').references(() => gstReturns.id),
+
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  teamPeriodIdx: uniqueIndex('gst_period_locks_team_period_idx').on(table.teamId, table.periodStart, table.periodEnd),
+}));
+
+// ============================================================
+// CUSTOMER PAYMENTS (Receive Payment with Allocation)
+// ============================================================
+
+export const customerPayments = pgTable('customer_payments', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  customerId: integer('customer_id')
+    .notNull()
+    .references(() => customers.id),
+
+  // Payment Details
+  amount: numeric('amount', { precision: 15, scale: 2 }).notNull(),
+  currency: varchar('currency', { length: 3 }).notNull(),
+  paymentDate: timestamp('payment_date').notNull().defaultNow(),
+
+  // Allocation tracking
+  allocatedAmount: numeric('allocated_amount', { precision: 15, scale: 2 }).notNull().default('0.00'),
+  unallocatedAmount: numeric('unallocated_amount', { precision: 15, scale: 2 }).notNull().default('0.00'),
+
+  // Payment Type & Advance Support
+  paymentType: varchar('payment_type', { length: 20 }).notNull().default('payment'), // 'payment' or 'advance'
+  advanceNumber: varchar('advance_number', { length: 50 }), // For advance-type payments: ADV-C-YYYY-NNNN
+
+  // Payment Method
+  paymentMethod: varchar('payment_method', { length: 50 }).notNull(),
+  paymentGateway: varchar('payment_gateway', { length: 100 }),
+  transactionId: varchar('transaction_id', { length: 255 }),
+
+  // Banking Details
+  bankName: varchar('bank_name', { length: 255 }),
+  chequeNumber: varchar('cheque_number', { length: 50 }),
+
+  // Receipt
+  receiptNumber: varchar('receipt_number', { length: 50 }),
+
+  // Notes
+  notes: text('notes'),
+
+  // Metadata
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdBy: integer('created_by')
+    .notNull()
+    .references(() => users.id),
+}, (table) => ({
+  teamCustomerPaymentIdx: index('team_customer_payment_idx').on(table.teamId),
+  customerPaymentIdx: index('customer_payment_idx').on(table.customerId),
+  customerPaymentDateIdx: index('customer_payment_date_idx').on(table.paymentDate),
+  receiptNumberIdx: index('receipt_number_idx').on(table.receiptNumber),
+  advanceNumberCustomerIdx: index('advance_number_customer_idx').on(table.advanceNumber),
+  paymentTypeCustomerIdx: index('payment_type_customer_idx').on(table.paymentType),
+}));
+
+export const paymentAllocations = pgTable('payment_allocations', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  customerPaymentId: integer('customer_payment_id')
+    .notNull()
+    .references(() => customerPayments.id, { onDelete: 'cascade' }),
+  invoiceId: integer('invoice_id')
+    .notNull()
+    .references(() => invoices.id),
+
+  // Allocation amount
+  allocatedAmount: numeric('allocated_amount', { precision: 15, scale: 2 }).notNull(),
+
+  // Metadata
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdBy: integer('created_by')
+    .notNull()
+    .references(() => users.id),
+}, (table) => ({
+  teamPaymentAllocationIdx: index('team_payment_allocation_idx').on(table.teamId),
+  customerPaymentAllocationIdx: index('customer_payment_allocation_idx').on(table.customerPaymentId),
+  invoiceAllocationIdx: index('invoice_allocation_idx').on(table.invoiceId),
+}));
+
+// Customer Advance Sequences (for gap-free advance numbering)
+export const customerAdvanceSequences = pgTable('customer_advance_sequences', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' })
+    .unique(),
+  year: integer('year').notNull(),
+  lastNumber: integer('last_number').notNull().default(0),
+  lockedAt: timestamp('locked_at'),
+  lockedBy: varchar('locked_by', { length: 100 }),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamCustomerAdvanceYearIdx: uniqueIndex('team_customer_advance_year_idx').on(table.teamId, table.year),
+}));
+
+// ============================================================
 // RELATIONS
 // ============================================================
 
@@ -555,9 +1007,14 @@ export const teamsRelations = relations(teams, ({ many }) => ({
   activityLogs: many(activityLogs),
   invitations: many(invitations),
   customers: many(customers),
+  suppliers: many(suppliers),
   products: many(products),
   invoices: many(invoices),
+  supplierBills: many(supplierBills),
   payments: many(payments),
+  supplierPayments: many(supplierPayments),
+  customerPayments: many(customerPayments),
+  paymentAllocations: many(paymentAllocations),
   taxSettings: many(taxSettings),
 }));
 
@@ -665,6 +1122,149 @@ export const invoiceDeliveriesRelations = relations(invoiceDeliveries, ({ one })
   }),
 }));
 
+export const suppliersRelations = relations(suppliers, ({ one, many }) => ({
+  team: one(teams, {
+    fields: [suppliers.teamId],
+    references: [teams.id],
+  }),
+  supplierBills: many(supplierBills),
+}));
+
+export const supplierBillsRelations = relations(supplierBills, ({ one, many }) => ({
+  team: one(teams, {
+    fields: [supplierBills.teamId],
+    references: [teams.id],
+  }),
+  supplier: one(suppliers, {
+    fields: [supplierBills.supplierId],
+    references: [suppliers.id],
+  }),
+  items: many(supplierBillItems),
+  payments: many(supplierPayments),
+  adjustments: many(supplierBillAdjustments),
+}));
+
+export const supplierBillItemsRelations = relations(supplierBillItems, ({ one }) => ({
+  bill: one(supplierBills, {
+    fields: [supplierBillItems.billId],
+    references: [supplierBills.id],
+  }),
+  product: one(products, {
+    fields: [supplierBillItems.productId],
+    references: [products.id],
+  }),
+}));
+
+export const supplierPaymentsRelations = relations(supplierPayments, ({ one, many }) => ({
+  team: one(teams, {
+    fields: [supplierPayments.teamId],
+    references: [teams.id],
+  }),
+  bill: one(supplierBills, {
+    fields: [supplierPayments.billId],
+    references: [supplierBills.id],
+  }),
+  allocations: many(supplierPaymentAllocations),
+}));
+
+export const supplierBillAdjustmentsRelations = relations(supplierBillAdjustments, ({ one }) => ({
+  team: one(teams, {
+    fields: [supplierBillAdjustments.teamId],
+    references: [teams.id],
+  }),
+  bill: one(supplierBills, {
+    fields: [supplierBillAdjustments.billId],
+    references: [supplierBills.id],
+  }),
+}));
+
+export const supplierPaymentAllocationsRelations = relations(supplierPaymentAllocations, ({ one }) => ({
+  team: one(teams, {
+    fields: [supplierPaymentAllocations.teamId],
+    references: [teams.id],
+  }),
+  supplierPayment: one(supplierPayments, {
+    fields: [supplierPaymentAllocations.supplierPaymentId],
+    references: [supplierPayments.id],
+  }),
+  bill: one(supplierBills, {
+    fields: [supplierPaymentAllocations.billId],
+    references: [supplierBills.id],
+  }),
+}));
+
+export const supplierAdvanceSequencesRelations = relations(supplierAdvanceSequences, ({ one }) => ({
+  team: one(teams, {
+    fields: [supplierAdvanceSequences.teamId],
+    references: [teams.id],
+  }),
+}));
+
+export const customerAdvanceSequencesRelations = relations(customerAdvanceSequences, ({ one }) => ({
+  team: one(teams, {
+    fields: [customerAdvanceSequences.teamId],
+    references: [teams.id],
+  }),
+}));
+
+export const customerPaymentsRelations = relations(customerPayments, ({ one, many }) => ({
+  team: one(teams, {
+    fields: [customerPayments.teamId],
+    references: [teams.id],
+  }),
+  customer: one(customers, {
+    fields: [customerPayments.customerId],
+    references: [customers.id],
+  }),
+  allocations: many(paymentAllocations),
+}));
+
+export const paymentAllocationsRelations = relations(paymentAllocations, ({ one }) => ({
+  team: one(teams, {
+    fields: [paymentAllocations.teamId],
+    references: [teams.id],
+  }),
+  customerPayment: one(customerPayments, {
+    fields: [paymentAllocations.customerPaymentId],
+    references: [customerPayments.id],
+  }),
+  invoice: one(invoices, {
+    fields: [paymentAllocations.invoiceId],
+    references: [invoices.id],
+  }),
+}));
+
+export const gstReturnsRelations = relations(gstReturns, ({ one, many }) => ({
+  team: one(teams, {
+    fields: [gstReturns.teamId],
+    references: [teams.id],
+  }),
+  filedByUser: one(users, {
+    fields: [gstReturns.filedBy],
+    references: [users.id],
+  }),
+  createdByUser: one(users, {
+    fields: [gstReturns.createdBy],
+    references: [users.id],
+  }),
+  periodLocks: many(gstPeriodLocks),
+}));
+
+export const gstPeriodLocksRelations = relations(gstPeriodLocks, ({ one }) => ({
+  team: one(teams, {
+    fields: [gstPeriodLocks.teamId],
+    references: [teams.id],
+  }),
+  lockedByUser: one(users, {
+    fields: [gstPeriodLocks.lockedBy],
+    references: [users.id],
+  }),
+  gstReturn: one(gstReturns, {
+    fields: [gstPeriodLocks.gstReturnId],
+    references: [gstReturns.id],
+  }),
+}));
+
 // ============================================================
 // TYPE EXPORTS
 // ============================================================
@@ -697,6 +1297,10 @@ export type NewPaymentMethod = typeof paymentMethods.$inferInsert;
 export type Customer = typeof customers.$inferSelect;
 export type NewCustomer = typeof customers.$inferInsert;
 
+// Supplier types
+export type Supplier = typeof suppliers.$inferSelect;
+export type NewSupplier = typeof suppliers.$inferInsert;
+
 // Unit types
 export type Unit = typeof units.$inferSelect;
 export type NewUnit = typeof units.$inferInsert;
@@ -715,9 +1319,33 @@ export type NewInvoice = typeof invoices.$inferInsert;
 export type InvoiceItem = typeof invoiceItems.$inferSelect;
 export type NewInvoiceItem = typeof invoiceItems.$inferInsert;
 
+// Supplier Bill types
+export type SupplierBill = typeof supplierBills.$inferSelect;
+export type NewSupplierBill = typeof supplierBills.$inferInsert;
+export type SupplierBillItem = typeof supplierBillItems.$inferSelect;
+export type NewSupplierBillItem = typeof supplierBillItems.$inferInsert;
+
 // Payment types
 export type Payment = typeof payments.$inferSelect;
 export type NewPayment = typeof payments.$inferInsert;
+
+// Supplier Payment types
+export type SupplierPayment = typeof supplierPayments.$inferSelect;
+export type NewSupplierPayment = typeof supplierPayments.$inferInsert;
+
+// Customer Payment types
+export type CustomerPayment = typeof customerPayments.$inferSelect;
+export type NewCustomerPayment = typeof customerPayments.$inferInsert;
+export type PaymentAllocation = typeof paymentAllocations.$inferSelect;
+export type NewPaymentAllocation = typeof paymentAllocations.$inferInsert;
+
+// Supplier Payment Allocation types
+export type SupplierPaymentAllocation = typeof supplierPaymentAllocations.$inferSelect;
+export type NewSupplierPaymentAllocation = typeof supplierPaymentAllocations.$inferInsert;
+
+// Supplier Bill Adjustment types
+export type SupplierBillAdjustment = typeof supplierBillAdjustments.$inferSelect;
+export type NewSupplierBillAdjustment = typeof supplierBillAdjustments.$inferInsert;
 
 // Tax types
 export type TaxSetting = typeof taxSettings.$inferSelect;
@@ -730,6 +1358,16 @@ export type NewInvoiceDelivery = typeof invoiceDeliveries.$inferInsert;
 // Sequence types
 export type InvoiceSequence = typeof invoiceSequences.$inferSelect;
 export type NewInvoiceSequence = typeof invoiceSequences.$inferInsert;
+export type CustomerAdvanceSequence = typeof customerAdvanceSequences.$inferSelect;
+export type NewCustomerAdvanceSequence = typeof customerAdvanceSequences.$inferInsert;
+export type SupplierAdvanceSequence = typeof supplierAdvanceSequences.$inferSelect;
+export type NewSupplierAdvanceSequence = typeof supplierAdvanceSequences.$inferInsert;
+
+// GST Return types
+export type GstReturn = typeof gstReturns.$inferSelect;
+export type NewGstReturn = typeof gstReturns.$inferInsert;
+export type GstPeriodLock = typeof gstPeriodLocks.$inferSelect;
+export type NewGstPeriodLock = typeof gstPeriodLocks.$inferInsert;
 
 // Complex types with relations
 export type TeamDataWithMembers = Team & {
@@ -742,6 +1380,12 @@ export type InvoiceWithDetails = Invoice & {
   customer: Customer;
   items: (InvoiceItem & { product: Product | null })[];
   payments: Payment[];
+};
+
+export type SupplierBillWithDetails = SupplierBill & {
+  supplier: Supplier;
+  items: (SupplierBillItem & { product: Product | null })[];
+  payments: SupplierPayment[];
 };
 
 // ============================================================

@@ -21,7 +21,8 @@ import {
   Wallet,
   FileSpreadsheet,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  FileEdit
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -110,7 +111,6 @@ const navigation = [
     children: [
       { name: 'Tax Invoices', href: '/sales/invoices' },
       { name: 'Cash Sales', href: '/sales/cash-sales' },
-      { name: 'Credit Notes', href: '/sales/credit-notes' },
       { name: 'Customers', href: '/customers' },
       { name: 'Sales Register', href: '/sales/register' },
     ]
@@ -120,9 +120,16 @@ const navigation = [
     icon: ShoppingBag,
     children: [
       { name: 'Supplier Bills', href: '/purchases/bills' },
-      { name: 'Supplier Credit Notes', href: '/purchases/credit-notes' },
       { name: 'Suppliers', href: '/suppliers' },
       { name: 'Purchase Register', href: '/purchases/register' },
+    ]
+  },
+  {
+    name: 'Adjustments',
+    icon: FileEdit,
+    children: [
+      { name: 'Invoice Adjustments', href: '/adjustments/invoices' },
+      { name: 'Bill Adjustments', href: '/adjustments/bills' },
     ]
   },
   {
@@ -130,11 +137,10 @@ const navigation = [
     icon: Wallet,
     children: [
       { name: 'Receive Payments', href: '/payments/receive' },
-      { name: 'Pay Suppliers', href: '/payments/pay' },
+      { name: 'Pay Suppliers', href: '/payments/pay-suppliers' },
       { name: 'Payment Receipts', href: '/payments/receipts' },
-      { name: 'Payment Adjustments', href: '/payments/adjustments' },
-      { name: 'Bill Adjustments', href: '/payments/bill-adjustments' },
-      { name: 'Advances', href: '/payments/advances' },
+      { name: 'Customer Advances', href: '/payments/advances/customer' },
+      { name: 'Supplier Advances', href: '/payments/advances/supplier' },
     ]
   },
   {
@@ -170,6 +176,8 @@ const navigation = [
     icon: Settings,
     children: [
       { name: 'Business Profile', href: '/settings/business' },
+      { name: 'Bank Accounts', href: '/settings/bank-accounts' },
+      { name: 'Payment Methods', href: '/settings/payment-methods' },
       { name: 'Tax Setup', href: '/settings/tax' },
       { name: 'Tax Classifications', href: '/settings/tax-classifications' },
       { name: 'Units', href: '/settings/units' },

@@ -8,11 +8,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { CustomerSearch } from './customer-search';
 import { ProductSearchInline } from './product-search-inline';
+import { QuickAddProductDialog } from '@/components/products/quick-add-product-dialog';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Plus, Trash2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { createInvoice } from '@/lib/invoices/actions';
 import useSWR from 'swr';
-import type { Unit } from '@/lib/db/schema';
+import type { Unit, TaxClassification } from '@/lib/db/schema';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -49,7 +51,10 @@ export function InvoiceFormNew({ defaultGstRate }: { defaultGstRate: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [invoiceDate, setInvoiceDate] = useState<Date>(new Date());
+  const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const { data: units } = useSWR<Unit[]>('/api/units', fetcher);
+  const { data: taxClassifications } = useSWR<TaxClassification[]>('/api/tax-classifications', fetcher);
   const [lineItems, setLineItems] = useState<LineItem[]>([
     {
       id: crypto.randomUUID(),
@@ -310,12 +315,13 @@ export function InvoiceFormNew({ defaultGstRate }: { defaultGstRate: string }) {
                   <Label htmlFor="invoiceDate" className="text-sm font-medium text-gray-700 mb-2 block">
                     Invoice Date <span className="text-red-500">*</span>
                   </Label>
-                  <Input
+                  <DatePicker
                     id="invoiceDate"
                     name="invoiceDate"
-                    type="date"
-                    defaultValue={new Date().toISOString().split('T')[0]}
-                    className="w-full"
+                    date={invoiceDate}
+                    onDateChange={(date) => setInvoiceDate(date || new Date())}
+                    placeholder="Select invoice date"
+                    required
                   />
                 </div>
 
@@ -323,7 +329,13 @@ export function InvoiceFormNew({ defaultGstRate }: { defaultGstRate: string }) {
                   <Label htmlFor="dueDate" className="text-sm font-medium text-gray-700 mb-2 block">
                     Due Date
                   </Label>
-                  <Input id="dueDate" name="dueDate" type="date" className="w-full" />
+                  <DatePicker
+                    id="dueDate"
+                    name="dueDate"
+                    date={dueDate}
+                    onDateChange={setDueDate}
+                    placeholder="Select due date (optional)"
+                  />
                 </div>
 
                 <div>
@@ -350,10 +362,13 @@ export function InvoiceFormNew({ defaultGstRate }: { defaultGstRate: string }) {
         <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-base font-semibold text-gray-900">Items</h2>
-            <Button type="button" onClick={addLineItem} variant="outline" size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Item
-            </Button>
+            <div className="flex gap-2">
+              <Button type="button" onClick={addLineItem} variant="outline" size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Line Item
+              </Button>
+              <QuickAddProductDialog defaultGstRate={defaultGstRate} />
+            </div>
           </div>
 
           <div className="overflow-x-auto">
@@ -484,12 +499,28 @@ export function InvoiceFormNew({ defaultGstRate }: { defaultGstRate: string }) {
                         disabled={item.isTaxExempt}
                         className="w-full h-9 px-2 py-1 border border-gray-300 rounded-md text-sm bg-white disabled:bg-gray-100 disabled:text-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
                       >
-                        <option value="0">0%</option>
-                        <option value="5">5%</option>
-                        <option value="10">10%</option>
-                        <option value="20">20%</option>
-                        <option value="30">30%</option>
-                        <option value="50">50%</option>
+                        {taxClassifications && taxClassifications.length > 0 ? (
+                          taxClassifications
+                            .sort((a, b) => a.sortOrder - b.sortOrder)
+                            .filter((tc) => tc.isActive)
+                            .map((classification) => (
+                              <option
+                                key={classification.id}
+                                value={parseFloat(classification.taxRate).toString()}
+                              >
+                                {classification.name} ({parseFloat(classification.taxRate)}%)
+                              </option>
+                            ))
+                        ) : (
+                          <>
+                            <option value="0">0%</option>
+                            <option value="5">5%</option>
+                            <option value="10">10%</option>
+                            <option value="20">20%</option>
+                            <option value="30">30%</option>
+                            <option value="50">50%</option>
+                          </>
+                        )}
                       </select>
                     </td>
                     <td className="py-3 px-2 text-center">
