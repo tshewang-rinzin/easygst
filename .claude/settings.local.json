@@ -15,7 +15,8 @@
       "Bash(npx shadcn@latest add:*)",
       "Bash(curl:*)",
       "Bash(pnpm db:generate:*)",
-      "Bash(pnpm build:*)"
+      "Bash(pnpm build:*)",
+      "Bash(FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch:*)"
     ]
   }
 }
