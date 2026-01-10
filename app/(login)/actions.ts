@@ -108,13 +108,14 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 });
 
 const signUpSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(100),
   email: z.string().email(),
   password: z.string().min(8),
   inviteToken: z.string().optional()
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
-  const { email, password, inviteToken } = data;
+  const { name, email, password, inviteToken } = data;
 
   const existingUser = await db
     .select()
@@ -138,6 +139,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   verificationTokenExpiry.setHours(verificationTokenExpiry.getHours() + 24); // 24 hours
 
   const newUser: NewUser = {
+    name,
     email,
     passwordHash,
     role: 'owner', // Default role, will be overridden if there's an invitation
@@ -213,7 +215,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   } else {
     // Create a new team if there's no invitation
     const newTeam: NewTeam = {
-      name: `${email}'s Team`
+      name: `${name}'s Team`
     };
 
     [createdTeam] = await db.insert(teams).values(newTeam).returning();
