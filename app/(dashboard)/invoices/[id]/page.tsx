@@ -6,6 +6,8 @@ import { ArrowLeft, Edit, Trash2, Send, Download } from 'lucide-react';
 import { getInvoiceWithDetails } from '@/lib/invoices/queries';
 import { notFound } from 'next/navigation';
 import { SendInvoiceDialog } from '@/components/invoices/send-invoice-dialog';
+import { EmailInvoiceButton } from '@/components/invoices/email-invoice-button';
+import { SendReminderButton } from '@/components/invoices/send-reminder-button';
 import { DeleteInvoiceDialog } from '@/components/invoices/delete-invoice-dialog';
 import { RecordPaymentDialog } from '@/components/payments/record-payment-dialog';
 import { getGSTClassification, getGSTClassificationLabel, getGSTClassificationColor } from '@/lib/invoices/gst-classification';
@@ -69,10 +71,26 @@ async function InvoiceDetails({ id }: { id: number }) {
                   <SendInvoiceDialog
                     invoiceId={invoice.id}
                     invoiceNumber={invoice.invoiceNumber}
+                    customerEmail={invoice.customer?.email}
                   />
                   <DeleteInvoiceDialog
                     invoiceId={invoice.id}
                     invoiceNumber={invoice.invoiceNumber}
+                  />
+                </>
+              )}
+              {!isDraft && (
+                <>
+                  <EmailInvoiceButton
+                    invoiceId={invoice.id}
+                    invoiceNumber={invoice.invoiceNumber}
+                    customerEmail={invoice.customer?.email}
+                  />
+                  <SendReminderButton
+                    invoiceId={invoice.id}
+                    invoiceNumber={invoice.invoiceNumber}
+                    customerEmail={invoice.customer?.email}
+                    paymentStatus={invoice.paymentStatus}
                   />
                 </>
               )}
