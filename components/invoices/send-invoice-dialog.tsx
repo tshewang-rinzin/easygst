@@ -36,9 +36,9 @@ export function SendInvoiceDialog({
       const formData = new FormData();
       formData.append('id', invoiceId.toString());
 
-      const result = await lockInvoice(null, formData);
+      const result = await lockInvoice({}, formData);
 
-      if (result.error) {
+      if ('error' in result && result.error) {
         setError(result.error);
       } else {
         setOpen(false);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useActionState, useTransition } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -75,7 +75,6 @@ interface InvoiceFormEditProps {
 
 export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const [invoiceDate, setInvoiceDate] = useState<Date>(new Date(invoice.invoiceDate));
   const [dueDate, setDueDate] = useState<Date | undefined>(
     invoice.dueDate ? new Date(invoice.dueDate) : undefined
@@ -95,16 +94,12 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
     }))
   );
 
-  const [state, formAction] = useActionState(updateInvoice, {
-    error: '',
-  });
-
-  if (state.success) {
-    router.push(`/invoices/${invoice.id}`);
-  }
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError('');
 
     // Validate at least one item with description
     const validItems = lineItems.filter((item) => item.description.trim() !== '');
@@ -129,6 +124,8 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
         return;
       }
     }
+
+    setIsSubmitting(true);
 
     const form = e.currentTarget;
     const formData = new FormData(form);
@@ -163,9 +160,15 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
     const notes = formData.get('notes');
     if (notes) cleanFormData.append('notes', notes as string);
 
-    startTransition(() => {
-      formAction(cleanFormData);
-    });
+    const result = await updateInvoice({}, cleanFormData);
+
+    setIsSubmitting(false);
+
+    if ('success' in result && result.success) {
+      router.push(`/invoices/${invoice.id}`);
+    } else if ('error' in result && result.error) {
+      setError(result.error);
+    }
   };
 
   const addLineItem = () => {
@@ -616,19 +619,19 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
           </div>
         </div>
 
-        {state.error && (
+        {error && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm font-medium text-red-600">{state.error}</p>
+            <p className="text-sm font-medium text-red-600">{error}</p>
           </div>
         )}
 
         <div className="flex gap-4 pb-8">
           <Button
             type="submit"
-            disabled={isPending}
+            disabled={isSubmitting}
             className="bg-orange-500 hover:bg-orange-600"
           >
-            {isPending ? 'Updating Invoice...' : 'Update Invoice'}
+            {isSubmitting ? 'Updating Invoice...' : 'Update Invoice'}
           </Button>
           <Link href={`/invoices/${invoice.id}`}>
             <Button type="button" variant="outline">

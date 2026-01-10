@@ -36,11 +36,15 @@ export async function DELETE(
 
     const result = await deleteCustomerAdvance({ id: advanceId });
 
-    if (result.error) {
+    if ('error' in result && result.error) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    return NextResponse.json({ success: result.success });
+    if ('success' in result && result.success) {
+      return NextResponse.json({ success: result.success });
+    }
+
+    return NextResponse.json({ error: 'Unknown error' }, { status: 500 });
   } catch (error) {
     console.error('Error deleting customer advance:', error);
     return NextResponse.json(

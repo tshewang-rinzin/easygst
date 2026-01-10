@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useActionState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -41,7 +41,8 @@ export default function ReceivePaymentPage() {
     fetcher
   );
 
-  const [state, formAction] = useActionState(recordCustomerPayment, { error: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   // Set default payment method
   useEffect(() => {
@@ -49,13 +50,6 @@ export default function ReceivePaymentPage() {
       setPaymentMethod(paymentMethods[0].code);
     }
   }, [paymentMethods, paymentMethod]);
-
-  // Auto-navigate on success
-  useEffect(() => {
-    if (state.success) {
-      router.push('/payments/receipts');
-    }
-  }, [state.success, router]);
 
   const handleAddAllocation = () => {
     if (!outstandingInvoices || outstandingInvoices.length === 0) return;
@@ -116,6 +110,7 @@ export default function ReceivePaymentPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError('');
 
     if (!selectedCustomer) {
       alert('Please select a customer');
@@ -127,12 +122,22 @@ export default function ReceivePaymentPage() {
       return;
     }
 
+    setIsSubmitting(true);
+
     const formData = new FormData(e.currentTarget);
     formData.append('customerId', selectedCustomer.id.toString());
     formData.append('paymentDate', paymentDate.toISOString());
     formData.append('allocations', JSON.stringify(allocations));
 
-    formAction(formData);
+    const result = await recordCustomerPayment({}, formData);
+
+    setIsSubmitting(false);
+
+    if ('success' in result && result.success) {
+      router.push('/payments/receipts');
+    } else if ('error' in result && result.error) {
+      setError(result.error);
+    }
   };
 
   return (
@@ -396,9 +401,9 @@ export default function ReceivePaymentPage() {
               </CardContent>
             </Card>
 
-            {state.error && (
+            {error && (
               <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-600">{state.error}</p>
+                <p className="text-sm text-red-600">{error}</p>
               </div>
             )}
 
@@ -406,10 +411,10 @@ export default function ReceivePaymentPage() {
               <Button
                 type="submit"
                 className="bg-orange-500 hover:bg-orange-600"
-                disabled={allocations.length === 0}
+                disabled={allocations.length === 0 || isSubmitting}
               >
                 <Check className="mr-2 h-4 w-4" />
-                Record Payment
+                {isSubmitting ? 'Recording...' : 'Record Payment'}
               </Button>
               <Button
                 type="button"

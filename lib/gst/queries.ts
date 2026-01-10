@@ -138,9 +138,9 @@ export async function calculateGstForPeriod(periodStart: Date, periodEnd: Date) 
       .where(eq(invoiceItems.invoiceId, invoice.id));
 
     for (const item of items) {
-      const subtotal = new Decimal(item.quantity)
-        .mul(item.unitPrice)
-        .minus(item.discount || 0);
+      const lineTotal = new Decimal(item.quantity).mul(item.unitPrice);
+      const discountAmount = lineTotal.mul(item.discountPercent || 0).div(100);
+      const subtotal = lineTotal.minus(discountAmount);
 
       if (item.gstClassification === 'STANDARD') {
         standardSales = standardSales.plus(subtotal);
@@ -166,9 +166,9 @@ export async function calculateGstForPeriod(periodStart: Date, periodEnd: Date) 
       .where(eq(supplierBillItems.billId, bill.id));
 
     for (const item of items) {
-      const subtotal = new Decimal(item.quantity)
-        .mul(item.unitPrice)
-        .minus(item.discount || 0);
+      const lineTotal = new Decimal(item.quantity).mul(item.unitPrice);
+      const discountAmount = lineTotal.mul(item.discountPercent || 0).div(100);
+      const subtotal = lineTotal.minus(discountAmount);
 
       if (item.gstClassification === 'STANDARD') {
         standardPurchases = standardPurchases.plus(subtotal);

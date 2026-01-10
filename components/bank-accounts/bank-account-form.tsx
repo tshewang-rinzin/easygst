@@ -49,7 +49,7 @@ export function BankAccountForm({ account, onSuccess }: BankAccountFormProps) {
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
     async (prevState: ActionState, formData: FormData) => {
       const result = await action(formData);
-      if (result.success && onSuccess) {
+      if ('success' in result && result.success && onSuccess) {
         onSuccess();
       }
       return result;

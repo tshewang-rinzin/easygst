@@ -17,14 +17,14 @@ export default function PrepareGstReturnPage() {
   const [periodEnd, setPeriodEnd] = useState<Date>(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0));
   const [returnType, setReturnType] = useState<string>('monthly');
 
-  const [state, formAction, isPending] = useActionState(createGstReturn, { error: '' });
+  const [state, formAction, isPending] = useActionState(createGstReturn, { error: '' } as any);
 
   // Auto-navigate on success
   useEffect(() => {
-    if (state.success && state.returnId) {
+    if ('success' in state && state.success && 'returnId' in state && state.returnId) {
       router.push(`/gst/filed-returns`);
     }
-  }, [state.success, state.returnId, router]);
+  }, [state, router]);
 
   // Update period end when start or type changes
   const handlePeriodStartChange = (date: Date | undefined) => {
@@ -132,7 +132,7 @@ export default function PrepareGstReturnPage() {
 
                   <div className="space-y-2">
                     <Label>Period End *</Label>
-                    <DatePicker date={periodEnd} onDateChange={setPeriodEnd} />
+                    <DatePicker date={periodEnd} onDateChange={(date) => setPeriodEnd(date || new Date())} />
                     <input
                       type="hidden"
                       name="periodEnd"

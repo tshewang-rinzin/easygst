@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useActionState, useTransition } from 'react';
+import { useActionState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -10,21 +10,13 @@ import { SupplierForm } from '@/components/suppliers/supplier-form';
 
 export default function NewSupplierPage() {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-  const [state, formAction] = useActionState(createSupplier, { error: '' });
+  const [state, formAction, isPending] = useActionState(createSupplier, { error: '' } as any);
 
-  if (state.success) {
-    router.push('/suppliers');
-  }
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-
-    startTransition(() => {
-      formAction(formData);
-    });
-  };
+  useEffect(() => {
+    if ('success' in state && state.success) {
+      router.push('/suppliers');
+    }
+  }, [state, router]);
 
   return (
     <section className="flex-1 p-4 lg:p-8">
@@ -44,10 +36,10 @@ export default function NewSupplierPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="max-w-4xl">
+      <form action={formAction} className="max-w-4xl">
         <SupplierForm />
 
-        {state.error && (
+        {'error' in state && state.error && (
           <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-sm text-red-600">{state.error}</p>
           </div>

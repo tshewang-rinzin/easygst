@@ -46,10 +46,10 @@ export function PaymentMethodsList({ initialMethods, hasAnyMethods: initialHasAn
     formData.append('id', id.toString());
     formData.append('isEnabled', (!currentStatus).toString());
     const result = await togglePaymentMethod(formData);
-    if (result.success) {
+    if ('success' in result && result.success) {
       mutate();
-    } else {
-      alert(result.error || 'Failed to update payment method');
+    } else if ('error' in result && result.error) {
+      alert(result.error);
     }
   };
 
@@ -57,20 +57,20 @@ export function PaymentMethodsList({ initialMethods, hasAnyMethods: initialHasAn
     const formData = new FormData();
     formData.append('id', id.toString());
     const result = await deletePaymentMethod(formData);
-    if (result.success) {
+    if ('success' in result && result.success) {
       mutate();
-    } else {
-      alert(result.error || 'Failed to delete payment method');
+    } else if ('error' in result && result.error) {
+      alert(result.error);
     }
   };
 
   const handleSeedDefaults = async () => {
     setIsSeeding(true);
     const result = await seedDefaultPaymentMethods();
-    if (result.success) {
+    if ('success' in result && result.success) {
       mutate();
-    } else {
-      alert(result.error || 'Failed to seed payment methods');
+    } else if ('error' in result && result.error) {
+      alert(result.error);
     }
     setIsSeeding(false);
   };

@@ -25,11 +25,15 @@ export async function POST(request: Request) {
     const body = await request.json();
     const result = await recordCustomerAdvance(body);
 
-    if (result.error) {
+    if ('error' in result && result.error) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    return NextResponse.json({ success: result.success });
+    if ('success' in result && result.success) {
+      return NextResponse.json({ success: result.success });
+    }
+
+    return NextResponse.json({ error: 'Unknown error' }, { status: 500 });
   } catch (error) {
     console.error('Error creating customer advance:', error);
     return NextResponse.json(

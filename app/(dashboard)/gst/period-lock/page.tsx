@@ -29,15 +29,15 @@ export default function PeriodLockPage() {
   const [periodType, setPeriodType] = useState<string>('monthly');
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  const [state, formAction, isPending] = useActionState(createPeriodLock, { error: '' });
+  const [state, formAction, isPending] = useActionState(createPeriodLock, { error: '' } as any);
 
   // Auto-close form on success
   useEffect(() => {
-    if (state.success) {
+    if ('success' in state && state.success) {
       setIsAddingLock(false);
       mutate('/api/gst/period-locks');
     }
-  }, [state.success]);
+  }, [state]);
 
   const handleRemoveLock = async (id: number) => {
     if (!confirm('Are you sure you want to remove this period lock? This will allow modifications to the period.')) {
@@ -124,7 +124,7 @@ export default function PeriodLockPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label>Period Start *</Label>
-                  <DatePicker date={periodStart} onDateChange={setPeriodStart} />
+                  <DatePicker date={periodStart} onDateChange={(date) => setPeriodStart(date || new Date())} />
                   <input
                     type="hidden"
                     name="periodStart"
@@ -135,7 +135,7 @@ export default function PeriodLockPage() {
 
                 <div className="space-y-2">
                   <Label>Period End *</Label>
-                  <DatePicker date={periodEnd} onDateChange={setPeriodEnd} />
+                  <DatePicker date={periodEnd} onDateChange={(date) => setPeriodEnd(date || new Date())} />
                   <input
                     type="hidden"
                     name="periodEnd"

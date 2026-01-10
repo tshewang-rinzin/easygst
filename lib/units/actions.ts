@@ -43,7 +43,7 @@ export const createUnit = validatedActionWithUser(
       await db.insert(activityLogs).values({
         teamId: team.id,
         userId: user.id,
-        action: `${ActivityType.CREATE}: Unit "${data.name}" created`,
+        action: `CREATE_UNIT: Unit "${data.name}" created`,
         timestamp: new Date(),
       });
 
@@ -103,7 +103,7 @@ export const updateUnit = validatedActionWithUser(
       await db.insert(activityLogs).values({
         teamId: team.id,
         userId: user.id,
-        action: `${ActivityType.UPDATE}: Unit "${data.name}" updated`,
+        action: `UPDATE_UNIT: Unit "${data.name}" updated`,
         timestamp: new Date(),
       });
 
@@ -150,7 +150,7 @@ export const deleteUnit = validatedActionWithUser(
       await db.insert(activityLogs).values({
         teamId: team.id,
         userId: user.id,
-        action: `${ActivityType.DELETE}: Unit "${existing.name}" deleted`,
+        action: `DELETE_UNIT: Unit "${existing.name}" deleted`,
         timestamp: new Date(),
       });
 
@@ -222,7 +222,7 @@ export const resetToDefaultUnits = validatedActionWithUser(
       await db.insert(activityLogs).values({
         teamId: team.id,
         userId: user.id,
-        action: `${ActivityType.UPDATE}: Reset units to defaults`,
+        action: `RESET_UNITS: Reset units to defaults`,
         timestamp: new Date(),
       });
 

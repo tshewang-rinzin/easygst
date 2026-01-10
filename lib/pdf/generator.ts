@@ -72,7 +72,7 @@ interface InvoiceData {
  * Generate a PDF invoice as a readable stream
  */
 export async function generateInvoicePDF(data: InvoiceData): Promise<NodeJS.ReadableStream> {
-  const document = React.createElement(InvoiceTemplate, { data });
+  const document = React.createElement(InvoiceTemplate, { data }) as any;
   const stream = await renderToStream(document);
   return stream;
 }

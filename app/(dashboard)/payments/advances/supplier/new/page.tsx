@@ -23,6 +23,7 @@ export default function NewSupplierAdvancePage() {
   const [paymentMethod, setPaymentMethod] = useState('');
 
   const { data: paymentMethods, isLoading: loadingMethods } = useSWR('/api/payment-methods/enabled', fetcher);
+  const { data: suppliers } = useSWR('/api/suppliers', fetcher);
 
   const [state, formAction, isPending] = useActionState(recordSupplierAdvance, { error: '' });
 
@@ -35,10 +36,10 @@ export default function NewSupplierAdvancePage() {
 
   // Auto-navigate on success
   useEffect(() => {
-    if (state.success) {
+    if ('success' in state && state.success) {
       router.push('/payments/advances/supplier');
     }
-  }, [state.success, router]);
+  }, [state, router]);
 
   const selectedMethod = paymentMethods?.find((m: any) => m.code === paymentMethod);
 
@@ -76,6 +77,7 @@ export default function NewSupplierAdvancePage() {
             <div className="space-y-2">
               <Label htmlFor="supplier">Supplier *</Label>
               <SearchableSupplierSelect
+                suppliers={suppliers || []}
                 selectedSupplier={selectedSupplier}
                 onSelectSupplier={setSelectedSupplier}
               />
@@ -120,7 +122,7 @@ export default function NewSupplierAdvancePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label>Payment Date *</Label>
-                <DatePicker date={paymentDate} onDateChange={setPaymentDate} />
+                <DatePicker date={paymentDate} onDateChange={(date) => setPaymentDate(date || new Date())} />
                 <input
                   type="hidden"
                   name="paymentDate"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useActionState, useTransition } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -31,8 +31,8 @@ interface LineItem {
 
 export default function NewCashSalePage() {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-  const [state, formAction] = useActionState(createCashSale, { error: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const { data: team } = useSWR('/api/team', fetcher);
   const { data: taxClassifications } = useSWR<TaxClassification[]>('/api/tax-classifications', fetcher);
   const { data: paymentMethods } = useSWR<PaymentMethod[]>('/api/payment-methods/enabled', fetcher);
@@ -52,10 +52,6 @@ export default function NewCashSalePage() {
       isTaxExempt: false,
     },
   ]);
-
-  if (state.success && state.invoiceId) {
-    router.push(`/invoices/${state.invoiceId}`);
-  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -123,9 +119,15 @@ export default function NewCashSalePage() {
     const notes = formData.get('notes');
     if (notes) cleanFormData.append('notes', notes as string);
 
-    startTransition(() => {
-      formAction(cleanFormData);
-    });
+    setIsSubmitting(true);
+    const result = await createCashSale({}, cleanFormData);
+    setIsSubmitting(false);
+
+    if ('success' in result && result.success && 'invoiceId' in result && result.invoiceId) {
+      router.push(`/invoices/${result.invoiceId}`);
+    } else if ('error' in result && result.error) {
+      setError(result.error);
+    }
   };
 
   const addLineItem = () => {
@@ -164,7 +166,7 @@ export default function NewCashSalePage() {
               ...item,
               description: product.name,
               unitPrice: parseFloat(product.unitPrice).toFixed(2),
-              unit: product.unit,
+              unit: product.unit || 'piece',
               taxRate: product.defaultTaxRate,
               isTaxExempt: product.isTaxExempt,
             }
@@ -251,7 +253,7 @@ export default function NewCashSalePage() {
               </h3>
               <div>
                 <CustomerSearch
-                  onSelect={setSelectedCustomer}
+                  onSelect={(customer) => setSelectedCustomer(customer as any)}
                   selectedCustomer={selectedCustomer}
                 />
                 <input
@@ -386,7 +388,7 @@ export default function NewCashSalePage() {
                       <ProductSearchInline
                         value={item.description}
                         onChange={(value) => updateLineItem(item.id, 'description', value)}
-                        onSelect={(product) => handleProductSelect(item.id, product)}
+                        onSelect={(product) => handleProductSelect(item.id, product as any)}
                         index={index}
                         required={false}
                       />
@@ -634,9 +636,10 @@ export default function NewCashSalePage() {
           </div>
         </div>
 
-        {state.error && (
+        {/* Error Display */}
+        {error && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600">{state.error}</p>
+            <p className="text-sm text-red-600">{error}</p>
           </div>
         )}
 
@@ -644,10 +647,10 @@ export default function NewCashSalePage() {
         <div className="flex gap-4">
           <Button
             type="submit"
-            disabled={isPending || !selectedCustomer}
+            disabled={isSubmitting || !selectedCustomer}
             className="bg-green-600 hover:bg-green-700"
           >
-            {isPending ? 'Recording Sale...' : 'Record Cash Sale'}
+            {isSubmitting ? 'Recording Sale...' : 'Record Cash Sale'}
           </Button>
           <Link href="/sales/cash-sales">
             <Button type="button" variant="outline">

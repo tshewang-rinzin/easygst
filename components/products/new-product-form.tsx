@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ProductForm } from '@/components/products/product-form';
@@ -16,11 +16,13 @@ export function NewProductForm({ defaultGstRate }: NewProductFormProps) {
   const router = useRouter();
   const [state, formAction, pending] = useActionState(createProduct, {
     error: '',
-  });
+  } as any);
 
-  if (state.success) {
-    router.push('/products');
-  }
+  useEffect(() => {
+    if ('success' in state && state.success) {
+      router.push('/products');
+    }
+  }, [state, router]);
 
   return (
     <section className="flex-1 p-4 lg:p-8">
@@ -43,7 +45,7 @@ export function NewProductForm({ defaultGstRate }: NewProductFormProps) {
       <form action={formAction}>
         <ProductForm defaultGstRate={defaultGstRate} />
 
-        {state.error && (
+        {'error' in state && state.error && (
           <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
             <p className="text-sm text-red-600">{state.error}</p>
           </div>

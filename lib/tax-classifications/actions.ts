@@ -20,15 +20,14 @@ import { getTeamForUser } from '@/lib/db/queries';
 async function logActivity(
   teamId: number,
   userId: number,
-  action: string,
-  description: string
+  action: string
 ) {
   await db.insert(activityLogs).values({
     teamId,
     userId,
     action,
-    description,
     ipAddress: '',
+    timestamp: new Date(),
   });
 }
 
@@ -68,8 +67,7 @@ export const createTaxClassification = validatedActionWithUser(
       await logActivity(
         team.id,
         user.id,
-        'CREATE_TAX_CLASSIFICATION',
-        `Created tax classification: ${classification.name} (${classification.code})`
+        `CREATE_TAX_CLASSIFICATION: Created tax classification ${classification.name} (${classification.code})`
       );
 
       revalidatePath('/settings/tax-classifications');
@@ -132,8 +130,7 @@ export const updateTaxClassification = validatedActionWithUser(
       await logActivity(
         team.id,
         user.id,
-        'UPDATE_TAX_CLASSIFICATION',
-        `Updated tax classification: ${updated.name} (${updated.code})`
+        `UPDATE_TAX_CLASSIFICATION: Updated tax classification ${updated.name} (${updated.code})`
       );
 
       revalidatePath('/settings/tax-classifications');
@@ -179,8 +176,7 @@ export const deleteTaxClassification = validatedActionWithUser(
       await logActivity(
         team.id,
         user.id,
-        'DELETE_TAX_CLASSIFICATION',
-        `Deleted tax classification: ${existing.name} (${existing.code})`
+        `DELETE_TAX_CLASSIFICATION: Deleted tax classification ${existing.name} (${existing.code})`
       );
 
       revalidatePath('/settings/tax-classifications');
@@ -238,8 +234,7 @@ export async function seedDefaultTaxClassifications(teamId: number, userId: numb
     await logActivity(
       teamId,
       userId,
-      'SEED_TAX_CLASSIFICATIONS',
-      'Seeded default tax classifications for Bhutan GST'
+      'SEED_TAX_CLASSIFICATIONS: Seeded default tax classifications for Bhutan GST'
     );
 
     return { success: true };

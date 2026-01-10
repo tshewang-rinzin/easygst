@@ -39,11 +39,11 @@ export default function ViewReceiptPage() {
     formData.append('id', paymentId.toString());
 
     const result = await deleteCustomerPayment({}, formData);
-    if (result.success) {
+    if ('success' in result && result.success) {
       mutate('/api/customer-payments');
       router.push('/payments/receipts');
     } else {
-      alert(result.error || 'Failed to delete payment');
+      alert(('error' in result && result.error) || 'Failed to delete payment');
     }
   };
 

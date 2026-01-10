@@ -47,19 +47,19 @@ export function BankAccountsList({ initialAccounts }: BankAccountsListProps) {
 
   const handleDelete = async (accountId: number) => {
     const result = await deleteBankAccount({ id: accountId });
-    if (result.success) {
+    if ('success' in result && result.success) {
       mutate();
     } else {
-      alert(result.error || 'Failed to delete account');
+      alert(('error' in result && result.error) || 'Failed to delete account');
     }
   };
 
   const handleSetDefault = async (accountId: number) => {
     const result = await setDefaultBankAccount({ id: accountId });
-    if (result.success) {
+    if ('success' in result && result.success) {
       mutate();
     } else {
-      alert(result.error || 'Failed to set default account');
+      alert(('error' in result && result.error) || 'Failed to set default account');
     }
   };
 

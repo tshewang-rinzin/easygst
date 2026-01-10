@@ -170,12 +170,23 @@ interface InvoiceData {
   businessName: string;
   logoUrl?: string | null;
   tpn?: string | null;
+  gstNumber?: string | null;
   licenseNumber?: string | null;
   address?: string | null;
   city?: string | null;
   dzongkhag?: string | null;
+  // Legacy bank fields (deprecated)
   bankName?: string | null;
   bankAccountNumber?: string | null;
+  // Bank Accounts (new)
+  bankAccounts?: Array<{
+    id: number;
+    bankName: string;
+    accountNumber: string;
+    accountName: string;
+    paymentMethod: string;
+    isDefault: boolean;
+  }>;
 
   // Invoice Info
   invoiceNumber: string;

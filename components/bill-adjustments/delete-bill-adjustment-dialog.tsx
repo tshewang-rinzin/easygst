@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useActionState, useTransition } from 'react';
+import { useState, useActionState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,23 +26,14 @@ export function DeleteBillAdjustmentDialog({
 }: DeleteBillAdjustmentDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const [state, formAction] = useActionState(deleteBillAdjustment, { error: '' });
+  const [state, formAction, isPending] = useActionState(deleteBillAdjustment, { error: '' } as any);
 
-  if (state.success) {
-    setOpen(false);
-    router.refresh();
-  }
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    formData.append('id', adjustmentId.toString());
-
-    startTransition(() => {
-      formAction(formData);
-    });
-  };
+  useEffect(() => {
+    if ('success' in state && state.success) {
+      setOpen(false);
+      router.refresh();
+    }
+  }, [state, router]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -52,7 +43,8 @@ export function DeleteBillAdjustmentDialog({
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
-        <form onSubmit={handleSubmit}>
+        <form action={formAction}>
+          <input type="hidden" name="id" value={adjustmentId} />
           <DialogHeader>
             <DialogTitle>Delete Adjustment</DialogTitle>
             <DialogDescription>
@@ -61,7 +53,7 @@ export function DeleteBillAdjustmentDialog({
             </DialogDescription>
           </DialogHeader>
 
-          {state.error && (
+          {'error' in state && state.error && (
             <div className="p-3 mb-4 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-sm text-red-600">{state.error}</p>
             </div>

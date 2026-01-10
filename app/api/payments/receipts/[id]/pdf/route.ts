@@ -31,13 +31,13 @@ export async function GET(request: NextRequest, context: Context) {
 
     // Generate PDF
     const pdfBuffer = await renderToBuffer(
-      React.createElement(PaymentReceiptDocument, { payment, team })
+      React.createElement(PaymentReceiptDocument, { payment, team } as any) as any
     );
 
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(pdfBuffer as any, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${payment.receiptNumber}.pdf"`,
+        'Content-Disposition': `attachment; filename="${payment.receiptNumber || 'receipt'}.pdf"`,
       },
     });
   } catch (error) {
