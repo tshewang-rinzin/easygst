@@ -234,7 +234,7 @@ export const updateInvoice = validatedActionWithUser(
       await db.insert(activityLogs).values({
         teamId: team.id,
         userId: user.id,
-        action: `${ActivityType.UPDATE_INVOICE}: ${existingInvoice.invoiceNumber}`,
+        action: `${ActivityType.EDIT_INVOICE}: ${existingInvoice.invoiceNumber}`,
         timestamp: new Date(),
       });
 

@@ -284,7 +284,7 @@ function TaxClassificationRow({ classification, onEdit, onDelete }: TaxClassific
         <div className="flex items-center gap-3">
           <span
             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              badgeColors[classification.color] || badgeColors.blue
+              badgeColors[classification.color || 'blue'] || badgeColors.blue
             }`}
           >
             {classification.code}
@@ -363,10 +363,10 @@ export default function TaxClassificationsPage() {
     setIsResetting(true);
     try {
       const result = await resetToDefaultTaxClassifications({}, new FormData());
-      if (result.success) {
+      if ('success' in result && result.success) {
         mutate();
         alert(result.success);
-      } else if (result.error) {
+      } else if ('error' in result && result.error) {
         alert(result.error);
       }
     } catch (error) {

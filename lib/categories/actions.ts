@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { db } from '@/lib/db/drizzle';
 import { productCategories } from '@/lib/db/schema';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, ne } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { validatedAction, validatedActionWithUser } from '@/lib/auth/middleware';
@@ -91,7 +91,7 @@ export const updateCategory = validatedActionWithUser(
           eq(productCategories.teamId, team.id),
           eq(productCategories.name, data.name),
           // Exclude current category from check
-          db.$with('id').notIn([data.id])
+          ne(productCategories.id, data.id)
         )
       )
       .limit(1);

@@ -41,11 +41,11 @@ export function QuickAddProductDialog({
     setIsPending(true);
 
     const formData = new FormData(e.currentTarget);
-    const result = await createProduct(null, formData);
+    const result = await createProduct({}, formData);
 
     setIsPending(false);
 
-    if (result.success) {
+    if ('success' in result && result.success) {
       // Refresh products list
       mutate('/api/products');
 
@@ -60,8 +60,8 @@ export function QuickAddProductDialog({
       if (onProductCreated) {
         onProductCreated();
       }
-    } else {
-      alert(result.error || 'Failed to create product');
+    } else if ('error' in result && result.error) {
+      alert(result.error);
     }
   };
 

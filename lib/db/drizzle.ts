@@ -11,12 +11,12 @@ if (!process.env.POSTGRES_URL) {
 
 // Prevent multiple connections during hot reload in development
 declare global {
-  var __db: ReturnType<typeof drizzle> | undefined;
+  var __db: ReturnType<typeof drizzle<typeof schema>> | undefined;
   var __client: ReturnType<typeof postgres> | undefined;
 }
 
 let client: ReturnType<typeof postgres>;
-let db: ReturnType<typeof drizzle>;
+let db: ReturnType<typeof drizzle<typeof schema>>;
 
 if (process.env.NODE_ENV === 'production') {
   // Production: Create connection with pooling limits

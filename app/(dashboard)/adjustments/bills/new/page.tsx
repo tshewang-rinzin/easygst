@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useActionState, useTransition, useEffect } from 'react';
+import { useState, useActionState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,8 +17,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function NewBillAdjustmentPage() {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-  const [state, formAction] = useActionState(createBillAdjustment, { error: '' });
+  const [state, formAction, isPending] = useActionState(createBillAdjustment, { error: '' });
   const [adjustmentType, setAdjustmentType] = useState<string>('discount');
   const [adjustmentDate, setAdjustmentDate] = useState<Date>(new Date());
 
@@ -30,15 +29,6 @@ export default function NewBillAdjustmentPage() {
       router.push('/adjustments/bills');
     }
   }, [state, router]);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-
-    startTransition(() => {
-      formAction(formData);
-    });
-  };
 
   const getAdjustmentHelp = () => {
     switch (adjustmentType) {
@@ -75,7 +65,7 @@ export default function NewBillAdjustmentPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
+      <form action={formAction} className="max-w-2xl space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>Adjustment Details</CardTitle>

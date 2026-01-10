@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useActionState, useTransition } from 'react';
+import { useState, useActionState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -31,10 +31,10 @@ export default function UnitsSettingsPage() {
     setIsResetting(true);
     try {
       const result = await resetToDefaultUnits({}, new FormData());
-      if (result.success) {
+      if ('success' in result && result.success) {
         mutate('/api/units');
         alert(result.success);
-      } else if (result.error) {
+      } else if ('error' in result && result.error) {
         alert(result.error);
       }
     } catch (error) {
@@ -153,18 +153,22 @@ function UnitRow({
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  const [isPending, startTransition] = useTransition();
-  const [deleteState, deleteAction] = useActionState(deleteUnit, { error: '' });
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (confirm(`Are you sure you want to delete the unit "${unit.name}"?`)) {
+      setIsDeleting(true);
       const formData = new FormData();
       formData.append('id', unit.id.toString());
 
-      startTransition(() => {
-        deleteAction(formData);
+      const result = await deleteUnit({}, formData);
+      setIsDeleting(false);
+
+      if ('success' in result && result.success) {
         onDelete();
-      });
+      } else if ('error' in result && result.error) {
+        alert(result.error);
+      }
     }
   };
 
@@ -191,7 +195,7 @@ function UnitRow({
           variant="ghost"
           size="sm"
           onClick={onEdit}
-          disabled={isPending}
+          disabled={isDeleting}
         >
           <Edit2 className="h-4 w-4" />
         </Button>
@@ -199,7 +203,7 @@ function UnitRow({
           variant="ghost"
           size="sm"
           onClick={handleDelete}
-          disabled={isPending}
+          disabled={isDeleting}
           className="text-red-600 hover:text-red-700 hover:bg-red-50"
         >
           <Trash2 className="h-4 w-4" />
@@ -218,29 +222,21 @@ function UnitForm({
   onCancel: () => void;
   onSuccess: () => void;
 }) {
-  const [isPending, startTransition] = useTransition();
-  const [state, formAction] = useActionState(
+  const [state, formAction, isPending] = useActionState(
     unit ? updateUnit : createUnit,
-    { error: '' }
+    { error: '' } as any
   );
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-
-    startTransition(() => {
-      formAction(formData);
-    });
-  };
-
-  if (state.success) {
-    onSuccess();
-  }
+  useEffect(() => {
+    if ('success' in state && state.success) {
+      onSuccess();
+    }
+  }, [state, onSuccess]);
 
   return (
     <Card className="border-orange-200">
       <CardContent className="pt-6">
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form action={formAction} className="space-y-4">
           {unit && <input type="hidden" name="id" value={unit.id} />}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -311,7 +307,7 @@ function UnitForm({
             </div>
           </div>
 
-          {state.error && (
+          {'error' in state && state.error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-sm text-red-600">{state.error}</p>
             </div>

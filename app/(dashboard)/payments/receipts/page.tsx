@@ -81,8 +81,8 @@ export default function PaymentReceiptsPage() {
               </Label>
               <DatePicker
                 id="startDate"
-                date={startDate}
-                onDateChange={(date) => setStartDate(date)}
+                date={startDate || undefined}
+                onDateChange={(date) => setStartDate(date || null)}
                 placeholder="Select start date"
               />
             </div>
@@ -93,8 +93,8 @@ export default function PaymentReceiptsPage() {
               </Label>
               <DatePicker
                 id="endDate"
-                date={endDate}
-                onDateChange={(date) => setEndDate(date)}
+                date={endDate || undefined}
+                onDateChange={(date) => setEndDate(date || null)}
                 placeholder="Select end date"
               />
             </div>

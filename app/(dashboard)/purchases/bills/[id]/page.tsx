@@ -106,11 +106,11 @@ export default function ViewSupplierBillPage() {
     formData.append('id', paymentId.toString());
 
     const result = await deleteSupplierPayment({}, formData);
-    if (result.success) {
+    if ('success' in result && result.success) {
       mutate(`/api/purchases/bills/${billId}`);
       mutatePayments();
     } else {
-      alert(result.error || 'Failed to delete payment');
+      alert(('error' in result && result.error) || 'Failed to delete payment');
     }
   };
 

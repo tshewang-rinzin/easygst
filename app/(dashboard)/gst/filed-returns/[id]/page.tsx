@@ -30,15 +30,15 @@ export default function GstReturnDetailPage({
   const [isAmendMode, setIsAmendMode] = useState(false);
   const [filingDate, setFilingDate] = useState<Date>(new Date());
 
-  const [fileState, fileAction, isFilingPending] = useActionState(fileGstReturn, { error: '' });
-  const [amendState, amendAction, isAmendPending] = useActionState(amendGstReturn, { error: '' });
+  const [fileState, fileAction, isFilingPending] = useActionState(fileGstReturn, { error: '' } as any);
+  const [amendState, amendAction, isAmendPending] = useActionState(amendGstReturn, { error: '' } as any);
 
   // Auto-navigate on success
   useEffect(() => {
-    if (fileState.success || amendState.success) {
+    if (('success' in fileState && fileState.success) || ('success' in amendState && amendState.success)) {
       router.push('/gst/filed-returns');
     }
-  }, [fileState.success, amendState.success, router]);
+  }, [fileState, amendState, router]);
 
   if (isLoading) {
     return (
@@ -232,7 +232,7 @@ export default function GstReturnDetailPage({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label>Filing Date *</Label>
-                  <DatePicker date={filingDate} onDateChange={setFilingDate} />
+                  <DatePicker date={filingDate} onDateChange={(date) => setFilingDate(date || new Date())} />
                   <input type="hidden" name="filingDate" value={filingDate?.toISOString()} required />
                 </div>
 

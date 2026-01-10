@@ -203,10 +203,14 @@ export default function AllocateCustomerAdvancePage({
                       <div className="flex-1 space-y-2">
                         <Label>Invoice</Label>
                         <SearchableInvoiceSelect
-                          selectedInvoice={invoice}
-                          onSelectInvoice={(inv) => handleAllocationChange(index, 'invoiceId', inv.id)}
-                          customerId={advance.customer.id}
-                          excludeInvoiceIds={allocations.map(a => a.invoiceId).filter(id => id !== allocation.invoiceId)}
+                          invoices={outstandingInvoices || []}
+                          selectedInvoiceId={allocation.invoiceId}
+                          onSelectInvoice={(invoiceId) => {
+                            if (invoiceId !== null) {
+                              handleAllocationChange(index, 'invoiceId', invoiceId);
+                            }
+                          }}
+                          excludedInvoiceIds={allocations.map(a => a.invoiceId).filter(id => id !== allocation.invoiceId)}
                         />
                       </div>
                       <div className="w-48 space-y-2">

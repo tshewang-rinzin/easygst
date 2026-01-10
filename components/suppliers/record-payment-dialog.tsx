@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useActionState, useTransition } from 'react';
+import { useState, useActionState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,7 +28,6 @@ export function RecordPaymentDialog({
   onClose,
   onSuccess,
 }: RecordPaymentDialogProps) {
-  const [isPending, startTransition] = useTransition();
   const [paymentDate, setPaymentDate] = useState<Date>(new Date());
   const [paymentMethod, setPaymentMethod] = useState('');
 
@@ -43,26 +42,16 @@ export function RecordPaymentDialog({
     setPaymentMethod(paymentMethods[0].code);
   }
 
-  const [state, formAction] = useActionState(recordSupplierPayment, {
+  const [state, formAction, isPending] = useActionState(recordSupplierPayment, {
     error: '',
-  });
+  } as any);
 
-  if (state.success) {
-    mutate(`/api/purchases/bills/${billId}`);
-    onSuccess();
-  }
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-
-    // Ensure billId is included
-    formData.append('billId', billId.toString());
-
-    startTransition(() => {
-      formAction(formData);
-    });
-  };
+  useEffect(() => {
+    if ('success' in state && state.success) {
+      mutate(`/api/purchases/bills/${billId}`);
+      onSuccess();
+    }
+  }, [state, billId, onSuccess]);
 
   // Helper function to determine field requirements based on payment method code
   const getMethodType = (code: string): 'cash' | 'bank_transfer' | 'online' | 'cheque' | 'other' => {
@@ -98,7 +87,8 @@ export function RecordPaymentDialog({
         </div>
 
         {/* Form - Scrollable */}
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+        <form action={formAction} className="flex flex-col flex-1 overflow-hidden">
+          <input type="hidden" name="billId" value={billId} />
           <div className="p-6 space-y-4 overflow-y-auto flex-1">
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
             <div className="flex justify-between items-center">
@@ -287,7 +277,7 @@ export function RecordPaymentDialog({
               />
             </div>
 
-            {state.error && (
+            {'error' in state && state.error && (
               <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
                 <p className="text-sm text-red-700">{state.error}</p>
               </div>

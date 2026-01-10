@@ -56,14 +56,14 @@ export default function UsersRolesPage() {
 
     const result = await inviteUser({ email: inviteEmail, role: inviteRole });
 
-    if (result.success) {
+    if ('success' in result && result.success) {
       setMessage({ type: 'success', text: result.message || 'Invitation sent' });
       setIsInviteDialogOpen(false);
       setInviteEmail('');
       setInviteRole('member');
       mutate();
     } else {
-      setMessage({ type: 'error', text: result.message || 'Failed to send invitation' });
+      setMessage({ type: 'error', text: ('message' in result && result.message) || 'Failed to send invitation' });
     }
 
     setIsSubmitting(false);
@@ -73,11 +73,11 @@ export default function UsersRolesPage() {
     setMessage(null);
     const result = await updateMemberRole({ memberId, role: newRole });
 
-    if (result.success) {
+    if ('success' in result && result.success) {
       setMessage({ type: 'success', text: result.message || 'Role updated' });
       mutate();
     } else {
-      setMessage({ type: 'error', text: result.message || 'Failed to update role' });
+      setMessage({ type: 'error', text: ('message' in result && result.message) || 'Failed to update role' });
     }
   };
 
@@ -87,11 +87,11 @@ export default function UsersRolesPage() {
     setMessage(null);
     const result = await removeMember({ memberId });
 
-    if (result.success) {
+    if ('success' in result && result.success) {
       setMessage({ type: 'success', text: result.message || 'Member removed' });
       mutate();
     } else {
-      setMessage({ type: 'error', text: result.message || 'Failed to remove member' });
+      setMessage({ type: 'error', text: ('message' in result && result.message) || 'Failed to remove member' });
     }
   };
 
@@ -99,11 +99,11 @@ export default function UsersRolesPage() {
     setMessage(null);
     const result = await cancelInvitation({ invitationId });
 
-    if (result.success) {
+    if ('success' in result && result.success) {
       setMessage({ type: 'success', text: result.message || 'Invitation cancelled' });
       mutate();
     } else {
-      setMessage({ type: 'error', text: result.message || 'Failed to cancel invitation' });
+      setMessage({ type: 'error', text: ('message' in result && result.message) || 'Failed to cancel invitation' });
     }
   };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useActionState, useTransition } from 'react';
+import { useState, useActionState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -38,28 +38,19 @@ export function RecordPaymentDialog({
 }: RecordPaymentDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
   const [paymentDate, setPaymentDate] = useState<Date>(new Date());
-  const [state, formAction] = useActionState(recordPayment, { error: '' });
+  const [state, formAction, isPending] = useActionState(recordPayment, { error: '' } as any);
   const { data: paymentMethods } = useSWR<PaymentMethod[]>(
     '/api/payment-methods/enabled',
     fetcher
   );
 
-  if (state.success) {
-    setOpen(false);
-    router.refresh();
-  }
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    formData.append('invoiceId', invoiceId.toString());
-
-    startTransition(() => {
-      formAction(formData);
-    });
-  };
+  useEffect(() => {
+    if ('success' in state && state.success) {
+      setOpen(false);
+      router.refresh();
+    }
+  }, [state, router]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -70,7 +61,8 @@ export function RecordPaymentDialog({
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-        <form onSubmit={handleSubmit}>
+        <form action={formAction}>
+          <input type="hidden" name="invoiceId" value={invoiceId} />
           <DialogHeader>
             <DialogTitle>Record Payment</DialogTitle>
             <DialogDescription>
@@ -228,7 +220,7 @@ export function RecordPaymentDialog({
             </div>
           </div>
 
-          {state.error && (
+          {'error' in state && state.error && (
             <div className="p-3 mb-4 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-sm text-red-600">{state.error}</p>
             </div>

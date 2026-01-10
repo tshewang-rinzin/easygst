@@ -142,11 +142,17 @@ export const deleteSupplierPayment = validatedActionWithUser(
         return { error: 'Payment not found' };
       }
 
+      if (!payment.billId) {
+        return { error: 'Payment has no associated bill' };
+      }
+
+      const billId = payment.billId; // Store to satisfy TypeScript
+
       // Get the bill
       const [bill] = await db
         .select()
         .from(supplierBills)
-        .where(eq(supplierBills.id, payment.billId))
+        .where(eq(supplierBills.id, billId))
         .limit(1);
 
       if (!bill) {
@@ -182,7 +188,7 @@ export const deleteSupplierPayment = validatedActionWithUser(
             status: paymentStatus === 'paid' ? 'paid' : 'sent',
             updatedAt: new Date(),
           })
-          .where(eq(supplierBills.id, payment.billId));
+          .where(eq(supplierBills.id, billId));
       });
 
       // Activity log

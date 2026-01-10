@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useActionState } from 'react';
+import { useState, useActionState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,17 +42,18 @@ export function CategoryForm({ category, mode }: CategoryFormProps) {
     {}
   );
 
-  const handleSubmit = async (formData: FormData) => {
+  useEffect(() => {
+    if ('success' in state && state.success) {
+      router.push('/products/categories');
+    }
+  }, [state, router]);
+
+  const handleSubmit = (formData: FormData) => {
     formData.set('isActive', String(isActive));
     if (mode === 'edit' && category) {
       formData.set('id', String(category.id));
     }
-
-    const result = await formAction(formData);
-
-    if (result?.success) {
-      router.push('/products/categories');
-    }
+    formAction(formData);
   };
 
   return (

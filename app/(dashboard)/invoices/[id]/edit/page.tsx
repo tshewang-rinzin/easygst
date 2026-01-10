@@ -38,7 +38,7 @@ async function EditInvoiceForm({ id }: { id: number }) {
         invoiceDate: invoice.invoiceDate,
         dueDate: invoice.dueDate,
         currency: invoice.currency,
-        items: invoice.items.map((item) => ({
+        items: invoice.items.map((item: any) => ({
           description: item.description,
           quantity: item.quantity,
           unit: item.unit || 'piece',

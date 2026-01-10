@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useActionState, useTransition } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -49,7 +49,8 @@ interface LineItem {
 
 export function InvoiceFormNew({ defaultGstRate }: { defaultGstRate: string }) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [invoiceDate, setInvoiceDate] = useState<Date>(new Date());
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
@@ -68,16 +69,9 @@ export function InvoiceFormNew({ defaultGstRate }: { defaultGstRate: string }) {
     },
   ]);
 
-  const [state, formAction] = useActionState(createInvoice, {
-    error: '',
-  });
-
-  if (state.success && state.invoiceId) {
-    router.push(`/invoices/${state.invoiceId}`);
-  }
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError('');
 
     // Validate customer selection
     if (!selectedCustomer) {
@@ -108,6 +102,8 @@ export function InvoiceFormNew({ defaultGstRate }: { defaultGstRate: string }) {
         return;
       }
     }
+
+    setIsSubmitting(true);
 
     const form = e.currentTarget;
     const formData = new FormData(form);
@@ -141,9 +137,15 @@ export function InvoiceFormNew({ defaultGstRate }: { defaultGstRate: string }) {
     const notes = formData.get('notes');
     if (notes) cleanFormData.append('notes', notes as string);
 
-    startTransition(() => {
-      formAction(cleanFormData);
-    });
+    const result = await createInvoice({}, cleanFormData);
+
+    setIsSubmitting(false);
+
+    if ('success' in result && result.success && 'invoiceId' in result && result.invoiceId) {
+      router.push(`/invoices/${result.invoiceId}`);
+    } else if ('error' in result && result.error) {
+      setError(result.error);
+    }
   };
 
   const addLineItem = () => {
@@ -630,19 +632,19 @@ export function InvoiceFormNew({ defaultGstRate }: { defaultGstRate: string }) {
           </div>
         </div>
 
-        {state.error && (
+        {error && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm font-medium text-red-600">{state.error}</p>
+            <p className="text-sm font-medium text-red-600">{error}</p>
           </div>
         )}
 
         <div className="flex gap-4 pb-8">
           <Button
             type="submit"
-            disabled={isPending || !selectedCustomer}
+            disabled={isSubmitting || !selectedCustomer}
             className="bg-orange-500 hover:bg-orange-600"
           >
-            {isPending ? 'Creating Invoice...' : 'Create Invoice'}
+            {isSubmitting ? 'Creating Invoice...' : 'Create Invoice'}
           </Button>
           <Link href="/invoices">
             <Button type="button" variant="outline">

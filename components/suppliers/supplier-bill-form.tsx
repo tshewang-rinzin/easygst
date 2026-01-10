@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useActionState, useTransition } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,6 @@ import Link from 'next/link';
 import { createSupplierBill, updateSupplierBill } from '@/lib/supplier-bills/actions';
 import useSWR from 'swr';
 import type { Unit, TaxClassification } from '@/lib/db/schema';
-import { useEffect } from 'react';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -63,7 +62,6 @@ export function SupplierBillForm({
   existingBill,
 }: SupplierBillFormProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
   const [billNumber, setBillNumber] = useState('');
   const [billDate, setBillDate] = useState<Date>(new Date());
@@ -131,21 +129,12 @@ export function SupplierBillForm({
     }
   }, [editMode, existingBill]);
 
-  const [state, formAction] = useActionState(
-    editMode ? updateSupplierBill : createSupplierBill,
-    { error: '' }
-  );
-
-  if (state.success && !editMode && state.billId) {
-    router.push(`/purchases/bills/${state.billId}`);
-  }
-
-  if (state.success && editMode && billId) {
-    router.push(`/purchases/bills/${billId}`);
-  }
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError('');
 
     if (!selectedSupplier) {
       alert('Please select a supplier');
@@ -203,9 +192,20 @@ export function SupplierBillForm({
     const notes = formData.get('notes');
     if (notes) cleanFormData.append('notes', notes as string);
 
-    startTransition(() => {
-      formAction(cleanFormData);
-    });
+    setIsSubmitting(true);
+    const action = editMode ? updateSupplierBill : createSupplierBill;
+    const result = await action({}, cleanFormData);
+    setIsSubmitting(false);
+
+    if ('success' in result && result.success) {
+      if (!editMode && 'billId' in result && result.billId) {
+        router.push(`/purchases/bills/${result.billId}`);
+      } else if (editMode && billId) {
+        router.push(`/purchases/bills/${billId}`);
+      }
+    } else if ('error' in result && result.error) {
+      setError(result.error);
+    }
   };
 
   const addLineItem = () => {
@@ -494,10 +494,10 @@ export function SupplierBillForm({
                           onChange={(value) =>
                             updateLineItem(item.id, 'description', value)
                           }
-                          onProductSelect={(product) =>
+                          onSelect={(product) =>
                             handleProductSelect(item.id, product)
                           }
-                          placeholder="Enter or search..."
+                          index={index}
                         />
                       </td>
                       <td className="py-3 px-2">
@@ -687,7 +687,7 @@ export function SupplierBillForm({
         </div>
 
         {/* Error Message */}
-        {state.error && (
+        {error && (
           <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
             <div className="flex">
               <div className="flex-shrink-0">
@@ -704,7 +704,7 @@ export function SupplierBillForm({
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-sm text-red-700">{state.error}</p>
+                <p className="text-sm text-red-700">{error}</p>
               </div>
             </div>
           </div>
@@ -719,11 +719,11 @@ export function SupplierBillForm({
           </Link>
           <Button
             type="submit"
-            disabled={isPending}
+            disabled={isSubmitting}
             size="lg"
             className="bg-orange-500 hover:bg-orange-600 min-w-[160px]"
           >
-            {isPending
+            {isSubmitting
               ? editMode
                 ? 'Updating Bill...'
                 : 'Creating Bill...'

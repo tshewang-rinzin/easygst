@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useActionState, useTransition, useEffect } from 'react';
+import { useState, useActionState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Trash2 } from 'lucide-react';
@@ -25,11 +25,10 @@ export default function EditSupplierPage() {
   const params = useParams();
   const supplierId = Number(params.id);
 
-  const [isPending, startTransition] = useTransition();
   const [isDeleting, setIsDeleting] = useState(false);
   const [supplier, setSupplier] = useState<Supplier | null>(null);
   const [loading, setLoading] = useState(true);
-  const [state, formAction] = useActionState(updateSupplier, { error: '' });
+  const [state, formAction, isPending] = useActionState(updateSupplier, { error: '' } as any);
 
   useEffect(() => {
     fetch(`/api/suppliers/${supplierId}`)
@@ -44,26 +43,23 @@ export default function EditSupplierPage() {
       });
   }, [supplierId]);
 
-  if (state.success) {
-    router.push('/suppliers');
-  }
+  useEffect(() => {
+    if ('success' in state && state.success) {
+      router.push('/suppliers');
+    }
+  }, [state, router]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    formData.append('id', supplierId.toString());
-
-    startTransition(() => {
-      formAction(formData);
-    });
-  };
 
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      const result = await deleteSupplier(null, new FormData());
-      if (result.success) {
+      const formData = new FormData();
+      formData.append('id', supplierId.toString());
+      const result = await deleteSupplier({}, formData);
+      if ('success' in result && result.success) {
         router.push('/suppliers');
+      } else {
+        setIsDeleting(false);
       }
     } catch (error) {
       console.error('Error deleting supplier:', error);
@@ -144,10 +140,11 @@ export default function EditSupplierPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="max-w-4xl">
+      <form action={formAction} className="max-w-4xl">
+        <input type="hidden" name="id" value={supplierId} />
         <SupplierForm supplier={supplier} />
 
-        {state.error && (
+        {'error' in state && state.error && (
           <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-sm text-red-600">{state.error}</p>
           </div>

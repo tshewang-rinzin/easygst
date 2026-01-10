@@ -36,11 +36,11 @@ export function DeleteInvoiceDialog({
       const formData = new FormData();
       formData.append('id', invoiceId.toString());
 
-      const result = await deleteInvoice(null, formData);
+      const result = await deleteInvoice({}, formData);
 
-      if (result.error) {
+      if ('error' in result && result.error) {
         setError(result.error);
-      } else {
+      } else if ('success' in result && result.success) {
         setOpen(false);
         router.push('/invoices');
       }

@@ -35,12 +35,12 @@ export default function DocumentNumberingPage() {
         invoicePrefix: invoicePrefix || 'INV',
       });
 
-      if (result.success) {
+      if ('success' in result && result.success) {
         setMessage({ type: 'success', text: 'Document numbering settings saved successfully' });
         mutate();
         router.refresh();
       } else {
-        setMessage({ type: 'error', text: result.message || 'Failed to save settings' });
+        setMessage({ type: 'error', text: ('message' in result && result.message) || 'Failed to save settings' });
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'An unexpected error occurred' });

@@ -40,16 +40,16 @@ export default function EditProductPage({
   );
 
   useEffect(() => {
-    if (updateState.success) {
+    if ('success' in updateState && updateState.success) {
       router.push('/products');
     }
-  }, [updateState.success, router]);
+  }, [updateState, router]);
 
   useEffect(() => {
-    if (deleteState.success) {
+    if ('success' in deleteState && deleteState.success) {
       router.push('/products');
     }
-  }, [deleteState.success, router]);
+  }, [deleteState, router]);
 
   if (error) {
     return (

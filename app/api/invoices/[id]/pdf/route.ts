@@ -64,7 +64,7 @@ export async function GET(
       },
 
       // Line Items
-      items: invoice.items.map((item) => ({
+      items: invoice.items.map((item: any) => ({
         description: item.description,
         quantity: item.quantity,
         unit: item.unit,
@@ -95,9 +95,9 @@ export async function GET(
     const filename = getInvoicePDFFilename(invoice.invoiceNumber);
 
     // Convert stream to buffer
-    const chunks: Uint8Array[] = [];
+    const chunks: Buffer[] = [];
     for await (const chunk of pdfStream) {
-      chunks.push(chunk);
+      chunks.push(chunk as Buffer);
     }
     const pdfBuffer = Buffer.concat(chunks);
 
