@@ -18,7 +18,9 @@ export default function ResendVerificationPage() {
     setLoading(true);
 
     try {
-      const result = await resendVerificationEmail({ email });
+      const formData = new FormData();
+      formData.append('email', email);
+      const result = await resendVerificationEmail({ email }, formData);
 
       if (result?.error) {
         setError(result.error);
