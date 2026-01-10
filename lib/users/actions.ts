@@ -2,7 +2,7 @@
 
 import { validatedActionWithUser } from '@/lib/auth/middleware';
 import { db } from '@/lib/db/drizzle';
-import { teamMembers, invitations, activityLogs, ActivityType, users } from '@/lib/db/schema';
+import { teamMembers, invitations, activityLogs, ActivityType, users, teams } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { getTeamForUser } from '@/lib/db/queries';
 import { revalidatePath } from 'next/cache';
@@ -428,13 +428,23 @@ export const getInvitationByToken = async (token: string) => {
       return { success: false, error: 'Invalid invitation link' };
     }
 
-    const invitation = await db.query.invitations.findFirst({
-      where: and(eq(invitations.invitationToken, token), eq(invitations.status, 'pending')),
-      with: {
-        team: true,
-        invitedByUser: true,
-      },
-    });
+    const result = await db
+      .select({
+        id: invitations.id,
+        email: invitations.email,
+        role: invitations.role,
+        invitationTokenExpiry: invitations.invitationTokenExpiry,
+        teamName: teams.name,
+        invitedByName: users.name,
+        invitedByEmail: users.email,
+      })
+      .from(invitations)
+      .innerJoin(teams, eq(invitations.teamId, teams.id))
+      .innerJoin(users, eq(invitations.invitedBy, users.id))
+      .where(and(eq(invitations.invitationToken, token), eq(invitations.status, 'pending')))
+      .limit(1);
+
+    const invitation = result[0];
 
     if (!invitation) {
       return { success: false, error: 'Invalid or expired invitation link' };
@@ -451,8 +461,8 @@ export const getInvitationByToken = async (token: string) => {
         id: invitation.id,
         email: invitation.email,
         role: invitation.role,
-        teamName: invitation.team.name,
-        invitedBy: invitation.invitedByUser.name || invitation.invitedByUser.email,
+        teamName: invitation.teamName,
+        invitedBy: invitation.invitedByName || invitation.invitedByEmail,
       },
     };
   } catch (error) {
