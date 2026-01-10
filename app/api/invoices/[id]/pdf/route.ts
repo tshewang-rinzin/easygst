@@ -30,6 +30,14 @@ export async function GET(
       return NextResponse.json({ error: 'Team not found' }, { status: 404 });
     }
 
+    // Generate verification URL using the request origin
+    const origin = request.headers.get('origin') || request.headers.get('host') || '';
+    const protocol = origin.includes('localhost') ? 'http' : 'https';
+    const baseUrl = origin.startsWith('http') ? origin : `${protocol}://${origin}`;
+    const verificationUrl = invoice.publicId
+      ? `${baseUrl}/verify/${invoice.publicId}`
+      : null;
+
     // Prepare invoice data for PDF
     const pdfData = {
       // Business Info
@@ -53,6 +61,7 @@ export async function GET(
       dueDate: invoice.dueDate,
       status: invoice.status,
       currency: invoice.currency,
+      publicId: invoice.publicId,
 
       // Customer Info
       customer: {
@@ -88,6 +97,9 @@ export async function GET(
       paymentTerms: invoice.paymentTerms,
       customerNotes: invoice.customerNotes,
       termsAndConditions: team.invoiceTerms,
+
+      // Verification
+      verificationUrl,
     };
 
     // Generate PDF

@@ -10,6 +10,7 @@ import {
   index,
   uniqueIndex,
   jsonb,
+  uuid,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -359,6 +360,7 @@ export const invoices = pgTable('invoices', {
     .references(() => customers.id),
 
   // Invoice Identification
+  publicId: uuid('public_id').defaultRandom().notNull().unique(), // UUID for public verification URL
   invoiceNumber: varchar('invoice_number', { length: 50 }).notNull(), // INV-2026-0001
   invoiceDate: timestamp('invoice_date').notNull().defaultNow(),
   dueDate: timestamp('due_date'),
@@ -403,6 +405,7 @@ export const invoices = pgTable('invoices', {
 }, (table) => ({
   teamInvoiceIdx: index('team_invoice_idx').on(table.teamId),
   invoiceNumberIdx: uniqueIndex('invoice_number_idx').on(table.teamId, table.invoiceNumber),
+  publicIdIdx: uniqueIndex('invoice_public_id_idx').on(table.publicId),
   customerInvoiceIdx: index('customer_invoice_idx').on(table.customerId),
   invoiceStatusIdx: index('invoice_status_idx').on(table.status),
   invoiceDateIdx: index('invoice_date_idx').on(table.invoiceDate),
