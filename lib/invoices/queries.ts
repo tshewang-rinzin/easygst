@@ -283,3 +283,49 @@ export async function getTotalOutstanding() {
 
   return result?.total || '0.00';
 }
+
+/**
+ * Get invoice by publicId for public verification (no auth required)
+ * Returns limited information suitable for public display
+ */
+export async function getInvoiceByPublicId(publicId: string) {
+  const { teams } = await import('@/lib/db/schema');
+
+  const [result] = await db
+    .select({
+      invoice: {
+        invoiceNumber: invoices.invoiceNumber,
+        publicId: invoices.publicId,
+        invoiceDate: invoices.invoiceDate,
+        dueDate: invoices.dueDate,
+        totalAmount: invoices.totalAmount,
+        currency: invoices.currency,
+        status: invoices.status,
+        paymentStatus: invoices.paymentStatus,
+      },
+      customer: {
+        name: customers.name,
+      },
+      team: {
+        name: teams.name,
+        tpn: teams.tpn,
+        gstNumber: teams.gstNumber,
+        address: teams.address,
+        city: teams.city,
+        dzongkhag: teams.dzongkhag,
+      },
+    })
+    .from(invoices)
+    .leftJoin(customers, eq(invoices.customerId, customers.id))
+    .leftJoin(teams, eq(invoices.teamId, teams.id))
+    .where(eq(invoices.publicId, publicId))
+    .limit(1);
+
+  if (!result) return null;
+
+  return {
+    ...result.invoice,
+    customer: result.customer,
+    team: result.team,
+  };
+}

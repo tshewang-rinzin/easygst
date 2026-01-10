@@ -9,159 +9,309 @@ import {
   Image,
 } from '@react-pdf/renderer';
 
-// Define styles for the PDF
 const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 10,
     fontFamily: 'Helvetica',
+    backgroundColor: '#ffffff',
   },
+  // Header Section
   header: {
-    marginBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 30,
+    paddingBottom: 20,
+    borderBottom: '2px solid #1f2937',
   },
-  companyName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  companyDetails: {
-    fontSize: 9,
-    color: '#555',
-    marginBottom: 2,
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
   },
   logo: {
-    width: 80,
-    height: 80,
-    marginBottom: 10,
+    width: 60,
+    height: 60,
+    marginRight: 15,
     objectFit: 'contain',
   },
+  headerRight: {
+    alignItems: 'flex-end',
+  },
   invoiceTitle: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 'bold',
-    textAlign: 'right',
-    marginBottom: 10,
+    color: '#1f2937',
+    letterSpacing: 2,
   },
   invoiceNumber: {
     fontSize: 12,
-    textAlign: 'right',
-    marginBottom: 4,
+    color: '#4b5563',
+    marginTop: 4,
   },
-  section: {
-    marginBottom: 15,
+  originalBadge: {
+    marginTop: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    backgroundColor: '#dcfce7',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#16a34a',
   },
-  sectionTitle: {
-    fontSize: 11,
+  originalBadgeText: {
+    fontSize: 9,
     fontWeight: 'bold',
-    marginBottom: 6,
-    color: '#333',
+    color: '#16a34a',
+    letterSpacing: 1,
   },
-  row: {
+  // Two Column Section for From/To
+  twoColumnSection: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 15,
+    marginBottom: 25,
+    gap: 30,
   },
   column: {
     flex: 1,
   },
-  label: {
+  columnBox: {
+    backgroundColor: '#f9fafb',
+    padding: 15,
+    borderRadius: 4,
+    minHeight: 120,
+  },
+  sectionLabel: {
     fontSize: 8,
-    color: '#666',
+    fontWeight: 'bold',
+    color: '#6b7280',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  companyName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#1f2937',
+    marginBottom: 6,
+  },
+  detailText: {
+    fontSize: 9,
+    color: '#4b5563',
+    marginBottom: 3,
+    lineHeight: 1.4,
+  },
+  detailLabel: {
+    fontSize: 8,
+    color: '#6b7280',
+  },
+  // Invoice Meta (Date, Due Date)
+  metaSection: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: 20,
+    gap: 30,
+  },
+  metaItem: {
+    alignItems: 'flex-end',
+  },
+  metaLabel: {
+    fontSize: 8,
+    color: '#6b7280',
+    textTransform: 'uppercase',
     marginBottom: 2,
   },
-  value: {
-    fontSize: 10,
-    color: '#000',
+  metaValue: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#1f2937',
   },
+  // Table
   table: {
-    marginTop: 10,
     marginBottom: 20,
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#f3f4f6',
-    padding: 8,
+    backgroundColor: '#1f2937',
+    padding: 10,
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
+  },
+  tableHeaderText: {
+    color: '#ffffff',
+    fontSize: 8,
     fontWeight: 'bold',
-    borderBottom: '2px solid #d1d5db',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   tableRow: {
     flexDirection: 'row',
-    padding: 8,
+    padding: 10,
     borderBottom: '1px solid #e5e7eb',
+    backgroundColor: '#ffffff',
+  },
+  tableRowAlt: {
+    backgroundColor: '#f9fafb',
   },
   tableCell: {
     fontSize: 9,
+    color: '#374151',
   },
   col1: { width: '35%' },
   col2: { width: '10%', textAlign: 'right' },
-  col3: { width: '10%', textAlign: 'right' },
-  col4: { width: '15%', textAlign: 'right' },
-  col5: { width: '15%', textAlign: 'right' },
+  col3: { width: '15%', textAlign: 'right' },
+  col4: { width: '12%', textAlign: 'right' },
+  col5: { width: '13%', textAlign: 'right' },
   col6: { width: '15%', textAlign: 'right' },
+  gstTag: {
+    fontSize: 7,
+    marginTop: 3,
+    paddingVertical: 2,
+    paddingHorizontal: 4,
+    borderRadius: 2,
+    alignSelf: 'flex-start',
+  },
+  // Totals Section
+  totalsWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
   totalsSection: {
-    marginLeft: 'auto',
-    width: '40%',
-    marginTop: 10,
+    width: '45%',
   },
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 4,
-    fontSize: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
   },
   totalLabel: {
-    color: '#666',
+    fontSize: 10,
+    color: '#6b7280',
   },
   totalValue: {
+    fontSize: 10,
     fontWeight: 'bold',
+    color: '#1f2937',
   },
-  grandTotal: {
+  grandTotalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 8,
-    backgroundColor: '#f9fafb',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    backgroundColor: '#1f2937',
+    borderRadius: 4,
     marginTop: 4,
-    borderTop: '2px solid #d1d5db',
   },
   grandTotalLabel: {
     fontSize: 12,
     fontWeight: 'bold',
+    color: '#ffffff',
   },
   grandTotalValue: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 'bold',
-    color: '#ea580c',
+    color: '#ffffff',
   },
+  // Payment Info
+  paymentSection: {
+    marginTop: 25,
+    padding: 15,
+    backgroundColor: '#fef3c7',
+    borderRadius: 4,
+    borderLeft: '4px solid #f59e0b',
+  },
+  paymentTitle: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#92400e',
+    marginBottom: 8,
+  },
+  paymentText: {
+    fontSize: 9,
+    color: '#78350f',
+    marginBottom: 4,
+  },
+  // Notes Section
+  notesSection: {
+    marginTop: 20,
+    padding: 12,
+    backgroundColor: '#f3f4f6',
+    borderRadius: 4,
+  },
+  notesTitle: {
+    fontSize: 9,
+    fontWeight: 'bold',
+    color: '#374151',
+    marginBottom: 6,
+  },
+  notesText: {
+    fontSize: 8,
+    color: '#6b7280',
+    lineHeight: 1.4,
+  },
+  // Footer
   footer: {
-    marginTop: 30,
+    position: 'absolute',
+    bottom: 40,
+    left: 40,
+    right: 40,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
     paddingTop: 15,
     borderTop: '1px solid #e5e7eb',
   },
+  footerLeft: {
+    flex: 1,
+  },
   footerText: {
     fontSize: 8,
-    color: '#666',
-    marginBottom: 4,
+    color: '#9ca3af',
+    marginBottom: 3,
   },
-  signature: {
-    marginTop: 40,
-    paddingTop: 20,
+  signatureSection: {
+    alignItems: 'center',
+    marginRight: 30,
   },
   signatureLine: {
-    borderTop: '1px solid #000',
-    width: 200,
-    marginTop: 40,
+    borderTop: '1px solid #374151',
+    width: 150,
+    marginBottom: 6,
   },
   signatureLabel: {
-    fontSize: 9,
-    marginTop: 4,
+    fontSize: 8,
+    color: '#6b7280',
   },
+  qrSection: {
+    alignItems: 'center',
+  },
+  qrCode: {
+    width: 70,
+    height: 70,
+  },
+  qrLabel: {
+    fontSize: 7,
+    color: '#9ca3af',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  // Watermark
   watermark: {
     position: 'absolute',
-    fontSize: 60,
-    color: '#f3f4f6',
+    fontSize: 72,
+    color: '#e5e7eb',
     transform: 'rotate(-45deg)',
     top: '40%',
-    left: '25%',
-    opacity: 0.1,
+    left: '15%',
+    opacity: 0.3,
+    fontWeight: 'bold',
+    letterSpacing: 10,
+  },
+  // Paid/Due badges in totals
+  paidBadge: {
+    color: '#16a34a',
+  },
+  dueBadge: {
+    color: '#dc2626',
   },
 });
 
@@ -229,6 +379,10 @@ interface InvoiceData {
   paymentTerms?: string | null;
   customerNotes?: string | null;
   termsAndConditions?: string | null;
+
+  // QR Code for verification
+  qrCodeDataUrl?: string | null;
+  verificationUrl?: string | null;
 }
 
 export const InvoiceTemplate: React.FC<{ data: InvoiceData }> = ({ data }) => {
@@ -242,78 +396,121 @@ export const InvoiceTemplate: React.FC<{ data: InvoiceData }> = ({ data }) => {
   };
 
   const formatCurrency = (amount: string, currency: string) => {
-    return `${currency} ${parseFloat(amount).toFixed(2)}`;
+    const num = parseFloat(amount);
+    return `${currency} ${num.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
   };
+
+  const getGstTagStyle = (classification: string) => {
+    switch (classification) {
+      case 'ZERO_RATED':
+        return { backgroundColor: '#dcfce7', color: '#16a34a' };
+      case 'EXEMPT':
+        return { backgroundColor: '#f3f4f6', color: '#6b7280' };
+      default:
+        return { backgroundColor: '#dbeafe', color: '#2563eb' };
+    }
+  };
+
+  const getGstLabel = (classification: string) => {
+    switch (classification) {
+      case 'ZERO_RATED':
+        return 'Zero-Rated';
+      case 'EXEMPT':
+        return 'Exempt';
+      default:
+        return 'Standard';
+    }
+  };
+
+  const isDraft = data.status === 'draft';
+  const isPaid = parseFloat(data.amountDue) <= 0;
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
         {/* Watermark for Draft */}
-        {data.status === 'draft' && (
-          <Text style={styles.watermark}>DRAFT</Text>
-        )}
+        {isDraft && <Text style={styles.watermark}>DRAFT</Text>}
 
-        {/* Header - Business & Invoice Info */}
+        {/* Header */}
         <View style={styles.header}>
-          <View style={styles.row}>
-            {/* Business Info */}
-            <View style={styles.column}>
-              {data.logoUrl && (
-                <Image src={data.logoUrl} style={styles.logo} />
-              )}
+          <View style={styles.headerLeft}>
+            {data.logoUrl && (
+              <Image src={data.logoUrl} style={styles.logo} />
+            )}
+          </View>
+          <View style={styles.headerRight}>
+            <Text style={styles.invoiceTitle}>INVOICE</Text>
+            <Text style={styles.invoiceNumber}>{data.invoiceNumber}</Text>
+            {!isDraft && (
+              <View style={styles.originalBadge}>
+                <Text style={styles.originalBadgeText}>ORIGINAL</Text>
+              </View>
+            )}
+          </View>
+        </View>
+
+        {/* Two Column: From / Bill To */}
+        <View style={styles.twoColumnSection}>
+          {/* From (Billing Company) */}
+          <View style={styles.column}>
+            <Text style={styles.sectionLabel}>From</Text>
+            <View style={styles.columnBox}>
               <Text style={styles.companyName}>{data.businessName}</Text>
               {data.tpn && (
-                <Text style={styles.companyDetails}>TPN: {data.tpn}</Text>
+                <Text style={styles.detailText}>TPN: {data.tpn}</Text>
               )}
               {data.gstNumber && (
-                <Text style={styles.companyDetails}>GST: {data.gstNumber}</Text>
+                <Text style={styles.detailText}>GST: {data.gstNumber}</Text>
               )}
               {data.licenseNumber && (
-                <Text style={styles.companyDetails}>
-                  License: {data.licenseNumber}
-                </Text>
+                <Text style={styles.detailText}>License: {data.licenseNumber}</Text>
               )}
               {data.address && (
-                <Text style={styles.companyDetails}>{data.address}</Text>
+                <Text style={styles.detailText}>{data.address}</Text>
               )}
-              {data.city && data.dzongkhag && (
-                <Text style={styles.companyDetails}>
-                  {data.city}, {data.dzongkhag}
+              {(data.city || data.dzongkhag) && (
+                <Text style={styles.detailText}>
+                  {[data.city, data.dzongkhag].filter(Boolean).join(', ')}
                 </Text>
               )}
             </View>
+          </View>
 
-            {/* Invoice Header */}
-            <View style={[styles.column, { alignItems: 'flex-end' }]}>
-              <Text style={styles.invoiceTitle}>INVOICE</Text>
-              <Text style={styles.invoiceNumber}>{data.invoiceNumber}</Text>
-              <Text style={styles.label}>
-                Date: {formatDate(data.invoiceDate)}
-              </Text>
-              {data.dueDate && (
-                <Text style={styles.label}>
-                  Due: {formatDate(data.dueDate)}
-                </Text>
+          {/* Bill To (Customer) */}
+          <View style={styles.column}>
+            <Text style={styles.sectionLabel}>Bill To</Text>
+            <View style={styles.columnBox}>
+              <Text style={styles.companyName}>{data.customer.name}</Text>
+              {data.customer.tpn && (
+                <Text style={styles.detailText}>TPN: {data.customer.tpn}</Text>
+              )}
+              {data.customer.email && (
+                <Text style={styles.detailText}>{data.customer.email}</Text>
+              )}
+              {data.customer.phone && (
+                <Text style={styles.detailText}>{data.customer.phone}</Text>
+              )}
+              {data.customer.address && (
+                <Text style={styles.detailText}>{data.customer.address}</Text>
               )}
             </View>
           </View>
         </View>
 
-        {/* Bill To Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>BILL TO</Text>
-          <Text style={styles.value}>{data.customer.name}</Text>
-          {data.customer.tpn && (
-            <Text style={styles.label}>TPN: {data.customer.tpn}</Text>
-          )}
-          {data.customer.email && (
-            <Text style={styles.label}>{data.customer.email}</Text>
-          )}
-          {data.customer.phone && (
-            <Text style={styles.label}>{data.customer.phone}</Text>
-          )}
-          {data.customer.address && (
-            <Text style={styles.label}>{data.customer.address}</Text>
+        {/* Invoice Meta */}
+        <View style={styles.metaSection}>
+          <View style={styles.metaItem}>
+            <Text style={styles.metaLabel}>Invoice Date</Text>
+            <Text style={styles.metaValue}>{formatDate(data.invoiceDate)}</Text>
+          </View>
+          {data.dueDate && (
+            <View style={styles.metaItem}>
+              <Text style={styles.metaLabel}>Due Date</Text>
+              <Text style={styles.metaValue}>{formatDate(data.dueDate)}</Text>
+            </View>
           )}
         </View>
 
@@ -321,33 +518,38 @@ export const InvoiceTemplate: React.FC<{ data: InvoiceData }> = ({ data }) => {
         <View style={styles.table}>
           {/* Table Header */}
           <View style={styles.tableHeader}>
-            <Text style={[styles.tableCell, styles.col1]}>Description</Text>
-            <Text style={[styles.tableCell, styles.col2]}>Qty</Text>
-            <Text style={[styles.tableCell, styles.col3]}>Unit Price</Text>
-            <Text style={[styles.tableCell, styles.col4]}>Tax Rate</Text>
-            <Text style={[styles.tableCell, styles.col5]}>Tax Amount</Text>
-            <Text style={[styles.tableCell, styles.col6]}>Total</Text>
+            <Text style={[styles.tableHeaderText, styles.col1]}>Description</Text>
+            <Text style={[styles.tableHeaderText, styles.col2]}>Qty</Text>
+            <Text style={[styles.tableHeaderText, styles.col3]}>Unit Price</Text>
+            <Text style={[styles.tableHeaderText, styles.col4]}>Tax</Text>
+            <Text style={[styles.tableHeaderText, styles.col5]}>Tax Amt</Text>
+            <Text style={[styles.tableHeaderText, styles.col6]}>Total</Text>
           </View>
 
           {/* Table Rows */}
           {data.items.map((item, index) => {
             const classification = item.gstClassification || 'STANDARD';
-            const classificationColors: Record<string, string> = {
-              STANDARD: '#3b82f6',
-              ZERO_RATED: '#16a34a',
-              EXEMPT: '#6b7280',
-            };
+            const gstStyle = getGstTagStyle(classification);
 
             return (
-              <View key={index} style={styles.tableRow}>
+              <View
+                key={index}
+                style={[
+                  styles.tableRow,
+                  index % 2 === 1 ? styles.tableRowAlt : {},
+                ]}
+              >
                 <View style={styles.col1}>
                   <Text style={styles.tableCell}>{item.description}</Text>
-                  <Text style={[styles.tableCell, { fontSize: 7, color: classificationColors[classification] || '#6b7280', marginTop: 2 }]}>
-                    {classification === 'ZERO_RATED' ? 'Zero-Rated' : classification === 'EXEMPT' ? 'Exempt' : 'Standard'}
-                  </Text>
+                  <View style={[styles.gstTag, gstStyle]}>
+                    <Text style={{ fontSize: 6, color: gstStyle.color }}>
+                      {getGstLabel(classification)}
+                    </Text>
+                  </View>
                 </View>
                 <Text style={[styles.tableCell, styles.col2]}>
-                  {parseFloat(item.quantity).toFixed(2)} {item.unit || ''}
+                  {parseFloat(item.quantity).toFixed(2)}
+                  {item.unit ? ` ${item.unit}` : ''}
                 </Text>
                 <Text style={[styles.tableCell, styles.col3]}>
                   {formatCurrency(item.unitPrice, data.currency)}
@@ -358,7 +560,7 @@ export const InvoiceTemplate: React.FC<{ data: InvoiceData }> = ({ data }) => {
                 <Text style={[styles.tableCell, styles.col5]}>
                   {formatCurrency(item.taxAmount || '0', data.currency)}
                 </Text>
-                <Text style={[styles.tableCell, styles.col6]}>
+                <Text style={[styles.tableCell, styles.col6, { fontWeight: 'bold' }]}>
                   {formatCurrency(item.itemTotal, data.currency)}
                 </Text>
               </View>
@@ -367,97 +569,95 @@ export const InvoiceTemplate: React.FC<{ data: InvoiceData }> = ({ data }) => {
         </View>
 
         {/* Totals */}
-        <View style={styles.totalsSection}>
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Subtotal:</Text>
-            <Text style={styles.totalValue}>
-              {formatCurrency(data.subtotal, data.currency)}
-            </Text>
-          </View>
-
-          {parseFloat(data.totalDiscount) > 0 && (
+        <View style={styles.totalsWrapper}>
+          <View style={styles.totalsSection}>
             <View style={styles.totalRow}>
-              <Text style={[styles.totalLabel, { color: '#16a34a' }]}>
-                Discount:
-              </Text>
-              <Text style={[styles.totalValue, { color: '#16a34a' }]}>
-                -{formatCurrency(data.totalDiscount, data.currency)}
+              <Text style={styles.totalLabel}>Subtotal</Text>
+              <Text style={styles.totalValue}>
+                {formatCurrency(data.subtotal, data.currency)}
               </Text>
             </View>
-          )}
 
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Total Tax (GST):</Text>
-            <Text style={styles.totalValue}>
-              {formatCurrency(data.totalTax, data.currency)}
-            </Text>
-          </View>
-
-          <View style={styles.grandTotal}>
-            <Text style={styles.grandTotalLabel}>Total Amount:</Text>
-            <Text style={styles.grandTotalValue}>
-              {formatCurrency(data.totalAmount, data.currency)}
-            </Text>
-          </View>
-
-          {parseFloat(data.amountPaid) > 0 && (
-            <>
+            {parseFloat(data.totalDiscount) > 0 && (
               <View style={styles.totalRow}>
-                <Text style={[styles.totalLabel, { color: '#16a34a' }]}>
-                  Amount Paid:
-                </Text>
-                <Text style={[styles.totalValue, { color: '#16a34a' }]}>
-                  -{formatCurrency(data.amountPaid, data.currency)}
+                <Text style={[styles.totalLabel, styles.paidBadge]}>Discount</Text>
+                <Text style={[styles.totalValue, styles.paidBadge]}>
+                  -{formatCurrency(data.totalDiscount, data.currency)}
                 </Text>
               </View>
-              <View style={styles.totalRow}>
-                <Text style={[styles.totalLabel, { color: '#dc2626' }]}>
-                  Amount Due:
-                </Text>
-                <Text style={[styles.totalValue, { color: '#dc2626' }]}>
-                  {formatCurrency(data.amountDue, data.currency)}
-                </Text>
-              </View>
-            </>
-          )}
+            )}
+
+            <View style={styles.totalRow}>
+              <Text style={styles.totalLabel}>GST</Text>
+              <Text style={styles.totalValue}>
+                {formatCurrency(data.totalTax, data.currency)}
+              </Text>
+            </View>
+
+            <View style={styles.grandTotalRow}>
+              <Text style={styles.grandTotalLabel}>Total Amount</Text>
+              <Text style={styles.grandTotalValue}>
+                {formatCurrency(data.totalAmount, data.currency)}
+              </Text>
+            </View>
+
+            {parseFloat(data.amountPaid) > 0 && (
+              <>
+                <View style={[styles.totalRow, { marginTop: 8 }]}>
+                  <Text style={[styles.totalLabel, styles.paidBadge]}>Amount Paid</Text>
+                  <Text style={[styles.totalValue, styles.paidBadge]}>
+                    -{formatCurrency(data.amountPaid, data.currency)}
+                  </Text>
+                </View>
+                <View style={styles.totalRow}>
+                  <Text style={[styles.totalLabel, styles.dueBadge, { fontWeight: 'bold' }]}>
+                    Balance Due
+                  </Text>
+                  <Text style={[styles.totalValue, styles.dueBadge]}>
+                    {formatCurrency(data.amountDue, data.currency)}
+                  </Text>
+                </View>
+              </>
+            )}
+          </View>
         </View>
 
         {/* Payment Info */}
         {(data.paymentTerms || data.bankAccounts?.length || data.bankName) && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>PAYMENT INFORMATION</Text>
+          <View style={styles.paymentSection}>
+            <Text style={styles.paymentTitle}>PAYMENT INFORMATION</Text>
             {data.paymentTerms && (
-              <Text style={styles.value}>{data.paymentTerms}</Text>
+              <Text style={styles.paymentText}>{data.paymentTerms}</Text>
             )}
 
-            {/* Display new bank accounts if available */}
             {data.bankAccounts && data.bankAccounts.length > 0 ? (
-              <View style={{ marginTop: 8 }}>
-                {data.bankAccounts.map((account, index) => (
-                  <View key={account.id} style={{ marginBottom: index < data.bankAccounts!.length - 1 ? 8 : 0 }}>
-                    <Text style={styles.label}>
-                      {account.paymentMethod === 'mbob' ? 'mBoB' :
-                       account.paymentMethod === 'mpay' ? 'mPay' :
-                       account.paymentMethod === 'bank_transfer' ? 'Bank Transfer' :
-                       account.paymentMethod.charAt(0).toUpperCase() + account.paymentMethod.slice(1)}
-                      {account.isDefault && ' (Default)'}
-                    </Text>
-                    <Text style={styles.label}>
-                      {account.bankName} - {account.accountNumber}
-                    </Text>
-                    <Text style={[styles.label, { fontSize: 7 }]}>
-                      A/c Name: {account.accountName}
-                    </Text>
-                  </View>
-                ))}
-              </View>
+              data.bankAccounts.map((account, index) => (
+                <View key={account.id} style={{ marginTop: index > 0 ? 6 : 4 }}>
+                  <Text style={[styles.paymentText, { fontWeight: 'bold' }]}>
+                    {account.paymentMethod === 'mbob'
+                      ? 'mBoB'
+                      : account.paymentMethod === 'mpay'
+                        ? 'mPay'
+                        : account.paymentMethod === 'bank_transfer'
+                          ? 'Bank Transfer'
+                          : account.paymentMethod.charAt(0).toUpperCase() +
+                            account.paymentMethod.slice(1)}
+                    {account.isDefault ? ' (Default)' : ''}
+                  </Text>
+                  <Text style={styles.paymentText}>
+                    {account.bankName} - {account.accountNumber}
+                  </Text>
+                  <Text style={[styles.paymentText, { fontSize: 8 }]}>
+                    A/c Name: {account.accountName}
+                  </Text>
+                </View>
+              ))
             ) : (
-              /* Fallback to legacy bank fields */
               data.bankName && (
                 <>
-                  <Text style={styles.label}>Bank: {data.bankName}</Text>
+                  <Text style={styles.paymentText}>Bank: {data.bankName}</Text>
                   {data.bankAccountNumber && (
-                    <Text style={styles.label}>
+                    <Text style={styles.paymentText}>
                       Account: {data.bankAccountNumber}
                     </Text>
                   )}
@@ -469,26 +669,34 @@ export const InvoiceTemplate: React.FC<{ data: InvoiceData }> = ({ data }) => {
 
         {/* Customer Notes */}
         {data.customerNotes && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>NOTES</Text>
-            <Text style={styles.value}>{data.customerNotes}</Text>
+          <View style={styles.notesSection}>
+            <Text style={styles.notesTitle}>Notes</Text>
+            <Text style={styles.notesText}>{data.customerNotes}</Text>
           </View>
         )}
 
         {/* Footer */}
         <View style={styles.footer}>
-          {data.termsAndConditions && (
-            <Text style={styles.footerText}>{data.termsAndConditions}</Text>
-          )}
-          <Text style={styles.footerText}>
-            This is a computer-generated invoice. For queries, please contact us.
-          </Text>
-        </View>
+          <View style={styles.footerLeft}>
+            {data.termsAndConditions && (
+              <Text style={styles.footerText}>{data.termsAndConditions}</Text>
+            )}
+            <Text style={styles.footerText}>
+              This is a computer-generated invoice.
+            </Text>
+          </View>
 
-        {/* Signature */}
-        <View style={styles.signature}>
-          <View style={styles.signatureLine} />
-          <Text style={styles.signatureLabel}>Authorized Signature</Text>
+          <View style={styles.signatureSection}>
+            <View style={styles.signatureLine} />
+            <Text style={styles.signatureLabel}>Authorized Signature</Text>
+          </View>
+
+          {data.qrCodeDataUrl && (
+            <View style={styles.qrSection}>
+              <Image src={data.qrCodeDataUrl} style={styles.qrCode} />
+              <Text style={styles.qrLabel}>Scan to verify</Text>
+            </View>
+          )}
         </View>
       </Page>
     </Document>
