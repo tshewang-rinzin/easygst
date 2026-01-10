@@ -110,11 +110,11 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 const signUpSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
-  inviteId: z.string().optional()
+  inviteToken: z.string().optional()
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
-  const { email, password, inviteId } = data;
+  const { email, password, inviteToken } = data;
 
   const existingUser = await db
     .select()
@@ -160,39 +160,56 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   let userRole: string;
   let createdTeam: typeof teams.$inferSelect | null = null;
 
-  if (inviteId) {
-    // Check if there's a valid invitation
+  if (inviteToken) {
+    // Check if there's a valid invitation by token
     const [invitation] = await db
       .select()
       .from(invitations)
       .where(
         and(
-          eq(invitations.id, parseInt(inviteId)),
-          eq(invitations.email, email),
+          eq(invitations.invitationToken, inviteToken),
           eq(invitations.status, 'pending')
         )
       )
       .limit(1);
 
-    if (invitation) {
-      teamId = invitation.teamId;
-      userRole = invitation.role;
-
-      await db
-        .update(invitations)
-        .set({ status: 'accepted' })
-        .where(eq(invitations.id, invitation.id));
-
-      await logActivity(teamId, createdUser.id, ActivityType.ACCEPT_INVITATION);
-
-      [createdTeam] = await db
-        .select()
-        .from(teams)
-        .where(eq(teams.id, teamId))
-        .limit(1);
-    } else {
+    if (!invitation) {
       return { error: 'Invalid or expired invitation.', email, password };
     }
+
+    // Security check: verify email matches invitation
+    if (invitation.email.toLowerCase() !== email.toLowerCase()) {
+      return {
+        error: `This invitation was sent to ${invitation.email}. Please use that email address.`,
+        email,
+        password
+      };
+    }
+
+    // Check if token is expired
+    if (invitation.invitationTokenExpiry && invitation.invitationTokenExpiry < new Date()) {
+      return { error: 'This invitation has expired. Please ask for a new invitation.', email, password };
+    }
+
+    teamId = invitation.teamId;
+    userRole = invitation.role;
+
+    // Mark invitation as accepted with timestamp
+    await db
+      .update(invitations)
+      .set({
+        status: 'accepted',
+        acceptedAt: new Date()
+      })
+      .where(eq(invitations.id, invitation.id));
+
+    await logActivity(teamId, createdUser.id, ActivityType.ACCEPT_INVITATION);
+
+    [createdTeam] = await db
+      .select()
+      .from(teams)
+      .where(eq(teams.id, teamId))
+      .limit(1);
   } else {
     // Create a new team if there's no invitation
     const newTeam: NewTeam = {

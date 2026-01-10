@@ -19,6 +19,10 @@ export interface PendingInvitation {
   invitedAt: Date;
   invitedByName: string | null;
   invitedByEmail: string;
+  emailSentCount: number;
+  lastEmailSentAt: Date | null;
+  invitationTokenExpiry: Date | null;
+  status: string;
 }
 
 /**
@@ -59,10 +63,14 @@ export async function getPendingInvitations(): Promise<PendingInvitation[]> {
       invitedAt: invitations.invitedAt,
       invitedByName: users.name,
       invitedByEmail: users.email,
+      emailSentCount: invitations.emailSentCount,
+      lastEmailSentAt: invitations.lastEmailSentAt,
+      invitationTokenExpiry: invitations.invitationTokenExpiry,
+      status: invitations.status,
     })
     .from(invitations)
     .innerJoin(users, eq(invitations.invitedBy, users.id))
-    .where(eq(invitations.teamId, team.id));
+    .where(and(eq(invitations.teamId, team.id), eq(invitations.status, 'pending')));
 
   return pending;
 }

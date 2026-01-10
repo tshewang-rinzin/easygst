@@ -107,6 +107,11 @@ export const invitations = pgTable('invitations', {
     .references(() => users.id),
   invitedAt: timestamp('invited_at').notNull().defaultNow(),
   status: varchar('status', { length: 20 }).notNull().default('pending'),
+  invitationToken: varchar('invitation_token', { length: 255 }).unique(),
+  invitationTokenExpiry: timestamp('invitation_token_expiry'),
+  acceptedAt: timestamp('accepted_at'),
+  lastEmailSentAt: timestamp('last_email_sent_at'),
+  emailSentCount: integer('email_sent_count').notNull().default(1),
 });
 
 // Bank Accounts - Multiple accounts per team with QR codes

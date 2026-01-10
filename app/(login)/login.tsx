@@ -1,24 +1,44 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CircleIcon, Loader2 } from 'lucide-react';
+import { CircleIcon, Loader2, Mail } from 'lucide-react';
 import { signIn, signUp } from './actions';
 import { ActionState } from '@/lib/auth/middleware';
+import { getInvitationByToken } from '@/lib/users/actions';
 
 export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect');
   const priceId = searchParams.get('priceId');
-  const inviteId = searchParams.get('inviteId');
+  const inviteToken = searchParams.get('token');
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     mode === 'signin' ? signIn : signUp,
     { error: '' }
   );
+  const [invitationDetails, setInvitationDetails] = useState<{
+    email: string;
+    role: string;
+    teamName: string;
+    invitedBy: string;
+  } | null>(null);
+  const [invitationError, setInvitationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (mode === 'signup' && inviteToken) {
+      getInvitationByToken(inviteToken).then((result) => {
+        if (result.success && result.invitation) {
+          setInvitationDetails(result.invitation);
+        } else {
+          setInvitationError(result.error || 'Invalid invitation');
+        }
+      });
+    }
+  }, [inviteToken, mode]);
 
   return (
     <div className="min-h-[100dvh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
@@ -27,22 +47,48 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
           <CircleIcon className="h-12 w-12 text-orange-500" />
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          {mode === 'signin'
+          {invitationDetails
+            ? `Join ${invitationDetails.teamName}`
+            : mode === 'signin'
             ? 'Sign in to your account'
             : 'Create your account'}
         </h2>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        {invitationError && (
+          <div className="rounded-md bg-red-50 border border-red-200 p-4 mb-4">
+            <div className="flex">
+              <div className="ml-3">
+                <p className="text-sm text-red-800">{invitationError}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {invitationDetails && (
+          <div className="rounded-md bg-blue-50 border border-blue-200 p-4 mb-4">
+            <div className="flex items-center gap-3">
+              <Mail className="h-5 w-5 text-blue-600" />
+              <div>
+                <p className="text-sm font-medium text-blue-900">
+                  {invitationDetails.invitedBy} invited you to join{' '}
+                  {invitationDetails.teamName}
+                </p>
+                <p className="text-xs text-blue-700 mt-1">
+                  Role: <span className="font-semibold">{invitationDetails.role}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <form className="space-y-6" action={formAction}>
           <input type="hidden" name="redirect" value={redirect || ''} />
           <input type="hidden" name="priceId" value={priceId || ''} />
-          <input type="hidden" name="inviteId" value={inviteId || ''} />
+          <input type="hidden" name="inviteToken" value={inviteToken || ''} />
           <div>
-            <Label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <Label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email
             </Label>
             <div className="mt-1">
@@ -51,20 +97,20 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                 name="email"
                 type="email"
                 autoComplete="email"
-                defaultValue={state.email}
+                defaultValue={invitationDetails?.email || state.email}
+                readOnly={!!invitationDetails}
                 required
                 maxLength={50}
-                className="appearance-none rounded-full relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
+                className={`appearance-none rounded-full relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm ${
+                  invitationDetails ? 'bg-gray-100 cursor-not-allowed' : ''
+                }`}
                 placeholder="Enter your email"
               />
             </div>
           </div>
 
           <div>
-            <Label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <Label htmlFor="password" className="block text-sm font-medium text-gray-700">
               Password
             </Label>
             <div className="mt-1">
@@ -72,9 +118,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                 id="password"
                 name="password"
                 type="password"
-                autoComplete={
-                  mode === 'signin' ? 'current-password' : 'new-password'
-                }
+                autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                 defaultValue={state.password}
                 required
                 minLength={8}
@@ -131,6 +175,8 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                 </>
               ) : mode === 'signin' ? (
                 'Sign in'
+              ) : invitationDetails ? (
+                'Join Team'
               ) : (
                 'Sign up'
               )}
@@ -145,9 +191,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-gray-50 text-gray-500">
-                {mode === 'signin'
-                  ? 'New to our platform?'
-                  : 'Already have an account?'}
+                {mode === 'signin' ? 'New to our platform?' : 'Already have an account?'}
               </span>
             </div>
           </div>
@@ -159,9 +203,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               }${priceId ? `&priceId=${priceId}` : ''}`}
               className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-full shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
             >
-              {mode === 'signin'
-                ? 'Create an account'
-                : 'Sign in to existing account'}
+              {mode === 'signin' ? 'Create an account' : 'Sign in to existing account'}
             </Link>
           </div>
         </div>

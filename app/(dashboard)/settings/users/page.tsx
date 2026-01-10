@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, UserPlus, Mail, Shield, Trash2, X, AlertCircle } from 'lucide-react';
+import { Users, UserPlus, Mail, Shield, Trash2, X, AlertCircle, RefreshCw, Clock } from 'lucide-react';
 import useSWR from 'swr';
-import { inviteUser, updateMemberRole, removeMember, cancelInvitation } from '@/lib/users/actions';
+import { inviteUser, updateMemberRole, removeMember, cancelInvitation, resendInvitation } from '@/lib/users/actions';
 import {
   Dialog,
   DialogContent,
@@ -34,6 +34,10 @@ interface PendingInvitation {
   invitedAt: string;
   invitedByName: string | null;
   invitedByEmail: string;
+  emailSentCount: number;
+  lastEmailSentAt: string | null;
+  invitationTokenExpiry: string | null;
+  status: string;
 }
 
 export default function UsersRolesPage() {
@@ -47,6 +51,7 @@ export default function UsersRolesPage() {
   const [inviteRole, setInviteRole] = useState<'owner' | 'admin' | 'member'>('member');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [resendingId, setResendingId] = useState<number | null>(null);
 
   const handleInvite = async () => {
     if (!inviteEmail) return;
@@ -105,6 +110,22 @@ export default function UsersRolesPage() {
     } else {
       setMessage({ type: 'error', text: ('message' in result && result.message) || 'Failed to cancel invitation' });
     }
+  };
+
+  const handleResendInvitation = async (invitationId: number) => {
+    setResendingId(invitationId);
+    setMessage(null);
+
+    const result = await resendInvitation({ invitationId });
+
+    if ('success' in result && result.success) {
+      setMessage({ type: 'success', text: result.message || 'Invitation resent' });
+      mutate();
+    } else {
+      setMessage({ type: 'error', text: ('message' in result && result.message) || 'Failed to resend invitation' });
+    }
+
+    setResendingId(null);
   };
 
   const getRoleBadge = (role: string) => {
@@ -234,13 +255,39 @@ export default function UsersRolesPage() {
                       <div className="text-sm text-muted-foreground">
                         Invited by {invitation.invitedByName || invitation.invitedByEmail}
                       </div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {new Date(invitation.invitedAt).toLocaleDateString()}
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                        <span>
+                          Sent {new Date(invitation.invitedAt).toLocaleDateString()}
+                        </span>
+                        {invitation.emailSentCount > 1 && (
+                          <span className="flex items-center gap-1">
+                            <RefreshCw className="h-3 w-3" />
+                            Resent {invitation.emailSentCount - 1} time{invitation.emailSentCount > 2 ? 's' : ''}
+                          </span>
+                        )}
+                        {invitation.invitationTokenExpiry && (
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            Expires {new Date(invitation.invitationTokenExpiry).toLocaleDateString()}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     {getRoleBadge(invitation.role)}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleResendInvitation(invitation.id)}
+                      disabled={resendingId === invitation.id}
+                    >
+                      {resendingId === invitation.id ? (
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-4 w-4" />
+                      )}
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"

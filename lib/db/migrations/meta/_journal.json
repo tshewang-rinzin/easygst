@@ -127,6 +127,13 @@
       "when": 1768066932561,
       "tag": "0017_motionless_white_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1768071720589,
+      "tag": "0018_milky_post",
+      "breakpoints": true
     }
   ]
 }
