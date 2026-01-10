@@ -26,6 +26,9 @@ import {
 } from '@/lib/auth/middleware';
 import { seedDefaultUnits } from '@/lib/units/actions';
 import { seedDefaultTaxClassifications } from '@/lib/tax-classifications/actions';
+import { randomBytes } from 'crypto';
+import { sendEmail } from '@/lib/email/utils';
+import VerifyEmail from '@/lib/email/templates/verify-email';
 
 async function logActivity(
   teamId: number | null | undefined,
@@ -87,6 +90,15 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     };
   }
 
+  // Check if email is verified
+  if (!foundUser.emailVerified) {
+    return {
+      error: 'Please verify your email address before signing in. Check your inbox for the verification link.',
+      email,
+      password
+    };
+  }
+
   await Promise.all([
     setSession(foundUser),
     logActivity(foundTeam?.id, foundUser.id, ActivityType.SIGN_IN)
@@ -120,10 +132,18 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   const passwordHash = await hashPassword(password);
 
+  // Generate verification token
+  const verificationToken = randomBytes(32).toString('hex');
+  const verificationTokenExpiry = new Date();
+  verificationTokenExpiry.setHours(verificationTokenExpiry.getHours() + 24); // 24 hours
+
   const newUser: NewUser = {
     email,
     passwordHash,
-    role: 'owner' // Default role, will be overridden if there's an invitation
+    role: 'owner', // Default role, will be overridden if there's an invitation
+    emailVerified: false,
+    verificationToken,
+    verificationTokenExpiry
   };
 
   const [createdUser] = await db.insert(users).values(newUser).returning();
@@ -209,11 +229,28 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   await Promise.all([
     db.insert(teamMembers).values(newTeamMember),
-    logActivity(teamId, createdUser.id, ActivityType.SIGN_UP),
-    setSession(createdUser)
+    logActivity(teamId, createdUser.id, ActivityType.SIGN_UP)
   ]);
 
-  redirect('/dashboard');
+  // Send verification email
+  const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`;
+
+  try {
+    await sendEmail({
+      to: email,
+      subject: 'Verify your email address - EasyGST',
+      template: VerifyEmail({
+        name: createdUser.name || undefined,
+        verificationUrl,
+        expiryHours: 24
+      })
+    });
+  } catch (error) {
+    console.error('[SignUp] Failed to send verification email:', error);
+    // Continue anyway - user can request a new verification email
+  }
+
+  redirect(`/verify-email-sent?email=${encodeURIComponent(email)}`);
 });
 
 export async function signOut() {
@@ -222,6 +259,116 @@ export async function signOut() {
   await logActivity(userWithTeam?.teamId, user.id, ActivityType.SIGN_OUT);
   (await cookies()).delete('session');
 }
+
+const verifyEmailSchema = z.object({
+  token: z.string().min(1)
+});
+
+export const verifyEmail = validatedAction(verifyEmailSchema, async (data) => {
+  const { token } = data;
+
+  // Find user with this verification token
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.verificationToken, token))
+    .limit(1);
+
+  if (!user) {
+    return {
+      error: 'Invalid verification link. Please check your email or request a new verification link.'
+    };
+  }
+
+  // Check if already verified
+  if (user.emailVerified) {
+    return {
+      error: 'Email already verified. You can sign in now.'
+    };
+  }
+
+  // Check if token expired
+  if (user.verificationTokenExpiry && new Date() > user.verificationTokenExpiry) {
+    return {
+      error: 'Verification link has expired. Please request a new verification link.'
+    };
+  }
+
+  // Verify the email
+  await db
+    .update(users)
+    .set({
+      emailVerified: true,
+      verificationToken: null,
+      verificationTokenExpiry: null
+    })
+    .where(eq(users.id, user.id));
+
+  return { success: true };
+});
+
+const resendVerificationSchema = z.object({
+  email: z.string().email()
+});
+
+export const resendVerificationEmail = validatedAction(resendVerificationSchema, async (data) => {
+  const { email } = data;
+
+  // Find user
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
+
+  if (!user) {
+    // Don't reveal if user exists or not
+    return { success: true };
+  }
+
+  // Check if already verified
+  if (user.emailVerified) {
+    return {
+      error: 'Email already verified. You can sign in now.'
+    };
+  }
+
+  // Generate new verification token
+  const verificationToken = randomBytes(32).toString('hex');
+  const verificationTokenExpiry = new Date();
+  verificationTokenExpiry.setHours(verificationTokenExpiry.getHours() + 24);
+
+  // Update user with new token
+  await db
+    .update(users)
+    .set({
+      verificationToken,
+      verificationTokenExpiry
+    })
+    .where(eq(users.id, user.id));
+
+  // Send verification email
+  const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`;
+
+  try {
+    await sendEmail({
+      to: email,
+      subject: 'Verify your email address - EasyGST',
+      template: VerifyEmail({
+        name: user.name || undefined,
+        verificationUrl,
+        expiryHours: 24
+      })
+    });
+  } catch (error) {
+    console.error('[ResendVerification] Failed to send email:', error);
+    return {
+      error: 'Failed to send verification email. Please try again.'
+    };
+  }
+
+  return { success: true };
+});
 
 const updatePasswordSchema = z.object({
   currentPassword: z.string().min(8).max(100),

@@ -20,7 +20,10 @@
       "Bash(pnpm add:*)",
       "Bash(vercel env add:*)",
       "Bash(vercel env rm:*)",
-      "Bash(vercel env:*)"
+      "Bash(vercel env:*)",
+      "Bash(pkill:*)",
+      "Bash(POSTGRES_URL=\"$DATABASE_URL\" pnpm db:migrate:*)",
+      "Bash(npx tsx:*)"
     ]
   }
 }

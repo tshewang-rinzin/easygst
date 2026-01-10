@@ -66,11 +66,12 @@ export async function sendInvoiceEmail(
       : undefined;
 
     // Send email
+    const displayName = invoice.team.businessName || invoice.team.name;
     const result = await sendEmail({
       to: invoice.customer.email,
-      subject: `Invoice ${invoice.invoiceNumber} from ${invoice.team.name}`,
+      subject: `Invoice ${invoice.invoiceNumber} from ${displayName}`,
       template: InvoiceEmail({
-        businessName: invoice.team.name,
+        businessName: displayName,
         customerName: invoice.customer.name,
         invoiceNumber: invoice.invoiceNumber,
         invoiceDate: new Date(invoice.invoiceDate).toLocaleDateString('en-GB', {
@@ -169,11 +170,12 @@ export async function sendPaymentReceiptEmail(
     }
 
     // Send email
+    const displayName = payment.team.businessName || payment.team.name;
     const result = await sendEmail({
       to: payment.customer.email,
-      subject: `Payment Receipt ${payment.receiptNumber} from ${payment.team.name}`,
+      subject: `Payment Receipt ${payment.receiptNumber} from ${displayName}`,
       template: PaymentReceiptEmail({
-        businessName: payment.team.name,
+        businessName: displayName,
         customerName: payment.customer.name,
         receiptNumber: payment.receiptNumber || `RCP-${payment.id}`,
         paymentDate: new Date(payment.paymentDate).toLocaleDateString('en-GB', {
@@ -264,13 +266,14 @@ export async function sendPaymentReminderEmail(
       : undefined;
 
     // Send email
+    const displayName = invoice.team.businessName || invoice.team.name;
     const result = await sendEmail({
       to: invoice.customer.email,
       subject: daysOverdue > 0
         ? `Payment Overdue: Invoice ${invoice.invoiceNumber}`
         : `Payment Reminder: Invoice ${invoice.invoiceNumber}`,
       template: PaymentReminderEmail({
-        businessName: invoice.team.name,
+        businessName: displayName,
         customerName: invoice.customer.name,
         invoiceNumber: invoice.invoiceNumber,
         invoiceDate: new Date(invoice.invoiceDate).toLocaleDateString('en-GB', {
