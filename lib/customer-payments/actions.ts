@@ -20,6 +20,7 @@ import {
   deleteCustomerAdvanceSchema,
 } from './validation';
 import Decimal from 'decimal.js';
+import { sendPaymentReceiptEmail } from '@/lib/email/actions';
 
 export const recordCustomerPayment = validatedActionWithUser(
   customerPaymentSchema,
@@ -94,6 +95,7 @@ export const recordCustomerPayment = validatedActionWithUser(
       const unallocated = new Decimal(data.amount).minus(totalAllocation);
 
       // Create payment in transaction
+      let paymentId: number | undefined;
       await db.transaction(async (tx) => {
         // Insert customer payment
         const [payment] = await tx
@@ -116,6 +118,10 @@ export const recordCustomerPayment = validatedActionWithUser(
             createdBy: user.id,
           })
           .returning();
+
+        if (payment) {
+          paymentId = payment.id;
+        }
 
         // Create allocations and update invoices
         for (const allocation of data.allocations) {
@@ -160,6 +166,13 @@ export const recordCustomerPayment = validatedActionWithUser(
             .where(eq(invoices.id, allocation.invoiceId));
         }
       });
+
+      // Send payment receipt email (fire and forget - don't block on email)
+      if (paymentId) {
+        sendPaymentReceiptEmail(paymentId).catch((error) => {
+          console.error('Failed to send payment receipt email:', error);
+        });
+      }
 
       revalidatePath('/payments/receive');
       revalidatePath('/sales/invoices');

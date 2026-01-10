@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Download, Mail, Trash2 } from 'lucide-react';
 import { deleteCustomerPayment } from '@/lib/customer-payments/actions';
+import { sendPaymentReceiptEmail } from '@/lib/email/actions';
 import { mutate } from 'swr';
 
 export default function ViewReceiptPage() {
@@ -16,6 +17,8 @@ export default function ViewReceiptPage() {
   const paymentId = Number(params.id);
   const [payment, setPayment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailSuccess, setEmailSuccess] = useState(false);
 
   useEffect(() => {
     fetch(`/api/customer-payments/${paymentId}`)
@@ -29,6 +32,30 @@ export default function ViewReceiptPage() {
         setLoading(false);
       });
   }, [paymentId]);
+
+  const handleSendEmail = async () => {
+    if (!payment.customer?.email) {
+      alert('Customer does not have an email address');
+      return;
+    }
+
+    setSendingEmail(true);
+    setEmailSuccess(false);
+
+    try {
+      const result = await sendPaymentReceiptEmail(paymentId);
+      if (result.success) {
+        setEmailSuccess(true);
+        setTimeout(() => setEmailSuccess(false), 3000);
+      } else {
+        alert(result.error || 'Failed to send email');
+      }
+    } catch (error) {
+      alert('Failed to send email');
+    } finally {
+      setSendingEmail(false);
+    }
+  };
 
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this payment? This will reverse all allocations to invoices.')) {
@@ -96,6 +123,18 @@ export default function ViewReceiptPage() {
             </p>
           </div>
           <div className="flex gap-2">
+            {payment.customer?.email && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSendEmail}
+                disabled={sendingEmail}
+                className={emailSuccess ? 'bg-green-50 border-green-200 text-green-700' : ''}
+              >
+                <Mail className="h-4 w-4 mr-2" />
+                {sendingEmail ? 'Sending...' : emailSuccess ? 'Sent!' : 'Email Receipt'}
+              </Button>
+            )}
             <Link href={`/api/payments/receipts/${paymentId}/pdf`} target="_blank">
               <Button variant="outline" size="sm">
                 <Download className="h-4 w-4 mr-2" />
