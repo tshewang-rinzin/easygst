@@ -11,7 +11,7 @@ import Decimal from 'decimal.js';
 
 // Payment validation schema
 const paymentSchema = z.object({
-  invoiceId: z.coerce.number().min(1, 'Invoice is required'),
+  invoiceId: z.string().uuid('Invoice is required'),
   amount: z.coerce
     .number()
     .min(0.01, 'Amount must be greater than 0')
@@ -34,7 +34,7 @@ const paymentSchema = z.object({
 });
 
 const deletePaymentSchema = z.object({
-  id: z.coerce.number(),
+  id: z.string().uuid(),
 });
 
 /**

@@ -45,7 +45,7 @@ export function BankAccountsList({ initialAccounts }: BankAccountsListProps) {
     { fallbackData: initialAccounts }
   );
 
-  const handleDelete = async (accountId: number) => {
+  const handleDelete = async (accountId: string) => {
     const result = await deleteBankAccount({ id: accountId });
     if ('success' in result && result.success) {
       mutate();
@@ -54,7 +54,7 @@ export function BankAccountsList({ initialAccounts }: BankAccountsListProps) {
     }
   };
 
-  const handleSetDefault = async (accountId: number) => {
+  const handleSetDefault = async (accountId: string) => {
     const result = await setDefaultBankAccount({ id: accountId });
     if ('success' in result && result.success) {
       mutate();

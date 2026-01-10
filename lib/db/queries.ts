@@ -36,7 +36,7 @@ export async function getUser() {
   return user[0];
 }
 
-export async function getUserWithTeam(userId: number) {
+export async function getUserWithTeam(userId: string) {
   const result = await db
     .select({
       user: users,

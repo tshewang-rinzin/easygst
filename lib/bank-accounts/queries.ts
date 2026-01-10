@@ -31,7 +31,7 @@ export async function getBankAccounts() {
 /**
  * Get a single bank account by ID
  */
-export async function getBankAccountById(accountId: number) {
+export async function getBankAccountById(accountId: string) {
   const team = await getTeamForUser();
   if (!team) {
     throw new Error('Team not found');

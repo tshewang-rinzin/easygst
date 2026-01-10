@@ -21,7 +21,7 @@ export default function AllocateCustomerAdvancePage({
 }) {
   const { id } = use(params);
   const router = useRouter();
-  const [allocations, setAllocations] = useState<{ invoiceId: number; allocatedAmount: string }[]>([]);
+  const [allocations, setAllocations] = useState<{ invoiceId: string; allocatedAmount: string }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -50,9 +50,9 @@ export default function AllocateCustomerAdvancePage({
   const handleAllocationChange = (index: number, field: 'invoiceId' | 'allocatedAmount', value: string | number) => {
     const updated = [...allocations];
     if (field === 'invoiceId') {
-      updated[index].invoiceId = Number(value);
+      updated[index].invoiceId = String(value);
       // Auto-fill amount with invoice amount due
-      const invoice = outstandingInvoices?.find((inv: any) => inv.id === Number(value));
+      const invoice = outstandingInvoices?.find((inv: any) => inv.id === String(value));
       if (invoice) {
         updated[index].allocatedAmount = invoice.amountDue;
       }

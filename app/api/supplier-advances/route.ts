@@ -7,9 +7,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const supplierId = searchParams.get('supplierId');
 
-    const advances = await getSupplierAdvances(
-      supplierId ? parseInt(supplierId) : undefined
-    );
+    const advances = await getSupplierAdvances(supplierId || undefined);
     return NextResponse.json(advances);
   } catch (error) {
     console.error('Error fetching supplier advances:', error);

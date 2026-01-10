@@ -12,7 +12,7 @@ import { getTeamForUser } from '@/lib/db/queries';
 /**
  * Get all unpaid/partially paid invoices for a customer
  */
-export async function getCustomerOutstandingInvoices(customerId: number) {
+export async function getCustomerOutstandingInvoices(customerId: string) {
   const team = await getTeamForUser();
   if (!team) return [];
 
@@ -49,7 +49,7 @@ export async function getCustomerOutstandingInvoices(customerId: number) {
 /**
  * Get all customer payments with their allocations
  */
-export async function getCustomerPayments(customerId?: number) {
+export async function getCustomerPayments(customerId?: string) {
   const team = await getTeamForUser();
   if (!team) return [];
 
@@ -96,7 +96,7 @@ export async function getCustomerPayments(customerId?: number) {
 /**
  * Get a single customer payment with full details including allocations
  */
-export async function getCustomerPaymentWithDetails(paymentId: number) {
+export async function getCustomerPaymentWithDetails(paymentId: string) {
   const team = await getTeamForUser();
   if (!team) return null;
 
@@ -162,7 +162,7 @@ export async function getCustomerPaymentWithDetails(paymentId: number) {
 /**
  * Get all customer advances (payments with type='advance')
  */
-export async function getCustomerAdvances(customerId?: number) {
+export async function getCustomerAdvances(customerId?: string) {
   const team = await getTeamForUser();
   if (!team) return [];
 
@@ -212,7 +212,7 @@ export async function getCustomerAdvances(customerId?: number) {
 /**
  * Get a single customer advance with full details including allocations
  */
-export async function getCustomerAdvanceById(advanceId: number) {
+export async function getCustomerAdvanceById(advanceId: string) {
   const team = await getTeamForUser();
   if (!team) return null;
 
@@ -275,7 +275,7 @@ export async function getCustomerAdvanceById(advanceId: number) {
 /**
  * Get customer advances with unallocated balance
  */
-export async function getCustomerUnallocatedAdvances(customerId: number) {
+export async function getCustomerUnallocatedAdvances(customerId: string) {
   const team = await getTeamForUser();
   if (!team) return [];
 

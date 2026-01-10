@@ -9,7 +9,7 @@ import { getTeamForUser } from '@/lib/db/queries';
 export async function getPayments(params?: {
   startDate?: Date;
   endDate?: Date;
-  invoiceId?: number;
+  invoiceId?: string;
 }) {
   const team = await getTeamForUser();
   if (!team) return [];
@@ -70,7 +70,7 @@ export async function getRecentPayments() {
 /**
  * Get payment by ID
  */
-export async function getPaymentById(id: number) {
+export async function getPaymentById(id: string) {
   const team = await getTeamForUser();
   if (!team) return null;
 

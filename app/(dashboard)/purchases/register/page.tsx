@@ -18,7 +18,7 @@ import { Download, FileSpreadsheet, Calendar, TrendingDown } from 'lucide-react'
 import Link from 'next/link';
 
 interface PurchaseRegisterEntry {
-  id: number;
+  id: string;
   date: string;
   number: string;
   supplierName: string;

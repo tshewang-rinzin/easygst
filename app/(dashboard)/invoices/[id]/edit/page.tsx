@@ -4,7 +4,7 @@ import { getInvoiceWithDetails } from '@/lib/invoices/queries';
 import { getTeamForUser } from '@/lib/db/queries';
 import { InvoiceFormEdit } from '@/components/invoices/invoice-form-edit';
 
-async function EditInvoiceForm({ id }: { id: number }) {
+async function EditInvoiceForm({ id }: { id: string }) {
   const [invoice, team] = await Promise.all([
     getInvoiceWithDetails(id),
     getTeamForUser(),
@@ -30,7 +30,7 @@ async function EditInvoiceForm({ id }: { id: number }) {
         invoiceNumber: invoice.invoiceNumber,
         customerId: invoice.customerId,
         customer: {
-          id: invoice.customer?.id || 0,
+          id: invoice.customer?.id || '',
           name: invoice.customer?.name || '',
           email: invoice.customer?.email || null,
           phone: invoice.customer?.phone || null,
@@ -62,7 +62,6 @@ export default async function EditInvoicePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const invoiceId = parseInt(id);
 
   return (
     <Suspense
@@ -74,7 +73,7 @@ export default async function EditInvoicePage({
         </div>
       }
     >
-      <EditInvoiceForm id={invoiceId} />
+      <EditInvoiceForm id={id} />
     </Suspense>
   );
 }

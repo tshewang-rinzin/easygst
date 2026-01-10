@@ -20,7 +20,7 @@ export default function AllocateSupplierAdvancePage({
 }) {
   const { id } = use(params);
   const router = useRouter();
-  const [allocations, setAllocations] = useState<{ billId: number; allocatedAmount: string }[]>([]);
+  const [allocations, setAllocations] = useState<{ billId: string; allocatedAmount: string }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -52,9 +52,9 @@ export default function AllocateSupplierAdvancePage({
   const handleAllocationChange = (index: number, field: 'billId' | 'allocatedAmount', value: string | number) => {
     const updated = [...allocations];
     if (field === 'billId') {
-      updated[index].billId = Number(value);
+      updated[index].billId = String(value);
       // Auto-fill amount with bill amount due
-      const bill = outstandingBills?.find((b: any) => b.id === Number(value));
+      const bill = outstandingBills?.find((b: any) => b.id === String(value));
       if (bill) {
         updated[index].allocatedAmount = bill.amountDue;
       }

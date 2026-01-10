@@ -29,7 +29,7 @@ export default function CustomerAdvanceDetailPage({
     }
 
     setIsDeleting(true);
-    const result = await deleteCustomerAdvance({ id: parseInt(id) });
+    const result = await deleteCustomerAdvance({ id });
 
     if (result.error) {
       alert(result.error);

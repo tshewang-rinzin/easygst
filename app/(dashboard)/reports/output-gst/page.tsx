@@ -12,7 +12,7 @@ import { formatCurrency } from '@/lib/utils';
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 interface SalesEntry {
-  id: number;
+  id: string;
   date: string;
   type: string;
   number: string;

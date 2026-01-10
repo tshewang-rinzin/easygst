@@ -18,8 +18,8 @@ import { getTaxClassificationById, taxClassificationCodeExists } from './queries
 import { getTeamForUser } from '@/lib/db/queries';
 
 async function logActivity(
-  teamId: number,
-  userId: number,
+  teamId: string,
+  userId: string,
   action: string
 ) {
   await db.insert(activityLogs).values({
@@ -191,7 +191,7 @@ export const deleteTaxClassification = validatedActionWithUser(
   }
 );
 
-export async function seedDefaultTaxClassifications(teamId: number, userId: number) {
+export async function seedDefaultTaxClassifications(teamId: string, userId: string) {
   const defaultClassifications = [
     {
       code: 'STANDARD',

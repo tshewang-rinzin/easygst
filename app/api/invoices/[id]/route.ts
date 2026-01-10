@@ -7,16 +7,8 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const invoiceId = parseInt(id);
 
-    if (isNaN(invoiceId)) {
-      return NextResponse.json(
-        { error: 'Invalid invoice ID' },
-        { status: 400 }
-      );
-    }
-
-    const invoice = await getInvoiceWithDetails(invoiceId);
+    const invoice = await getInvoiceWithDetails(id);
 
     if (!invoice) {
       return NextResponse.json(

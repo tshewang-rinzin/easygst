@@ -35,7 +35,7 @@ export async function getGstReturns() {
 /**
  * Get a single GST return by ID
  */
-export async function getGstReturnById(id: number) {
+export async function getGstReturnById(id: string) {
   const team = await getTeamForUser();
   if (!team) {
     throw new Error('Team not found');

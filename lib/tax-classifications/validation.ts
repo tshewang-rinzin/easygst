@@ -19,11 +19,11 @@ export const taxClassificationSchema = z.object({
 });
 
 export const updateTaxClassificationSchema = taxClassificationSchema.extend({
-  id: z.coerce.number(),
+  id: z.string().uuid(),
 });
 
 export const deleteTaxClassificationSchema = z.object({
-  id: z.coerce.number(),
+  id: z.string().uuid(),
 });
 
 export type TaxClassificationInput = z.infer<typeof taxClassificationSchema>;

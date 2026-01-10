@@ -23,7 +23,7 @@ import {
 export default function EditSupplierPage() {
   const router = useRouter();
   const params = useParams();
-  const supplierId = Number(params.id);
+  const supplierId = params.id as string;
 
   const [isDeleting, setIsDeleting] = useState(false);
   const [supplier, setSupplier] = useState<Supplier | null>(null);

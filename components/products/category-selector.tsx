@@ -11,12 +11,12 @@ import Link from 'next/link';
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 interface Category {
-  id: number;
+  id: string;
   name: string;
 }
 
 interface CategorySelectorProps {
-  defaultCategoryId?: number | null;
+  defaultCategoryId?: string | null;
   defaultCategoryName?: string | null;
 }
 

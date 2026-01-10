@@ -15,7 +15,7 @@ import { Bell, CheckCircle2, AlertCircle } from 'lucide-react';
 import { sendPaymentReminderEmail } from '@/lib/email/actions';
 
 interface SendReminderButtonProps {
-  invoiceId: number;
+  invoiceId: string;
   invoiceNumber: string;
   customerEmail?: string | null;
   paymentStatus: string;

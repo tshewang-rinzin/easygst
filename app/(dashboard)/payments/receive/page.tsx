@@ -17,7 +17,7 @@ import { SearchableInvoiceSelect } from '@/components/invoices/searchable-invoic
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 interface OutstandingInvoice {
-  id: number;
+  id: string;
   invoiceNumber: string;
   invoiceDate: string;
   dueDate: string;
@@ -32,7 +32,7 @@ export default function ReceivePaymentPage() {
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [paymentDate, setPaymentDate] = useState<Date>(new Date());
   const [paymentMethod, setPaymentMethod] = useState('');
-  const [allocations, setAllocations] = useState<{ invoiceId: number; allocatedAmount: string }[]>([]);
+  const [allocations, setAllocations] = useState<{ invoiceId: string; allocatedAmount: string }[]>([]);
 
   const { data: customers } = useSWR('/api/customers', fetcher);
   const { data: paymentMethods, isLoading: loadingMethods } = useSWR('/api/payment-methods/enabled', fetcher);
@@ -70,9 +70,9 @@ export default function ReceivePaymentPage() {
   const handleAllocationChange = (index: number, field: 'invoiceId' | 'allocatedAmount', value: string | number) => {
     const updated = [...allocations];
     if (field === 'invoiceId') {
-      updated[index].invoiceId = Number(value);
+      updated[index].invoiceId = String(value);
       // Auto-fill amount with invoice amount due
-      const invoice = outstandingInvoices?.find((inv: OutstandingInvoice) => inv.id === Number(value));
+      const invoice = outstandingInvoices?.find((inv: OutstandingInvoice) => inv.id === String(value));
       if (invoice) {
         updated[index].allocatedAmount = invoice.amountDue;
       }
@@ -86,7 +86,7 @@ export default function ReceivePaymentPage() {
     return allocations.reduce((sum, alloc) => sum + (parseFloat(alloc.allocatedAmount) || 0), 0);
   };
 
-  const getInvoiceDetails = (invoiceId: number) => {
+  const getInvoiceDetails = (invoiceId: string) => {
     return outstandingInvoices?.find((inv: OutstandingInvoice) => inv.id === invoiceId);
   };
 

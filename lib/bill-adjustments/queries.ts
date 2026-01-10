@@ -28,7 +28,7 @@ export async function getBillAdjustments() {
 /**
  * Get adjustments for a specific bill
  */
-export async function getBillAdjustmentsByBillId(billId: number) {
+export async function getBillAdjustmentsByBillId(billId: string) {
   const team = await getTeamForUser();
   if (!team) return [];
 

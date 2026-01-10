@@ -59,7 +59,7 @@ export const createCategory = validatedActionWithUser(
  * Update an existing product category
  */
 export const updateCategory = validatedActionWithUser(
-  categorySchema.extend({ id: z.number() }),
+  categorySchema.extend({ id: z.string().uuid() }),
   async (data, _, user) => {
     const team = await getTeamForUser();
     if (!team) {
@@ -121,7 +121,7 @@ export const updateCategory = validatedActionWithUser(
  * Delete (deactivate) a product category
  */
 export const deleteCategory = validatedActionWithUser(
-  z.object({ id: z.number() }),
+  z.object({ id: z.string().uuid() }),
   async (data, _, user) => {
     const team = await getTeamForUser();
     if (!team) {
@@ -165,7 +165,7 @@ export const deleteCategory = validatedActionWithUser(
  */
 export const toggleCategoryStatus = validatedActionWithUser(
   z.object({
-    id: z.number(),
+    id: z.string().uuid(),
     isActive: booleanCoerce(false),
   }),
   async (data, _, user) => {

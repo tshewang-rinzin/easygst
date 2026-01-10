@@ -24,7 +24,7 @@ import type { PaymentMethod } from '@/lib/db/schema';
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 interface RecordPaymentDialogProps {
-  invoiceId: number;
+  invoiceId: string;
   invoiceNumber: string;
   currency: string;
   amountDue: string;

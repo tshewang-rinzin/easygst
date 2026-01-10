@@ -73,7 +73,7 @@ export const createBankAccount = validatedActionWithUser(
  * Update an existing bank account
  */
 export const updateBankAccount = validatedActionWithUser(
-  bankAccountSchema.extend({ id: z.number().int().positive() }),
+  bankAccountSchema.extend({ id: z.string().uuid() }),
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();
@@ -153,7 +153,7 @@ export const updateBankAccount = validatedActionWithUser(
  * Delete (soft delete) a bank account
  */
 export const deleteBankAccount = validatedActionWithUser(
-  z.object({ id: z.number().int().positive() }),
+  z.object({ id: z.string().uuid() }),
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();
@@ -210,7 +210,7 @@ export const deleteBankAccount = validatedActionWithUser(
  * Set a bank account as default
  */
 export const setDefaultBankAccount = validatedActionWithUser(
-  z.object({ id: z.number().int().positive() }),
+  z.object({ id: z.string().uuid() }),
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();

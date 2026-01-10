@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Search } from 'lucide-react';
 
 interface Supplier {
-  id: number;
+  id: string;
   name: string;
   email: string | null;
   phone: string | null;

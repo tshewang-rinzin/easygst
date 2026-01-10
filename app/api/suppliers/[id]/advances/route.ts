@@ -7,13 +7,12 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const supplierId = parseInt(id);
     const { searchParams } = new URL(request.url);
     const unallocatedOnly = searchParams.get('unallocatedOnly') === 'true';
 
     const advances = unallocatedOnly
-      ? await getSupplierUnallocatedAdvances(supplierId)
-      : await getSupplierAdvances(supplierId);
+      ? await getSupplierUnallocatedAdvances(id)
+      : await getSupplierAdvances(id);
 
     return NextResponse.json(advances);
   } catch (error) {

@@ -4,7 +4,7 @@ import { eq, and, gte, lte, desc, ne } from 'drizzle-orm';
 import { getTeamForUser } from '@/lib/db/queries';
 
 export interface PurchaseRegisterEntry {
-  id: number;
+  id: string;
   date: Date;
   number: string;
   supplierName: string;

@@ -8,16 +8,16 @@ export const inviteUserSchema = z.object({
 });
 
 export const updateMemberRoleSchema = z.object({
-  memberId: z.number().int().positive(),
+  memberId: z.string().uuid(),
   role: z.enum(['owner', 'admin', 'member']),
 });
 
 export const removeMemberSchema = z.object({
-  memberId: z.number().int().positive(),
+  memberId: z.string().uuid(),
 });
 
 export const cancelInvitationSchema = z.object({
-  invitationId: z.number().int().positive(),
+  invitationId: z.string().uuid(),
 });
 
 export type InviteUserData = z.infer<typeof inviteUserSchema>;

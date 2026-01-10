@@ -236,7 +236,7 @@ export const amendGstReturn = validatedActionWithUser(
 /**
  * Delete a draft GST return
  */
-export async function deleteGstReturn(returnId: number) {
+export async function deleteGstReturn(returnId: string) {
   try {
     const team = await getTeamForUser();
     if (!team) {
@@ -310,7 +310,7 @@ export const createPeriodLock = validatedActionWithUser(
 /**
  * Remove a period lock
  */
-export async function removePeriodLock(lockId: number) {
+export async function removePeriodLock(lockId: string) {
   try {
     const team = await getTeamForUser();
     if (!team) {

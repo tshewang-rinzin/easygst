@@ -11,7 +11,7 @@ import { useState } from 'react';
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 interface ActivityLogEntry {
-  id: number;
+  id: string;
   action: string;
   timestamp: string;
   ipAddress: string | null;

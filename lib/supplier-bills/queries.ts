@@ -31,7 +31,7 @@ export async function getSupplierBills() {
 /**
  * Get a single supplier bill by ID with all details
  */
-export async function getSupplierBillById(id: number) {
+export async function getSupplierBillById(id: string) {
   const team = await getTeamForUser();
   if (!team) return null;
 

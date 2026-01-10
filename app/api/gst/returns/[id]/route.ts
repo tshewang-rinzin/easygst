@@ -8,7 +8,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const gstReturn = await getGstReturnById(parseInt(id));
+    const gstReturn = await getGstReturnById(id);
 
     if (!gstReturn) {
       return NextResponse.json({ error: 'GST return not found' }, { status: 404 });
@@ -30,7 +30,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const result = await deleteGstReturn(parseInt(id));
+    const result = await deleteGstReturn(id);
 
     if (result.error) {
       return NextResponse.json({ error: result.error }, { status: 400 });

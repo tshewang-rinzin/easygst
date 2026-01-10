@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const customerPaymentSchema = z.object({
-  customerId: z.coerce.number().min(1, 'Customer is required'),
+  customerId: z.string().uuid('Customer is required'),
   amount: z.coerce.number().min(0.01).max(9999999999999.99, 'Amount must be valid'),
   currency: z.enum(['BTN', 'INR', 'USD']).default('BTN'),
   paymentDate: z.coerce.date(),
@@ -22,14 +22,14 @@ export const customerPaymentSchema = z.object({
     }),
     z.array(
       z.object({
-        invoiceId: z.coerce.number().min(1),
+        invoiceId: z.string().uuid(),
         allocatedAmount: z.coerce.number().min(0.01),
       })
     ),
   ]).pipe(
     z.array(
       z.object({
-        invoiceId: z.coerce.number().min(1),
+        invoiceId: z.string().uuid(),
         allocatedAmount: z.coerce.number().min(0.01),
       })
     ).min(1, 'At least one invoice allocation is required')
@@ -37,12 +37,12 @@ export const customerPaymentSchema = z.object({
 });
 
 export const deleteCustomerPaymentSchema = z.object({
-  id: z.coerce.number().min(1, 'Payment ID is required'),
+  id: z.string().uuid('Payment ID is required'),
 });
 
 // Customer Advance Schemas
 export const customerAdvanceSchema = z.object({
-  customerId: z.coerce.number().min(1, 'Customer is required'),
+  customerId: z.string().uuid('Customer is required'),
   amount: z.coerce.number().min(0.01).max(9999999999999.99, 'Amount must be valid'),
   currency: z.enum(['BTN', 'INR', 'USD']).default('BTN'),
   paymentDate: z.coerce.date(),
@@ -55,7 +55,7 @@ export const customerAdvanceSchema = z.object({
 });
 
 export const allocateCustomerAdvanceSchema = z.object({
-  advanceId: z.coerce.number().min(1, 'Advance ID is required'),
+  advanceId: z.string().uuid('Advance ID is required'),
   allocations: z.union([
     z.string().transform((str) => {
       try {
@@ -66,14 +66,14 @@ export const allocateCustomerAdvanceSchema = z.object({
     }),
     z.array(
       z.object({
-        invoiceId: z.coerce.number().min(1),
+        invoiceId: z.string().uuid(),
         allocatedAmount: z.coerce.number().min(0.01),
       })
     ),
   ]).pipe(
     z.array(
       z.object({
-        invoiceId: z.coerce.number().min(1),
+        invoiceId: z.string().uuid(),
         allocatedAmount: z.coerce.number().min(0.01),
       })
     ).min(1, 'At least one invoice allocation is required')
@@ -81,7 +81,7 @@ export const allocateCustomerAdvanceSchema = z.object({
 });
 
 export const deleteCustomerAdvanceSchema = z.object({
-  id: z.coerce.number().min(1, 'Advance ID is required'),
+  id: z.string().uuid('Advance ID is required'),
 });
 
 export type CustomerPaymentFormData = z.infer<typeof customerPaymentSchema>;

@@ -13,7 +13,7 @@ import { getTeamForUser } from '@/lib/db/queries';
  * Send invoice email to customer
  */
 export async function sendInvoiceEmail(
-  invoiceId: number
+  invoiceId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     // Get team for auth
@@ -114,7 +114,7 @@ export async function sendInvoiceEmail(
  * Send payment receipt email to customer
  */
 export async function sendPaymentReceiptEmail(
-  paymentId: number
+  paymentId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     // Get team for auth
@@ -210,7 +210,7 @@ export async function sendPaymentReceiptEmail(
  * Send payment reminder email to customer
  */
 export async function sendPaymentReminderEmail(
-  invoiceId: number
+  invoiceId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     // Get team for auth

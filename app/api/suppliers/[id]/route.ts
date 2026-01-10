@@ -6,8 +6,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: idParam } = await params;
-    const id = parseInt(idParam);
+    const { id } = await params;
     const supplier = await getSupplierById(id);
 
     if (!supplier) {

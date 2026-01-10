@@ -25,10 +25,10 @@ export type CustomerFormData = z.infer<typeof customerSchema>;
 
 // For update operations (includes ID)
 export const updateCustomerSchema = customerSchema.extend({
-  id: z.number(),
+  id: z.string().uuid(),
 });
 
 // For delete operations
 export const deleteCustomerSchema = z.object({
-  id: z.number(),
+  id: z.string().uuid(),
 });

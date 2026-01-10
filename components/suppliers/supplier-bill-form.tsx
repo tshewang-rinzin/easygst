@@ -18,7 +18,7 @@ import type { Unit, TaxClassification } from '@/lib/db/schema';
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 interface Supplier {
-  id: number;
+  id: string;
   name: string;
   email: string | null;
   phone: string | null;
@@ -26,7 +26,7 @@ interface Supplier {
 }
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   sku: string | null;
@@ -51,7 +51,7 @@ interface LineItem {
 interface SupplierBillFormProps {
   defaultGstRate: string;
   editMode?: boolean;
-  billId?: number;
+  billId?: string;
   existingBill?: any;
 }
 

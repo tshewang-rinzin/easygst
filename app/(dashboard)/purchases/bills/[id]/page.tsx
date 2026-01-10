@@ -16,7 +16,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function ViewSupplierBillPage() {
   const params = useParams();
   const router = useRouter();
-  const billId = Number(params.id);
+  const billId = params.id as string;
   const [bill, setBill] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
@@ -97,7 +97,7 @@ export default function ViewSupplierBillPage() {
     );
   };
 
-  const handleDeletePayment = async (paymentId: number) => {
+  const handleDeletePayment = async (paymentId: string) => {
     if (!confirm('Are you sure you want to delete this payment?')) {
       return;
     }

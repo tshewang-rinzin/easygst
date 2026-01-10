@@ -17,7 +17,7 @@ import { lockInvoice } from '@/lib/invoices/actions';
 import { sendInvoiceEmail } from '@/lib/email/actions';
 
 interface SendInvoiceDialogProps {
-  invoiceId: number;
+  invoiceId: string;
   invoiceNumber: string;
   customerEmail?: string | null;
 }

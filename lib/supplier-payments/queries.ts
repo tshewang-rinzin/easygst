@@ -6,7 +6,7 @@ import { eq, and, desc, ne, or } from 'drizzle-orm';
 /**
  * Get all payments for a specific supplier bill
  */
-export async function getSupplierBillPayments(billId: number) {
+export async function getSupplierBillPayments(billId: string) {
   const team = await getTeamForUser();
   if (!team) return [];
 
@@ -89,7 +89,7 @@ export async function getSupplierPayments() {
 /**
  * Get a single supplier payment by ID
  */
-export async function getSupplierPaymentById(id: number) {
+export async function getSupplierPaymentById(id: string) {
   const team = await getTeamForUser();
   if (!team) return null;
 
@@ -111,7 +111,7 @@ export async function getSupplierPaymentById(id: number) {
 /**
  * Get all supplier advances (payments with type='advance')
  */
-export async function getSupplierAdvances(supplierId?: number) {
+export async function getSupplierAdvances(supplierId?: string) {
   const team = await getTeamForUser();
   if (!team) return [];
 
@@ -161,7 +161,7 @@ export async function getSupplierAdvances(supplierId?: number) {
 /**
  * Get a single supplier advance with full details including allocations
  */
-export async function getSupplierAdvanceById(advanceId: number) {
+export async function getSupplierAdvanceById(advanceId: string) {
   const team = await getTeamForUser();
   if (!team) return null;
 
@@ -222,7 +222,7 @@ export async function getSupplierAdvanceById(advanceId: number) {
 /**
  * Get supplier advances with unallocated balance
  */
-export async function getSupplierUnallocatedAdvances(supplierId?: number) {
+export async function getSupplierUnallocatedAdvances(supplierId?: string) {
   const team = await getTeamForUser();
   if (!team) return [];
 
@@ -252,7 +252,7 @@ export async function getSupplierUnallocatedAdvances(supplierId?: number) {
 /**
  * Get outstanding bills for a supplier
  */
-export async function getSupplierOutstandingBills(supplierId: number) {
+export async function getSupplierOutstandingBills(supplierId: string) {
   const team = await getTeamForUser();
   if (!team) return [];
 

@@ -16,7 +16,7 @@ import { Trash2 } from 'lucide-react';
 import { deleteAdjustment } from '@/lib/adjustments/actions';
 
 interface DeleteAdjustmentDialogProps {
-  adjustmentId: number;
+  adjustmentId: string;
   adjustmentType: string;
 }
 

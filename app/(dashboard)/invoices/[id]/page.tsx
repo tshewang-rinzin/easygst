@@ -12,7 +12,7 @@ import { DeleteInvoiceDialog } from '@/components/invoices/delete-invoice-dialog
 import { RecordPaymentDialog } from '@/components/payments/record-payment-dialog';
 import { getGSTClassification, getGSTClassificationLabel, getGSTClassificationColor } from '@/lib/invoices/gst-classification';
 
-async function InvoiceDetails({ id }: { id: number }) {
+async function InvoiceDetails({ id }: { id: string }) {
   const invoice = await getInvoiceWithDetails(id);
 
   if (!invoice) {
@@ -450,7 +450,6 @@ export default async function InvoiceDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const invoiceId = parseInt(id);
 
   return (
     <section className="flex-1 p-4 lg:p-8">
@@ -471,7 +470,7 @@ export default async function InvoiceDetailPage({
           </div>
         }
       >
-        <InvoiceDetails id={invoiceId} />
+        <InvoiceDetails id={id} />
       </Suspense>
     </section>
   );

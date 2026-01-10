@@ -4,8 +4,8 @@ import { eq, and } from 'drizzle-orm';
 import { getTeamForUser } from '@/lib/db/queries';
 
 export interface TeamMemberWithUser {
-  id: number;
-  userId: number;
+  id: string;
+  userId: string;
   role: string;
   joinedAt: Date;
   name: string | null;
@@ -13,7 +13,7 @@ export interface TeamMemberWithUser {
 }
 
 export interface PendingInvitation {
-  id: number;
+  id: string;
   email: string;
   role: string;
   invitedAt: Date;
@@ -78,7 +78,7 @@ export async function getPendingInvitations(): Promise<PendingInvitation[]> {
 /**
  * Get team member by user ID
  */
-export async function getTeamMemberByUserId(userId: number) {
+export async function getTeamMemberByUserId(userId: string) {
   const team = await getTeamForUser();
   if (!team) return null;
 

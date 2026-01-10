@@ -7,9 +7,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const customerId = searchParams.get('customerId');
 
-    const advances = await getCustomerAdvances(
-      customerId ? parseInt(customerId) : undefined
-    );
+    const advances = await getCustomerAdvances(customerId || undefined);
     return NextResponse.json(advances);
   } catch (error) {
     console.error('Error fetching customer advances:', error);

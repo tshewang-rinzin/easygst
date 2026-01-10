@@ -25,10 +25,10 @@ export type SupplierFormData = z.infer<typeof supplierSchema>;
 
 // For update operations (includes ID)
 export const updateSupplierSchema = supplierSchema.extend({
-  id: z.coerce.number(),
+  id: z.string().uuid(),
 });
 
 // For delete operations
 export const deleteSupplierSchema = z.object({
-  id: z.coerce.number(),
+  id: z.string().uuid(),
 });
