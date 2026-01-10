@@ -3,7 +3,7 @@ import { booleanCoerce } from '@/lib/validation-helpers';
 
 // Invoice item validation schema
 export const invoiceItemSchema = z.object({
-  productId: z.coerce.number().optional(),
+  productId: z.string().uuid().optional(),
   description: z.string().min(1, 'Description is required').max(500),
   quantity: z.coerce.number().min(0.01, 'Quantity must be greater than 0'),
   unit: z.string().max(50).default('piece'),
@@ -28,7 +28,7 @@ export type InvoiceItemFormData = z.infer<typeof invoiceItemSchema>;
 
 // Invoice validation schema
 export const invoiceSchema = z.object({
-  customerId: z.coerce.number().min(1, 'Customer is required'),
+  customerId: z.string().uuid('Customer is required'),
   invoiceDate: z.coerce.date(),
   dueDate: z.coerce.date().optional(),
   currency: z.enum(['BTN', 'INR', 'USD']).default('BTN'),
@@ -51,17 +51,17 @@ export type InvoiceFormData = z.infer<typeof invoiceSchema>;
 
 // Update invoice schema (includes ID)
 export const updateInvoiceSchema = invoiceSchema.extend({
-  id: z.coerce.number(),
+  id: z.string().uuid(),
 });
 
 // Delete invoice schema
 export const deleteInvoiceSchema = z.object({
-  id: z.coerce.number(),
+  id: z.string().uuid(),
 });
 
 // Send invoice schema
 export const sendInvoiceSchema = z.object({
-  id: z.coerce.number(),
+  id: z.string().uuid(),
   channels: z.object({
     email: booleanCoerce(false),
     whatsapp: booleanCoerce(false),
@@ -71,12 +71,12 @@ export const sendInvoiceSchema = z.object({
 
 // Lock/unlock invoice schema
 export const lockInvoiceSchema = z.object({
-  id: z.coerce.number(),
+  id: z.string().uuid(),
 });
 
 // Update invoice status schema
 export const updateInvoiceStatusSchema = z.object({
-  id: z.coerce.number(),
+  id: z.string().uuid(),
   status: z.enum([
     'draft',
     'sent',

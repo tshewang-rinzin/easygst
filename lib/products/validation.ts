@@ -18,7 +18,7 @@ export const productSchema = z.object({
     .default(0),
   isTaxExempt: booleanCoerce(false),
   gstClassification: z.enum(['STANDARD', 'ZERO_RATED', 'EXEMPT']).default('STANDARD'),
-  categoryId: z.coerce.number().optional(),
+  categoryId: z.string().uuid().optional(),
   category: z.string().max(100).optional(),
   isActive: booleanCoerce(true),
 });
@@ -27,10 +27,10 @@ export type ProductFormData = z.infer<typeof productSchema>;
 
 // For update operations (includes ID)
 export const updateProductSchema = productSchema.extend({
-  id: z.coerce.number(),
+  id: z.string().uuid(),
 });
 
 // For delete operations
 export const deleteProductSchema = z.object({
-  id: z.coerce.number(),
+  id: z.string().uuid(),
 });

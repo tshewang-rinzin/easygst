@@ -5,7 +5,7 @@ import { Search, ChevronDown, Check } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 
 interface Customer {
-  id: number;
+  id: string;
   name: string;
   email?: string;
   mobile?: string;

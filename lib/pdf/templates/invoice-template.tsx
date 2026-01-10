@@ -330,7 +330,7 @@ interface InvoiceData {
   bankAccountNumber?: string | null;
   // Bank Accounts (new)
   bankAccounts?: Array<{
-    id: number;
+    id: string;
     bankName: string;
     accountNumber: string;
     accountName: string;

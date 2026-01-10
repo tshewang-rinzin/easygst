@@ -13,7 +13,7 @@ import { eq, and, sql } from 'drizzle-orm';
  * @returns Promise<string> - The generated invoice number
  */
 export async function generateInvoiceNumber(
-  teamId: number,
+  teamId: string,
   prefix: string = 'INV'
 ): Promise<string> {
   const currentYear = new Date().getFullYear();
@@ -82,7 +82,7 @@ export async function generateInvoiceNumber(
  * @returns Promise<string> - The next invoice number that will be generated
  */
 export async function previewNextInvoiceNumber(
-  teamId: number,
+  teamId: string,
   prefix: string = 'INV'
 ): Promise<string> {
   const currentYear = new Date().getFullYear();
@@ -109,7 +109,7 @@ export async function previewNextInvoiceNumber(
  * @returns Promise<number> - The count of invoices this year
  */
 export async function getCurrentYearInvoiceCount(
-  teamId: number
+  teamId: string
 ): Promise<number> {
   const currentYear = new Date().getFullYear();
 
@@ -135,7 +135,7 @@ export async function getCurrentYearInvoiceCount(
  * @param year - The year to reset (default: current year)
  */
 export async function resetInvoiceSequence(
-  teamId: number,
+  teamId: string,
   year?: number
 ): Promise<void> {
   const targetYear = year || new Date().getFullYear();

@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // Supplier payment validation
 export const supplierPaymentSchema = z.object({
-  billId: z.coerce.number().min(1, 'Bill is required'),
+  billId: z.string().uuid('Bill is required'),
   amount: z.coerce
     .number()
     .min(0.01, 'Amount must be greater than 0')
@@ -22,7 +22,7 @@ export type SupplierPaymentFormData = z.infer<typeof supplierPaymentSchema>;
 
 // For delete operations
 export const deleteSupplierPaymentSchema = z.object({
-  id: z.coerce.number(),
+  id: z.string().uuid(),
 });
 
 // ============================================================
@@ -30,7 +30,7 @@ export const deleteSupplierPaymentSchema = z.object({
 // ============================================================
 
 export const supplierAdvanceSchema = z.object({
-  supplierId: z.coerce.number().min(1, 'Supplier is required'),
+  supplierId: z.string().uuid('Supplier is required'),
   amount: z.coerce
     .number()
     .min(0.01, 'Amount must be greater than 0')
@@ -46,7 +46,7 @@ export const supplierAdvanceSchema = z.object({
 });
 
 export const allocateSupplierAdvanceSchema = z.object({
-  advanceId: z.coerce.number().min(1, 'Advance ID is required'),
+  advanceId: z.string().uuid('Advance ID is required'),
   allocations: z.union([
     z.string().transform((str) => {
       try {
@@ -57,14 +57,14 @@ export const allocateSupplierAdvanceSchema = z.object({
     }),
     z.array(
       z.object({
-        billId: z.coerce.number().min(1),
+        billId: z.string().uuid(),
         allocatedAmount: z.coerce.number().min(0.01),
       })
     ),
   ]).pipe(
     z.array(
       z.object({
-        billId: z.coerce.number().min(1),
+        billId: z.string().uuid(),
         allocatedAmount: z.coerce.number().min(0.01),
       })
     ).min(1, 'At least one bill allocation is required')
@@ -72,7 +72,7 @@ export const allocateSupplierAdvanceSchema = z.object({
 });
 
 export const deleteSupplierAdvanceSchema = z.object({
-  id: z.coerce.number().min(1, 'Advance ID is required'),
+  id: z.string().uuid('Advance ID is required'),
 });
 
 export type SupplierAdvanceFormData = z.infer<typeof supplierAdvanceSchema>;

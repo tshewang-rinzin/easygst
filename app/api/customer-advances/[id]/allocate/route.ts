@@ -7,11 +7,10 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const advanceId = parseInt(id);
     const body = await request.json();
 
     const result = await allocateCustomerAdvance({
-      advanceId,
+      advanceId: id,
       allocations: body.allocations,
     });
 

@@ -16,7 +16,7 @@ import { getTeamForUser } from '@/lib/db/queries';
 export async function getInvoices(params?: {
   searchTerm?: string;
   status?: string;
-  customerId?: number;
+  customerId?: string;
   startDate?: Date;
   endDate?: Date;
 }) {
@@ -84,7 +84,7 @@ export async function getInvoices(params?: {
 /**
  * Get a single invoice with all details (customer, items, payments)
  */
-export async function getInvoiceWithDetails(id: number) {
+export async function getInvoiceWithDetails(id: string) {
   const team = await getTeamForUser();
   if (!team) return null;
 
@@ -142,7 +142,7 @@ export async function getInvoiceWithDetails(id: number) {
 /**
  * Get a single invoice by ID (basic, without related data)
  */
-export async function getInvoiceById(id: number) {
+export async function getInvoiceById(id: string) {
   const team = await getTeamForUser();
   if (!team) return null;
 

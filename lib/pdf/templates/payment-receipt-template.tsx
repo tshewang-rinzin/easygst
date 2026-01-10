@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
 
 interface PaymentReceiptProps {
   payment: {
-    id: number;
+    id: string;
     receiptNumber: string;
     amount: string;
     allocatedAmount: string;
@@ -203,7 +203,7 @@ interface PaymentReceiptProps {
       tpn?: string;
     };
     allocations?: Array<{
-      id: number;
+      id: string;
       allocatedAmount: string;
       invoice?: {
         invoiceNumber: string;

@@ -12,7 +12,7 @@ import { useEffect } from 'react';
 type ActionState = {
   error?: string;
   success?: string;
-  customerId?: number;
+  customerId?: string;
 };
 
 export default function NewCustomerPage() {

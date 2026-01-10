@@ -12,11 +12,7 @@ export async function GET(
       return NextResponse.json({ error: 'Bill ID is required' }, { status: 400 });
     }
 
-    const billId = parseInt(resolvedParams.id);
-
-    if (isNaN(billId)) {
-      return NextResponse.json({ error: 'Invalid bill ID' }, { status: 400 });
-    }
+    const billId = resolvedParams.id;
 
     const payments = await getSupplierBillPayments(billId);
     return NextResponse.json(payments || []);

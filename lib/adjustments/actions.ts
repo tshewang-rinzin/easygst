@@ -11,7 +11,7 @@ import Decimal from 'decimal.js';
 
 // Adjustment validation schema
 const adjustmentSchema = z.object({
-  invoiceId: z.coerce.number().min(1, 'Invoice is required'),
+  invoiceId: z.string().uuid('Invoice is required'),
   adjustmentType: z.enum(['discount', 'late_fee', 'credit_note', 'debit_note', 'bank_charges', 'other']),
   amount: z.coerce
     .number()
@@ -23,7 +23,7 @@ const adjustmentSchema = z.object({
 });
 
 const deleteAdjustmentSchema = z.object({
-  id: z.coerce.number(),
+  id: z.string().uuid(),
 });
 
 /**

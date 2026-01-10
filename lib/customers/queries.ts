@@ -42,7 +42,7 @@ export async function getCustomers(searchTerm?: string) {
 /**
  * Get a single customer by ID (scoped to team)
  */
-export async function getCustomerById(id: number) {
+export async function getCustomerById(id: string) {
   const team = await getTeamForUser();
   if (!team) return null;
 

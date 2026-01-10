@@ -18,7 +18,7 @@ import { Download, FileSpreadsheet, Calendar } from 'lucide-react';
 import Link from 'next/link';
 
 interface SalesRegisterEntry {
-  id: number;
+  id: string;
   date: string;
   type: 'invoice' | 'cash_sale';
   number: string;

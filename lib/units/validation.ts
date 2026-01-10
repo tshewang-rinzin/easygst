@@ -9,9 +9,9 @@ export const unitSchema = z.object({
 });
 
 export const updateUnitSchema = unitSchema.extend({
-  id: z.coerce.number(),
+  id: z.string().uuid(),
 });
 
 export const deleteUnitSchema = z.object({
-  id: z.coerce.number(),
+  id: z.string().uuid(),
 });

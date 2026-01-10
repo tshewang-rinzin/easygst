@@ -13,7 +13,7 @@ import { useState } from 'react';
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 interface GstReturn {
-  id: number;
+  id: string;
   returnNumber: string;
   periodStart: string;
   periodEnd: string;
@@ -29,9 +29,9 @@ interface GstReturn {
 
 export default function FiledReturnsPage() {
   const { data: returns, isLoading } = useSWR<GstReturn[]>('/api/gst/returns', fetcher);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this draft return?')) {
       return;
     }

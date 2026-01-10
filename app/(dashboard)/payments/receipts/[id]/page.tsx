@@ -14,7 +14,7 @@ import { mutate } from 'swr';
 export default function ViewReceiptPage() {
   const params = useParams();
   const router = useRouter();
-  const paymentId = Number(params.id);
+  const paymentId = params.id as string;
   const [payment, setPayment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [sendingEmail, setSendingEmail] = useState(false);

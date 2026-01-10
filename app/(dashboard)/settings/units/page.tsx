@@ -16,7 +16,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function UnitsSettingsPage() {
   const { data: units, isLoading } = useSWR<Unit[]>('/api/units', fetcher);
   const [isAdding, setIsAdding] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [isResetting, setIsResetting] = useState(false);
 
   const handleReset = async () => {

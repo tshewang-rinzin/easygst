@@ -111,7 +111,7 @@ export const createPaymentMethod = validatedActionWithUser(
  * Update an existing payment method
  */
 export const updatePaymentMethod = validatedActionWithUser(
-  paymentMethodSchema.extend({ id: z.number().int().positive() }),
+  paymentMethodSchema.extend({ id: z.string().uuid() }),
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();
@@ -171,7 +171,7 @@ export const updatePaymentMethod = validatedActionWithUser(
  * Delete a payment method
  */
 export const deletePaymentMethod = validatedActionWithUser(
-  z.object({ id: z.coerce.number().int().positive() }),
+  z.object({ id: z.string().uuid() }),
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();
@@ -223,7 +223,7 @@ export const deletePaymentMethod = validatedActionWithUser(
  */
 export const togglePaymentMethod = validatedActionWithUser(
   z.object({
-    id: z.coerce.number().int().positive(),
+    id: z.string().uuid(),
     isEnabled: z.coerce.boolean(),
   }),
   async (data, _, user) => {

@@ -169,7 +169,7 @@ export const deleteUnit = validatedActionWithUser(
 /**
  * Seed default units for a team
  */
-export async function seedDefaultUnits(teamId: number, userId: number) {
+export async function seedDefaultUnits(teamId: string, userId: string) {
   const defaultUnits = [
     { name: 'Piece', abbreviation: 'pcs', description: 'Individual items', sortOrder: 1 },
     { name: 'Packet', abbreviation: 'pkt', description: 'Packet or pack', sortOrder: 2 },

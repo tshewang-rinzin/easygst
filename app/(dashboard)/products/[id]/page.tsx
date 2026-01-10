@@ -19,11 +19,10 @@ export default function EditProductPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
-  const productId = parseInt(id);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const { data: product, error } = useSWR<Product>(
-    `/api/products/${productId}`,
+    `/api/products/${id}`,
     fetcher
   );
 
@@ -116,7 +115,7 @@ export default function EditProductPage({
             catalog.
           </p>
           <form action={deleteAction} className="flex gap-2">
-            <input type="hidden" name="id" value={productId} />
+            <input type="hidden" name="id" value={id} />
             <Button
               type="submit"
               disabled={deletePending}
@@ -140,7 +139,7 @@ export default function EditProductPage({
       )}
 
       <form action={updateAction}>
-        <input type="hidden" name="id" value={productId} />
+        <input type="hidden" name="id" value={id} />
         <ProductForm
           product={product}
           defaultGstRate={team?.defaultGstRate || '0'}

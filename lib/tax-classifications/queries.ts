@@ -24,7 +24,7 @@ export async function getTaxClassifications(includeInactive: boolean = false) {
   return classifications;
 }
 
-export async function getTaxClassificationById(id: number) {
+export async function getTaxClassificationById(id: string) {
   const team = await getTeamForUser();
   if (!team) {
     throw new Error('Team not found');
@@ -46,7 +46,7 @@ export async function getTaxClassificationById(id: number) {
 
 export async function taxClassificationCodeExists(
   code: string,
-  excludeId?: number
+  excludeId?: string
 ): Promise<boolean> {
   const team = await getTeamForUser();
   if (!team) {

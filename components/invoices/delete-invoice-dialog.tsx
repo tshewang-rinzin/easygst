@@ -16,7 +16,7 @@ import { Trash2 } from 'lucide-react';
 import { deleteInvoice } from '@/lib/invoices/actions';
 
 interface DeleteInvoiceDialogProps {
-  invoiceId: number;
+  invoiceId: string;
   invoiceNumber: string;
 }
 

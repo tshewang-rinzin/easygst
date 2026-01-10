@@ -5,7 +5,7 @@ import { Search, ChevronDown, Check, FileText } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 
 interface Invoice {
-  id: number;
+  id: string;
   invoiceNumber: string;
   invoiceDate: string;
   dueDate: string;
@@ -19,9 +19,9 @@ interface Invoice {
 
 interface SearchableInvoiceSelectProps {
   invoices: Invoice[];
-  selectedInvoiceId: number | null;
-  onSelectInvoice: (invoiceId: number | null) => void;
-  excludedInvoiceIds?: number[];
+  selectedInvoiceId: string | null;
+  onSelectInvoice: (invoiceId: string | null) => void;
+  excludedInvoiceIds?: string[];
   label?: string;
   placeholder?: string;
   required?: boolean;
@@ -107,7 +107,7 @@ export function SearchableInvoiceSelect({
     }
   };
 
-  const handleSelectInvoice = (invoiceId: number) => {
+  const handleSelectInvoice = (invoiceId: string) => {
     onSelectInvoice(invoiceId);
     setIsOpen(false);
     setSearchTerm('');

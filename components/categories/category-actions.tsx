@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/alert-dialog';
 
 interface CategoryActionsProps {
-  categoryId: number;
+  categoryId: string;
   isActive: boolean;
 }
 

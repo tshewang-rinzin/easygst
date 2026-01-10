@@ -7,9 +7,8 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const supplierId = parseInt(id);
 
-    const bills = await getSupplierOutstandingBills(supplierId);
+    const bills = await getSupplierOutstandingBills(id);
 
     return NextResponse.json(bills);
   } catch (error) {

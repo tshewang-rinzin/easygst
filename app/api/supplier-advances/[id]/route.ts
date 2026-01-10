@@ -8,9 +8,8 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const advanceId = parseInt(id);
 
-    const advance = await getSupplierAdvanceById(advanceId);
+    const advance = await getSupplierAdvanceById(id);
 
     if (!advance) {
       return NextResponse.json({ error: 'Advance not found' }, { status: 404 });
@@ -32,9 +31,8 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const advanceId = parseInt(id);
 
-    const result = await deleteSupplierAdvance({ id: advanceId });
+    const result = await deleteSupplierAdvance({ id });
 
     if ('error' in result && result.error) {
       return NextResponse.json({ error: result.error }, { status: 400 });

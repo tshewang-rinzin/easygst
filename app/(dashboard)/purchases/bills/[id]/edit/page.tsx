@@ -10,7 +10,7 @@ import { ArrowLeft } from 'lucide-react';
 export default function EditSupplierBillPage() {
   const params = useParams();
   const router = useRouter();
-  const billId = Number(params.id);
+  const billId = params.id as string;
   const [bill, setBill] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 

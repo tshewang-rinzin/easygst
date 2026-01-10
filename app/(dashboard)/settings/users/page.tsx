@@ -19,8 +19,8 @@ import {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 interface TeamMemberWithUser {
-  id: number;
-  userId: number;
+  id: string;
+  userId: string;
   role: string;
   joinedAt: string;
   name: string | null;
@@ -28,7 +28,7 @@ interface TeamMemberWithUser {
 }
 
 interface PendingInvitation {
-  id: number;
+  id: string;
   email: string;
   role: string;
   invitedAt: string;
@@ -51,7 +51,7 @@ export default function UsersRolesPage() {
   const [inviteRole, setInviteRole] = useState<'owner' | 'admin' | 'member'>('member');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [resendingId, setResendingId] = useState<number | null>(null);
+  const [resendingId, setResendingId] = useState<string | null>(null);
 
   const handleInvite = async () => {
     if (!inviteEmail) return;
@@ -74,7 +74,7 @@ export default function UsersRolesPage() {
     setIsSubmitting(false);
   };
 
-  const handleChangeRole = async (memberId: number, newRole: 'owner' | 'admin' | 'member') => {
+  const handleChangeRole = async (memberId: string, newRole: 'owner' | 'admin' | 'member') => {
     setMessage(null);
     const result = await updateMemberRole({ memberId, role: newRole });
 
@@ -86,7 +86,7 @@ export default function UsersRolesPage() {
     }
   };
 
-  const handleRemoveMember = async (memberId: number) => {
+  const handleRemoveMember = async (memberId: string) => {
     if (!confirm('Are you sure you want to remove this member from the team?')) return;
 
     setMessage(null);
@@ -100,7 +100,7 @@ export default function UsersRolesPage() {
     }
   };
 
-  const handleCancelInvitation = async (invitationId: number) => {
+  const handleCancelInvitation = async (invitationId: string) => {
     setMessage(null);
     const result = await cancelInvitation({ invitationId });
 
@@ -112,7 +112,7 @@ export default function UsersRolesPage() {
     }
   };
 
-  const handleResendInvitation = async (invitationId: number) => {
+  const handleResendInvitation = async (invitationId: string) => {
     setResendingId(invitationId);
     setMessage(null);
 

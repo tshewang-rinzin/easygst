@@ -26,7 +26,7 @@ export async function getUnits(includeInactive = false) {
 /**
  * Get a single unit by ID
  */
-export async function getUnitById(id: number) {
+export async function getUnitById(id: string) {
   const team = await getTeamForUser();
   if (!team) return null;
 
@@ -42,7 +42,7 @@ export async function getUnitById(id: number) {
 /**
  * Check if a unit name already exists for the team
  */
-export async function unitNameExists(name: string, excludeId?: number) {
+export async function unitNameExists(name: string, excludeId?: string) {
   const team = await getTeamForUser();
   if (!team) return false;
 

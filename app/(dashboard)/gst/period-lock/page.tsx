@@ -13,7 +13,7 @@ import { createPeriodLock, removePeriodLock } from '@/lib/gst/actions';
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 interface PeriodLock {
-  id: number;
+  id: string;
   periodStart: string;
   periodEnd: string;
   periodType: string;
@@ -27,7 +27,7 @@ export default function PeriodLockPage() {
   const [periodStart, setPeriodStart] = useState<Date>(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const [periodEnd, setPeriodEnd] = useState<Date>(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0));
   const [periodType, setPeriodType] = useState<string>('monthly');
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [state, formAction, isPending] = useActionState(createPeriodLock, { error: '' } as any);
 
@@ -39,7 +39,7 @@ export default function PeriodLockPage() {
     }
   }, [state]);
 
-  const handleRemoveLock = async (id: number) => {
+  const handleRemoveLock = async (id: string) => {
     if (!confirm('Are you sure you want to remove this period lock? This will allow modifications to the period.')) {
       return;
     }

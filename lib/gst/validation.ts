@@ -8,7 +8,7 @@ export const createGstReturnSchema = z.object({
 });
 
 export const fileGstReturnSchema = z.object({
-  returnId: z.coerce.number().min(1),
+  returnId: z.string().uuid(),
   filingDate: z.coerce.date(),
   adjustments: z.coerce.number().default(0),
   previousPeriodBalance: z.coerce.number().default(0),
@@ -22,11 +22,11 @@ export const createPeriodLockSchema = z.object({
   periodEnd: z.coerce.date(),
   periodType: z.enum(['monthly', 'quarterly', 'annual']),
   reason: z.string().optional(),
-  gstReturnId: z.coerce.number().optional(),
+  gstReturnId: z.string().uuid().optional(),
 });
 
 export const amendGstReturnSchema = z.object({
-  returnId: z.coerce.number().min(1),
+  returnId: z.string().uuid(),
   adjustments: z.coerce.number(),
   reason: z.string().min(1, 'Amendment reason is required'),
 });

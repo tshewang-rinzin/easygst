@@ -18,14 +18,14 @@ import type { Unit, TaxClassification } from '@/lib/db/schema';
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 interface Customer {
-  id: number;
+  id: string;
   name: string;
   email: string | null;
   phone: string | null;
 }
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   sku: string | null;
@@ -47,9 +47,9 @@ interface LineItem {
 }
 
 interface InvoiceData {
-  id: number;
+  id: string;
   invoiceNumber: string;
-  customerId: number;
+  customerId: string;
   customer: Customer;
   invoiceDate: Date;
   dueDate: Date | null;

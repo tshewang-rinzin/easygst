@@ -28,7 +28,7 @@ export async function getCategories(includeInactive = false) {
 /**
  * Get a single category by ID
  */
-export async function getCategoryById(id: number) {
+export async function getCategoryById(id: string) {
   const team = await getTeamForUser();
   if (!team) return null;
 

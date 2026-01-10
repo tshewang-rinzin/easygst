@@ -8,13 +8,8 @@ export default async function EditCategoryPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const categoryId = parseInt(id, 10);
 
-  if (isNaN(categoryId)) {
-    notFound();
-  }
-
-  const category = await getCategoryById(categoryId);
+  const category = await getCategoryById(id);
 
   if (!category) {
     notFound();

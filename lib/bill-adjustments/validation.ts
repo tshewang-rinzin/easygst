@@ -11,7 +11,7 @@ export const billAdjustmentTypes = [
 ] as const;
 
 export const billAdjustmentSchema = z.object({
-  billId: z.coerce.number().min(1, 'Bill is required'),
+  billId: z.string().uuid('Bill is required'),
   adjustmentType: z.enum([
     'credit_note',
     'debit_note',
@@ -35,5 +35,5 @@ export type BillAdjustmentFormData = z.infer<typeof billAdjustmentSchema>;
 
 // For delete operations
 export const deleteBillAdjustmentSchema = z.object({
-  id: z.coerce.number(),
+  id: z.string().uuid(),
 });

@@ -11,7 +11,7 @@ import { formatCurrency } from '@/lib/utils';
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 interface UnpaidInvoice {
-  id: number;
+  id: string;
   invoiceNumber: string;
   invoiceDate: string;
   dueDate: string | null;

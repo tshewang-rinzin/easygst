@@ -13,7 +13,7 @@ import { eq, and } from 'drizzle-orm';
  * @returns Promise<string> - The generated bill number
  */
 export async function generateBillNumber(
-  teamId: number,
+  teamId: string,
   prefix: string = 'BILL'
 ): Promise<string> {
   const currentYear = new Date().getFullYear();
@@ -82,7 +82,7 @@ export async function generateBillNumber(
  * @returns Promise<string> - The next bill number that will be generated
  */
 export async function previewNextBillNumber(
-  teamId: number,
+  teamId: string,
   prefix: string = 'BILL'
 ): Promise<string> {
   const currentYear = new Date().getFullYear();

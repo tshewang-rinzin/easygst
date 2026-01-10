@@ -4,7 +4,7 @@ import { eq, and, gte, lte, desc } from 'drizzle-orm';
 import { getTeamForUser } from '@/lib/db/queries';
 
 export interface ActivityLogEntry {
-  id: number;
+  id: string;
   action: string;
   timestamp: Date;
   ipAddress: string | null;

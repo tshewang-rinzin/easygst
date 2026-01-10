@@ -13,13 +13,8 @@ export async function GET(
     }
 
     const { id } = await params;
-    const customerId = parseInt(id);
 
-    if (isNaN(customerId)) {
-      return NextResponse.json({ error: 'Invalid customer ID' }, { status: 400 });
-    }
-
-    const customer = await getCustomerById(customerId);
+    const customer = await getCustomerById(id);
 
     if (!customer) {
       return NextResponse.json({ error: 'Customer not found' }, { status: 404 });

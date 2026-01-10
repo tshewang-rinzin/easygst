@@ -1,6 +1,5 @@
 import {
   pgTable,
-  serial,
   varchar,
   text,
   timestamp,
@@ -19,7 +18,7 @@ import { relations } from 'drizzle-orm';
 // ============================================================
 
 export const users = pgTable('users', {
-  id: serial('id').primaryKey(),
+  id: uuid('id').defaultRandom().primaryKey(),
   name: varchar('name', { length: 100 }),
   email: varchar('email', { length: 255 }).notNull().unique(),
   passwordHash: text('password_hash').notNull(),
@@ -36,7 +35,7 @@ export const users = pgTable('users', {
 });
 
 export const teams = pgTable('teams', {
-  id: serial('id').primaryKey(),
+  id: uuid('id').defaultRandom().primaryKey(),
   name: varchar('name', { length: 100 }).notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
@@ -74,11 +73,11 @@ export const teams = pgTable('teams', {
 });
 
 export const teamMembers = pgTable('team_members', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id')
     .notNull()
     .references(() => users.id),
-  teamId: integer('team_id')
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id),
   role: varchar('role', { length: 50 }).notNull(),
@@ -86,24 +85,24 @@ export const teamMembers = pgTable('team_members', {
 });
 
 export const activityLogs = pgTable('activity_logs', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id),
-  userId: integer('user_id').references(() => users.id),
+  userId: uuid('user_id').references(() => users.id),
   action: text('action').notNull(),
   timestamp: timestamp('timestamp').notNull().defaultNow(),
   ipAddress: varchar('ip_address', { length: 45 }),
 });
 
 export const invitations = pgTable('invitations', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id),
   email: varchar('email', { length: 255 }).notNull(),
   role: varchar('role', { length: 50 }).notNull(),
-  invitedBy: integer('invited_by')
+  invitedBy: uuid('invited_by')
     .notNull()
     .references(() => users.id),
   invitedAt: timestamp('invited_at').notNull().defaultNow(),
@@ -117,8 +116,8 @@ export const invitations = pgTable('invitations', {
 
 // Bank Accounts - Multiple accounts per team with QR codes
 export const bankAccounts = pgTable('bank_accounts', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
 
@@ -151,8 +150,8 @@ export const bankAccounts = pgTable('bank_accounts', {
 
 // Payment Methods - Dynamic payment methods per team
 export const paymentMethods = pgTable('payment_methods', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
 
@@ -179,8 +178,8 @@ export const paymentMethods = pgTable('payment_methods', {
 
 // Customers/Clients
 export const customers = pgTable('customers', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
 
@@ -203,7 +202,7 @@ export const customers = pgTable('customers', {
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-  createdBy: integer('created_by').references(() => users.id),
+  createdBy: uuid('created_by').references(() => users.id),
 }, (table) => ({
   teamCustomerIdx: index('team_customer_idx').on(table.teamId),
   customerEmailIdx: index('customer_email_idx').on(table.email),
@@ -211,8 +210,8 @@ export const customers = pgTable('customers', {
 
 // Suppliers/Vendors
 export const suppliers = pgTable('suppliers', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
 
@@ -241,7 +240,7 @@ export const suppliers = pgTable('suppliers', {
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-  createdBy: integer('created_by').references(() => users.id),
+  createdBy: uuid('created_by').references(() => users.id),
 }, (table) => ({
   teamSupplierIdx: index('team_supplier_idx').on(table.teamId),
   supplierEmailIdx: index('supplier_email_idx').on(table.email),
@@ -249,8 +248,8 @@ export const suppliers = pgTable('suppliers', {
 
 // Product Categories (Master Data per Team)
 export const productCategories = pgTable('product_categories', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
 
@@ -269,8 +268,8 @@ export const productCategories = pgTable('product_categories', {
 
 // Units of Measurement
 export const units = pgTable('units', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
 
@@ -281,7 +280,7 @@ export const units = pgTable('units', {
   sortOrder: integer('sort_order').notNull().default(0),
 
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  createdBy: integer('created_by')
+  createdBy: uuid('created_by')
     .notNull()
     .references(() => users.id),
 }, (table) => ({
@@ -291,8 +290,8 @@ export const units = pgTable('units', {
 
 // Tax Classifications (GST Categories)
 export const taxClassifications = pgTable('tax_classifications', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
 
@@ -306,7 +305,7 @@ export const taxClassifications = pgTable('tax_classifications', {
   sortOrder: integer('sort_order').notNull().default(0),
 
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  createdBy: integer('created_by')
+  createdBy: uuid('created_by')
     .notNull()
     .references(() => users.id),
 }, (table) => ({
@@ -316,8 +315,8 @@ export const taxClassifications = pgTable('tax_classifications', {
 
 // Products/Services
 export const products = pgTable('products', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
 
@@ -336,14 +335,14 @@ export const products = pgTable('products', {
   gstClassification: varchar('gst_classification', { length: 20 }).notNull().default('STANDARD'), // STANDARD, ZERO_RATED, EXEMPT
 
   // Categorization
-  categoryId: integer('category_id').references(() => productCategories.id),
+  categoryId: uuid('category_id').references(() => productCategories.id),
   category: varchar('category', { length: 100 }), // Kept for backward compatibility and manual entry
 
   // Metadata
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-  createdBy: integer('created_by').references(() => users.id),
+  createdBy: uuid('created_by').references(() => users.id),
 }, (table) => ({
   teamProductIdx: index('team_product_idx').on(table.teamId),
   productSkuIdx: index('product_sku_idx').on(table.sku),
@@ -351,11 +350,11 @@ export const products = pgTable('products', {
 
 // Invoices
 export const invoices = pgTable('invoices', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
-  customerId: integer('customer_id')
+  customerId: uuid('customer_id')
     .notNull()
     .references(() => customers.id),
 
@@ -394,12 +393,12 @@ export const invoices = pgTable('invoices', {
   // Compliance & Audit (Immutability)
   isLocked: boolean('is_locked').notNull().default(false), // Lock after sending to prevent edits
   lockedAt: timestamp('locked_at'),
-  lockedBy: integer('locked_by').references(() => users.id),
+  lockedBy: uuid('locked_by').references(() => users.id),
 
   // Metadata
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-  createdBy: integer('created_by')
+  createdBy: uuid('created_by')
     .notNull()
     .references(() => users.id),
 }, (table) => ({
@@ -413,11 +412,11 @@ export const invoices = pgTable('invoices', {
 
 // Invoice Items (Line Items)
 export const invoiceItems = pgTable('invoice_items', {
-  id: serial('id').primaryKey(),
-  invoiceId: integer('invoice_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  invoiceId: uuid('invoice_id')
     .notNull()
     .references(() => invoices.id, { onDelete: 'cascade' }),
-  productId: integer('product_id').references(() => products.id), // Nullable - can be ad-hoc items
+  productId: uuid('product_id').references(() => products.id), // Nullable - can be ad-hoc items
 
   // Item Details (denormalized for immutability)
   description: text('description').notNull(),
@@ -449,11 +448,11 @@ export const invoiceItems = pgTable('invoice_items', {
 
 // Invoice Adjustments (discounts, late fees, credits, debits)
 export const invoiceAdjustments = pgTable('invoice_adjustments', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
-  invoiceId: integer('invoice_id')
+  invoiceId: uuid('invoice_id')
     .notNull()
     .references(() => invoices.id, { onDelete: 'cascade' }),
 
@@ -471,7 +470,7 @@ export const invoiceAdjustments = pgTable('invoice_adjustments', {
 
   // Metadata
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  createdBy: integer('created_by')
+  createdBy: uuid('created_by')
     .notNull()
     .references(() => users.id),
 }, (table) => ({
@@ -482,11 +481,11 @@ export const invoiceAdjustments = pgTable('invoice_adjustments', {
 
 // Payments
 export const payments = pgTable('payments', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
-  invoiceId: integer('invoice_id')
+  invoiceId: uuid('invoice_id')
     .notNull()
     .references(() => invoices.id),
 
@@ -514,7 +513,7 @@ export const payments = pgTable('payments', {
 
   // Metadata
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  createdBy: integer('created_by')
+  createdBy: uuid('created_by')
     .notNull()
     .references(() => users.id),
 }, (table) => ({
@@ -525,8 +524,8 @@ export const payments = pgTable('payments', {
 
 // Tax Settings (for different tax rates and compliance)
 export const taxSettings = pgTable('tax_settings', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
 
@@ -550,8 +549,8 @@ export const taxSettings = pgTable('tax_settings', {
 
 // Invoice Delivery Log (Email, WhatsApp, SMS tracking)
 export const invoiceDeliveries = pgTable('invoice_deliveries', {
-  id: serial('id').primaryKey(),
-  invoiceId: integer('invoice_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  invoiceId: uuid('invoice_id')
     .notNull()
     .references(() => invoices.id, { onDelete: 'cascade' }),
 
@@ -571,7 +570,7 @@ export const invoiceDeliveries = pgTable('invoice_deliveries', {
 
   // Metadata
   metadata: jsonb('metadata'), // Additional provider-specific data
-  createdBy: integer('created_by').references(() => users.id),
+  createdBy: uuid('created_by').references(() => users.id),
 }, (table) => ({
   invoiceDeliveryIdx: index('invoice_delivery_idx').on(table.invoiceId),
   deliveryMethodIdx: index('delivery_method_idx').on(table.deliveryMethod),
@@ -579,8 +578,8 @@ export const invoiceDeliveries = pgTable('invoice_deliveries', {
 
 // Invoice Sequence (for gap-free sequential numbering - concurrency safe)
 export const invoiceSequences = pgTable('invoice_sequences', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' })
     .unique(),
@@ -604,11 +603,11 @@ export const invoiceSequences = pgTable('invoice_sequences', {
 
 // Supplier Bills (Purchase Invoices)
 export const supplierBills = pgTable('supplier_bills', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
-  supplierId: integer('supplier_id')
+  supplierId: uuid('supplier_id')
     .notNull()
     .references(() => suppliers.id),
 
@@ -640,12 +639,12 @@ export const supplierBills = pgTable('supplier_bills', {
   // Compliance & Audit
   isLocked: boolean('is_locked').notNull().default(false),
   lockedAt: timestamp('locked_at'),
-  lockedBy: integer('locked_by').references(() => users.id),
+  lockedBy: uuid('locked_by').references(() => users.id),
 
   // Metadata
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-  createdBy: integer('created_by')
+  createdBy: uuid('created_by')
     .notNull()
     .references(() => users.id),
 }, (table) => ({
@@ -658,11 +657,11 @@ export const supplierBills = pgTable('supplier_bills', {
 
 // Supplier Bill Items (Line Items for purchases)
 export const supplierBillItems = pgTable('supplier_bill_items', {
-  id: serial('id').primaryKey(),
-  billId: integer('bill_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  billId: uuid('bill_id')
     .notNull()
     .references(() => supplierBills.id, { onDelete: 'cascade' }),
-  productId: integer('product_id').references(() => products.id),
+  productId: uuid('product_id').references(() => products.id),
 
   // Item Details
   description: text('description').notNull(),
@@ -694,8 +693,8 @@ export const supplierBillItems = pgTable('supplier_bill_items', {
 
 // Supplier Bill Sequence (for gap-free sequential numbering)
 export const supplierBillSequences = pgTable('supplier_bill_sequences', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' })
     .unique(),
@@ -715,11 +714,11 @@ export const supplierBillSequences = pgTable('supplier_bill_sequences', {
 
 // Supplier Bill Adjustments (discounts, late fees, credits, debits)
 export const supplierBillAdjustments = pgTable('supplier_bill_adjustments', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
-  billId: integer('bill_id')
+  billId: uuid('bill_id')
     .notNull()
     .references(() => supplierBills.id, { onDelete: 'cascade' }),
 
@@ -737,7 +736,7 @@ export const supplierBillAdjustments = pgTable('supplier_bill_adjustments', {
 
   // Metadata
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  createdBy: integer('created_by')
+  createdBy: uuid('created_by')
     .notNull()
     .references(() => users.id),
 }, (table) => ({
@@ -748,11 +747,11 @@ export const supplierBillAdjustments = pgTable('supplier_bill_adjustments', {
 
 // Supplier Payments
 export const supplierPayments = pgTable('supplier_payments', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
-  billId: integer('bill_id')
+  billId: uuid('bill_id')
     .references(() => supplierBills.id), // Nullable for advances
 
   // Payment Details
@@ -783,7 +782,7 @@ export const supplierPayments = pgTable('supplier_payments', {
 
   // Metadata
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  createdBy: integer('created_by')
+  createdBy: uuid('created_by')
     .notNull()
     .references(() => users.id),
 }, (table) => ({
@@ -796,14 +795,14 @@ export const supplierPayments = pgTable('supplier_payments', {
 
 // Supplier Payment Allocations (linking payments to bills)
 export const supplierPaymentAllocations = pgTable('supplier_payment_allocations', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
-  supplierPaymentId: integer('supplier_payment_id')
+  supplierPaymentId: uuid('supplier_payment_id')
     .notNull()
     .references(() => supplierPayments.id, { onDelete: 'cascade' }),
-  billId: integer('bill_id')
+  billId: uuid('bill_id')
     .notNull()
     .references(() => supplierBills.id),
 
@@ -812,7 +811,7 @@ export const supplierPaymentAllocations = pgTable('supplier_payment_allocations'
 
   // Metadata
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  createdBy: integer('created_by')
+  createdBy: uuid('created_by')
     .notNull()
     .references(() => users.id),
 }, (table) => ({
@@ -823,8 +822,8 @@ export const supplierPaymentAllocations = pgTable('supplier_payment_allocations'
 
 // Supplier Advance Sequences (for gap-free advance numbering)
 export const supplierAdvanceSequences = pgTable('supplier_advance_sequences', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' })
     .unique(),
@@ -842,8 +841,8 @@ export const supplierAdvanceSequences = pgTable('supplier_advance_sequences', {
 // ============================================================
 
 export const gstReturns = pgTable('gst_returns', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
 
@@ -871,7 +870,7 @@ export const gstReturns = pgTable('gst_returns', {
   // Filing details
   filingDate: timestamp('filing_date'),
   dueDate: timestamp('due_date').notNull(),
-  filedBy: integer('filed_by').references(() => users.id),
+  filedBy: uuid('filed_by').references(() => users.id),
 
   // Breakdown details (stored as JSON)
   salesBreakdown: jsonb('sales_breakdown'), // { standard: {...}, zeroRated: {...}, exempt: {...} }
@@ -883,15 +882,15 @@ export const gstReturns = pgTable('gst_returns', {
 
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-  createdBy: integer('created_by').references(() => users.id),
+  createdBy: uuid('created_by').references(() => users.id),
 }, (table) => ({
   teamPeriodIdx: index('gst_returns_team_period_idx').on(table.teamId, table.periodStart, table.periodEnd),
   returnNumberIdx: uniqueIndex('gst_returns_return_number_idx').on(table.teamId, table.returnNumber),
 }));
 
 export const gstPeriodLocks = pgTable('gst_period_locks', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
 
@@ -902,13 +901,13 @@ export const gstPeriodLocks = pgTable('gst_period_locks', {
 
   // Lock details
   lockedAt: timestamp('locked_at').notNull().defaultNow(),
-  lockedBy: integer('locked_by')
+  lockedBy: uuid('locked_by')
     .notNull()
     .references(() => users.id),
   reason: text('reason'),
 
   // Associated return (optional)
-  gstReturnId: integer('gst_return_id').references(() => gstReturns.id),
+  gstReturnId: uuid('gst_return_id').references(() => gstReturns.id),
 
   createdAt: timestamp('created_at').notNull().defaultNow(),
 }, (table) => ({
@@ -920,11 +919,11 @@ export const gstPeriodLocks = pgTable('gst_period_locks', {
 // ============================================================
 
 export const customerPayments = pgTable('customer_payments', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
-  customerId: integer('customer_id')
+  customerId: uuid('customer_id')
     .notNull()
     .references(() => customers.id),
 
@@ -958,7 +957,7 @@ export const customerPayments = pgTable('customer_payments', {
 
   // Metadata
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  createdBy: integer('created_by')
+  createdBy: uuid('created_by')
     .notNull()
     .references(() => users.id),
 }, (table) => ({
@@ -971,14 +970,14 @@ export const customerPayments = pgTable('customer_payments', {
 }));
 
 export const paymentAllocations = pgTable('payment_allocations', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' }),
-  customerPaymentId: integer('customer_payment_id')
+  customerPaymentId: uuid('customer_payment_id')
     .notNull()
     .references(() => customerPayments.id, { onDelete: 'cascade' }),
-  invoiceId: integer('invoice_id')
+  invoiceId: uuid('invoice_id')
     .notNull()
     .references(() => invoices.id),
 
@@ -987,7 +986,7 @@ export const paymentAllocations = pgTable('payment_allocations', {
 
   // Metadata
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  createdBy: integer('created_by')
+  createdBy: uuid('created_by')
     .notNull()
     .references(() => users.id),
 }, (table) => ({
@@ -998,8 +997,8 @@ export const paymentAllocations = pgTable('payment_allocations', {
 
 // Customer Advance Sequences (for gap-free advance numbering)
 export const customerAdvanceSequences = pgTable('customer_advance_sequences', {
-  id: serial('id').primaryKey(),
-  teamId: integer('team_id')
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
     .notNull()
     .references(() => teams.id, { onDelete: 'cascade' })
     .unique(),

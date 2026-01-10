@@ -8,13 +8,8 @@ type Context = {
 export async function GET(request: NextRequest, context: Context) {
   try {
     const { id } = await context.params;
-    const customerId = parseInt(id);
 
-    if (isNaN(customerId)) {
-      return NextResponse.json({ error: 'Invalid customer ID' }, { status: 400 });
-    }
-
-    const invoices = await getCustomerOutstandingInvoices(customerId);
+    const invoices = await getCustomerOutstandingInvoices(id);
     return NextResponse.json(invoices);
   } catch (error) {
     console.error('Error fetching customer outstanding invoices:', error);

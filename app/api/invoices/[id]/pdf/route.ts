@@ -10,14 +10,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const invoiceId = parseInt(id);
-
-    if (isNaN(invoiceId)) {
-      return NextResponse.json({ error: 'Invalid invoice ID' }, { status: 400 });
-    }
 
     const [invoice, team, bankAccounts] = await Promise.all([
-      getInvoiceWithDetails(invoiceId),
+      getInvoiceWithDetails(id),
       getTeamForUser(),
       getActiveBankAccounts().catch(() => []), // Gracefully handle if no bank accounts
     ]);

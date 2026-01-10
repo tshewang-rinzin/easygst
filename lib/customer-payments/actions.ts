@@ -95,7 +95,7 @@ export const recordCustomerPayment = validatedActionWithUser(
       const unallocated = new Decimal(data.amount).minus(totalAllocation);
 
       // Create payment in transaction
-      let paymentId: number | undefined;
+      let paymentId: string | undefined;
       await db.transaction(async (tx) => {
         // Insert customer payment
         const [payment] = await tx

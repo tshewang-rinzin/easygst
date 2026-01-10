@@ -42,7 +42,7 @@ export async function getProducts(searchTerm?: string) {
 /**
  * Get a single product by ID (scoped to team)
  */
-export async function getProductById(id: number) {
+export async function getProductById(id: string) {
   const team = await getTeamForUser();
   if (!team) return null;
 

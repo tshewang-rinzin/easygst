@@ -15,7 +15,7 @@ import { Mail, CheckCircle2, AlertCircle } from 'lucide-react';
 import { sendInvoiceEmail } from '@/lib/email/actions';
 
 interface EmailInvoiceButtonProps {
-  invoiceId: number;
+  invoiceId: string;
   invoiceNumber: string;
   customerEmail?: string | null;
   variant?: 'default' | 'outline' | 'ghost';

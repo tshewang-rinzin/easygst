@@ -36,7 +36,7 @@ export async function getCashSales() {
 /**
  * Get cash sale with payment details
  */
-export async function getCashSaleWithDetails(id: number) {
+export async function getCashSaleWithDetails(id: string) {
   const team = await getTeamForUser();
   if (!team) return null;
 

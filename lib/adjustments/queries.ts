@@ -28,7 +28,7 @@ export async function getAdjustments() {
 /**
  * Get adjustments for a specific invoice
  */
-export async function getInvoiceAdjustments(invoiceId: number) {
+export async function getInvoiceAdjustments(invoiceId: string) {
   const team = await getTeamForUser();
   if (!team) return [];
 
@@ -67,7 +67,7 @@ export async function getRecentAdjustments() {
 /**
  * Get adjustment by ID
  */
-export async function getAdjustmentById(id: number) {
+export async function getAdjustmentById(id: string) {
   const team = await getTeamForUser();
   if (!team) return null;
 

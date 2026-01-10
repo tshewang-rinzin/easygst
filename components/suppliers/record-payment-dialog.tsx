@@ -14,7 +14,7 @@ import useSWR from 'swr';
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 interface RecordPaymentDialogProps {
-  billId: number;
+  billId: string;
   amountDue: string;
   currency: string;
   onClose: () => void;

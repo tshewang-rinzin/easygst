@@ -41,7 +41,7 @@ export function PaymentMethodsList({ initialMethods, hasAnyMethods: initialHasAn
 
   const hasAnyMethods = methods && methods.length > 0;
 
-  const handleToggle = async (id: number, currentStatus: boolean) => {
+  const handleToggle = async (id: string, currentStatus: boolean) => {
     const formData = new FormData();
     formData.append('id', id.toString());
     formData.append('isEnabled', (!currentStatus).toString());
@@ -53,7 +53,7 @@ export function PaymentMethodsList({ initialMethods, hasAnyMethods: initialHasAn
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     const formData = new FormData();
     formData.append('id', id.toString());
     const result = await deletePaymentMethod(formData);

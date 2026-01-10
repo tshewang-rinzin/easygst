@@ -22,7 +22,7 @@ export async function getSuppliers() {
 /**
  * Get a single supplier by ID
  */
-export async function getSupplierById(id: number) {
+export async function getSupplierById(id: string) {
   const team = await getTeamForUser();
   if (!team) return null;
 

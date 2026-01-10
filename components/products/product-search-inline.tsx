@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { Input } from '@/components/ui/input';
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   sku: string | null;

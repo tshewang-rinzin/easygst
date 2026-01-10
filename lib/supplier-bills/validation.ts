@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // Supplier bill item validation
 export const billItemSchema = z.object({
-  productId: z.coerce.number().optional(),
+  productId: z.string().uuid().optional(),
   description: z.string().min(1, 'Description is required').max(500),
   quantity: z.coerce.number().min(0.01, 'Quantity must be greater than 0'),
   unit: z.string().max(50).default('Piece'),
@@ -26,7 +26,7 @@ export const billItemSchema = z.object({
 
 // Supplier bill validation
 export const supplierBillSchema = z.object({
-  supplierId: z.coerce.number().min(1, 'Supplier is required'),
+  supplierId: z.string().uuid('Supplier is required'),
   billNumber: z.string().min(1, 'Bill number is required').max(50),
   billDate: z.coerce.date(),
   dueDate: z.coerce.date().optional().nullable(),
@@ -51,10 +51,10 @@ export type SupplierBillFormData = z.infer<typeof supplierBillSchema>;
 
 // For update operations
 export const updateSupplierBillSchema = supplierBillSchema.extend({
-  id: z.coerce.number(),
+  id: z.string().uuid(),
 });
 
 // For delete operations
 export const deleteSupplierBillSchema = z.object({
-  id: z.coerce.number(),
+  id: z.string().uuid(),
 });

@@ -12,18 +12,13 @@ type Context = {
 export async function GET(request: NextRequest, context: Context) {
   try {
     const { id } = await context.params;
-    const paymentId = parseInt(id);
-
-    if (isNaN(paymentId)) {
-      return NextResponse.json({ error: 'Invalid payment ID' }, { status: 400 });
-    }
 
     const team = await getTeamForUser();
     if (!team) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const payment = await getCustomerPaymentWithDetails(paymentId);
+    const payment = await getCustomerPaymentWithDetails(id);
 
     if (!payment) {
       return NextResponse.json({ error: 'Payment not found' }, { status: 404 });

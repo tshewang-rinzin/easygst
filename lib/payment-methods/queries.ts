@@ -49,7 +49,7 @@ export async function getEnabledPaymentMethods() {
 /**
  * Get a single payment method by ID
  */
-export async function getPaymentMethodById(methodId: number) {
+export async function getPaymentMethodById(methodId: string) {
   const team = await getTeamForUser();
   if (!team) {
     throw new Error('Team not found');
