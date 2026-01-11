@@ -50,40 +50,51 @@ export const VerifyEmail = ({
         </Section>
 
         <Section style={{ textAlign: 'center' as const, margin: '32px 0' }}>
-          <Button
-            href={verificationUrl}
-            style={{
-              backgroundColor: '#5469d4',
-              borderRadius: '6px',
-              color: '#ffffff',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              textDecoration: 'none',
-              textAlign: 'center' as const,
-              display: 'inline-block',
-              padding: '14px 32px',
-            }}
-          >
-            Verify Email Address
-          </Button>
+          <table role="presentation" cellSpacing="0" cellPadding="0" style={{ margin: '0 auto' }}>
+            <tr>
+              <td>
+                <a
+                  href={verificationUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    backgroundColor: '#5469d4',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    textDecoration: 'none',
+                    textAlign: 'center' as const,
+                    display: 'inline-block',
+                    padding: '16px 40px',
+                    minWidth: '200px',
+                  }}
+                >
+                  Verify Email Address
+                </a>
+              </td>
+            </tr>
+          </table>
         </Section>
 
         <Section style={{ marginTop: '32px' }}>
           <Text style={{ color: '#525f7f', fontSize: '14px', lineHeight: '20px' }}>
             If the button above doesn't work, copy and paste this URL into your browser:
           </Text>
-          <Link
-            href={verificationUrl}
-            style={{
-              color: '#5469d4',
-              fontSize: '14px',
-              wordBreak: 'break-all',
-              marginTop: '8px',
-              display: 'block',
-            }}
-          >
-            {verificationUrl}
-          </Link>
+          <Text style={{ marginTop: '8px' }}>
+            <a
+              href={verificationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: '#5469d4',
+                fontSize: '14px',
+                wordBreak: 'break-all' as const,
+              }}
+            >
+              {verificationUrl}
+            </a>
+          </Text>
         </Section>
 
         <Section style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid #e6ebf1' }}>
