@@ -18,7 +18,10 @@ export const productSchema = z.object({
     .default(0),
   isTaxExempt: booleanCoerce(false),
   gstClassification: z.enum(['STANDARD', 'ZERO_RATED', 'EXEMPT']).default('STANDARD'),
-  categoryId: z.string().uuid().optional(),
+  categoryId: z.preprocess(
+    (val) => (val === '' || val === 'manual' ? undefined : val),
+    z.string().uuid().optional()
+  ),
   category: z.string().max(100).optional(),
   isActive: booleanCoerce(true),
 });
