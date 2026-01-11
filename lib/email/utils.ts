@@ -1,5 +1,5 @@
 import { render } from '@react-email/render';
-import { getEmailTransporter, getFromEmail, isEmailEnabled } from './client';
+import { createEmailTransporter, getEmailConfig } from './client';
 import type { ReactElement } from 'react';
 
 export interface SendEmailOptions {
@@ -15,6 +15,7 @@ export interface SendEmailOptions {
 
 /**
  * Send an email using the configured SMTP server
+ * Reads configuration from database first, then falls back to env variables
  */
 export async function sendEmail({
   to,
@@ -23,8 +24,11 @@ export async function sendEmail({
   attachments = [],
 }: SendEmailOptions): Promise<{ success: boolean; error?: string; messageId?: string }> {
   try {
+    // Get email configuration (database first, then env)
+    const config = await getEmailConfig();
+
     // Check if email is enabled
-    if (!isEmailEnabled()) {
+    if (!config.enabled) {
       console.log('[Email] Email sending is disabled. Email would be sent to:', to);
       console.log('[Email] Subject:', subject);
       return {
@@ -37,19 +41,21 @@ export async function sendEmail({
     const html = await render(template);
 
     // Get the transporter
-    const transporter = getEmailTransporter();
-    const from = getFromEmail();
+    const transporter = await createEmailTransporter();
+    const from = config.emailFrom || 'noreply@easygst.bt';
+    const fromName = config.emailFromName || 'EasyGST';
 
     // Prepare email recipients
     const recipients = Array.isArray(to) ? to.join(', ') : to;
 
     console.log('[Email] Sending email to:', recipients);
     console.log('[Email] Subject:', subject);
+    console.log('[Email] Config source:', config.source);
 
     // Send email
     const info = await transporter.sendMail({
       from: {
-        name: process.env.EMAIL_FROM_NAME || 'EasyGST',
+        name: fromName,
         address: from,
       },
       to: recipients,
