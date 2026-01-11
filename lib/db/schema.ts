@@ -1402,6 +1402,37 @@ export type SupplierBillWithDetails = SupplierBill & {
 };
 
 // ============================================================
+// GLOBAL SETTINGS
+// ============================================================
+
+// Email Settings (Global - single row for app-wide email configuration)
+export const emailSettings = pgTable('email_settings', {
+  id: uuid('id').defaultRandom().primaryKey(),
+
+  // SMTP Configuration
+  smtpHost: varchar('smtp_host', { length: 255 }),
+  smtpPort: integer('smtp_port'),
+  smtpUser: varchar('smtp_user', { length: 255 }),
+  smtpPassword: text('smtp_password'), // Encrypted in practice
+  smtpSecure: boolean('smtp_secure').default(false), // true for port 465
+
+  // Email Settings
+  emailFrom: varchar('email_from', { length: 255 }),
+  emailFromName: varchar('email_from_name', { length: 100 }),
+  emailEnabled: boolean('email_enabled').notNull().default(false),
+
+  // TLS Settings
+  tlsRejectUnauthorized: boolean('tls_reject_unauthorized').default(true),
+
+  // Metadata
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export type EmailSettings = typeof emailSettings.$inferSelect;
+export type NewEmailSettings = typeof emailSettings.$inferInsert;
+
+// ============================================================
 // ENUMS
 // ============================================================
 

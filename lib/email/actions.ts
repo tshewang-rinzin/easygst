@@ -1,13 +1,19 @@
 'use server';
 
+import { z } from 'zod';
 import { sendEmail, isValidEmail } from './utils';
 import InvoiceEmail from './templates/invoice-email';
 import PaymentReceiptEmail from './templates/payment-receipt-email';
 import PaymentReminderEmail from './templates/payment-reminder-email';
 import { db } from '@/lib/db/drizzle';
-import { invoices, invoiceItems, customers, customerPayments, teams } from '@/lib/db/schema';
+import { invoices, invoiceItems, customers, customerPayments, teams, emailSettings } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { getTeamForUser } from '@/lib/db/queries';
+import { getTeamForUser, getUser } from '@/lib/db/queries';
+import { revalidatePath } from 'next/cache';
+import { validatedActionWithUser } from '@/lib/auth/middleware';
+import nodemailer from 'nodemailer';
+import { getEmailSettings } from './queries';
+import { clearEmailSettingsCache } from './client';
 
 /**
  * Send invoice email to customer
@@ -309,3 +315,185 @@ export async function sendPaymentReminderEmail(
     };
   }
 }
+
+// ============================================================
+// EMAIL SETTINGS ACTIONS
+// ============================================================
+
+const emailSettingsSchema = z.object({
+  smtpHost: z.string().min(1, 'SMTP host is required'),
+  smtpPort: z.coerce.number().int().min(1).max(65535),
+  smtpUser: z.string().min(1, 'SMTP user is required'),
+  smtpPassword: z.string().optional(), // Optional to allow keeping existing password
+  smtpSecure: z.preprocess((val) => val === 'true' || val === true, z.boolean()).default(false),
+  emailFrom: z.string().email('Invalid email address'),
+  emailFromName: z.string().min(1, 'From name is required'),
+  emailEnabled: z.preprocess((val) => val === 'true' || val === true, z.boolean()).default(false),
+  tlsRejectUnauthorized: z.preprocess((val) => val === 'true' || val === true, z.boolean()).default(true),
+});
+
+/**
+ * Update global email settings
+ */
+export const updateEmailSettings = validatedActionWithUser(
+  emailSettingsSchema,
+  async (data, _, user) => {
+    try {
+      // Check if settings already exist
+      const existing = await getEmailSettings();
+
+      // Determine password: use new if provided, otherwise keep existing
+      const passwordToUse = data.smtpPassword && data.smtpPassword.length > 0
+        ? data.smtpPassword
+        : existing?.smtpPassword;
+
+      // Validate that we have a password (new or existing)
+      if (!passwordToUse && data.emailEnabled) {
+        return { error: 'SMTP password is required when email is enabled' };
+      }
+
+      if (existing) {
+        // Update existing settings
+        await db
+          .update(emailSettings)
+          .set({
+            smtpHost: data.smtpHost,
+            smtpPort: data.smtpPort,
+            smtpUser: data.smtpUser,
+            smtpPassword: passwordToUse || '',
+            smtpSecure: data.smtpSecure,
+            emailFrom: data.emailFrom,
+            emailFromName: data.emailFromName,
+            emailEnabled: data.emailEnabled,
+            tlsRejectUnauthorized: data.tlsRejectUnauthorized,
+            updatedAt: new Date(),
+          })
+          .where(eq(emailSettings.id, existing.id));
+      } else {
+        // For new settings, password is required
+        if (!passwordToUse) {
+          return { error: 'SMTP password is required' };
+        }
+
+        // Create new settings
+        await db.insert(emailSettings).values({
+          smtpHost: data.smtpHost,
+          smtpPort: data.smtpPort,
+          smtpUser: data.smtpUser,
+          smtpPassword: passwordToUse,
+          smtpSecure: data.smtpSecure,
+          emailFrom: data.emailFrom,
+          emailFromName: data.emailFromName,
+          emailEnabled: data.emailEnabled,
+          tlsRejectUnauthorized: data.tlsRejectUnauthorized,
+        });
+      }
+
+      // Clear the cache so new settings take effect immediately
+      clearEmailSettingsCache();
+
+      revalidatePath('/settings/email');
+      return { success: 'Email settings saved successfully' };
+    } catch (error) {
+      console.error('[EmailSettings] Error updating settings:', error);
+      return { error: 'Failed to save email settings' };
+    }
+  }
+);
+
+const testEmailSchema = z.object({
+  testEmail: z.string().email('Invalid email address'),
+});
+
+/**
+ * Send a test email to verify configuration
+ */
+export const sendTestEmailAction = validatedActionWithUser(
+  testEmailSchema,
+  async (data, _, user) => {
+    try {
+      // Get settings from database first, then fall back to env
+      const dbSettings = await getEmailSettings();
+
+      let smtpHost: string | undefined;
+      let smtpPort: number | undefined;
+      let smtpUser: string | undefined;
+      let smtpPassword: string | undefined;
+      let emailFrom: string | undefined;
+      let emailFromName: string | undefined;
+      let emailEnabled: boolean = false;
+      let tlsRejectUnauthorized: boolean = true;
+
+      if (dbSettings && dbSettings.emailEnabled) {
+        smtpHost = dbSettings.smtpHost || undefined;
+        smtpPort = dbSettings.smtpPort || undefined;
+        smtpUser = dbSettings.smtpUser || undefined;
+        smtpPassword = dbSettings.smtpPassword || undefined;
+        emailFrom = dbSettings.emailFrom || undefined;
+        emailFromName = dbSettings.emailFromName || undefined;
+        emailEnabled = dbSettings.emailEnabled;
+        tlsRejectUnauthorized = dbSettings.tlsRejectUnauthorized ?? true;
+      } else {
+        // Fall back to environment variables
+        smtpHost = process.env.SMTP_HOST;
+        smtpPort = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : undefined;
+        smtpUser = process.env.SMTP_USER;
+        smtpPassword = process.env.SMTP_PASSWORD;
+        emailFrom = process.env.EMAIL_FROM;
+        emailFromName = process.env.EMAIL_FROM_NAME || 'EasyGST';
+        emailEnabled = process.env.EMAIL_ENABLED === 'true';
+        tlsRejectUnauthorized = process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false';
+      }
+
+      if (!emailEnabled) {
+        return { error: 'Email is not enabled. Please enable email delivery first.' };
+      }
+
+      if (!smtpHost || !smtpPort || !smtpUser || !smtpPassword || !emailFrom) {
+        return { error: 'SMTP configuration is incomplete' };
+      }
+
+      // Create transporter
+      const transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: smtpPort,
+        secure: smtpPort === 465,
+        auth: {
+          user: smtpUser,
+          pass: smtpPassword,
+        },
+        tls: {
+          rejectUnauthorized: tlsRejectUnauthorized,
+        },
+      });
+
+      // Send test email
+      const info = await transporter.sendMail({
+        from: {
+          name: emailFromName || 'EasyGST',
+          address: emailFrom,
+        },
+        to: data.testEmail,
+        subject: 'Test Email from EasyGST',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #16a34a;">✓ Email Configuration Working!</h1>
+            <p>This is a test email from EasyGST to verify your SMTP configuration.</p>
+            <p>If you received this email, your email settings are configured correctly.</p>
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+            <p style="color: #6b7280; font-size: 12px;">
+              Sent from EasyGST at ${new Date().toLocaleString()}
+            </p>
+          </div>
+        `,
+      });
+
+      return { success: `Test email sent successfully to ${data.testEmail}` };
+    } catch (error) {
+      console.error('[EmailSettings] Error sending test email:', error);
+      return {
+        error: error instanceof Error ? error.message : 'Failed to send test email',
+      };
+    }
+  }
+);
