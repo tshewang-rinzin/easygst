@@ -41,9 +41,9 @@ export function UsersTable({ users }: UsersTableProps) {
 
       const result = await sendPasswordResetEmail({}, formData);
 
-      if (result.error) {
+      if ('error' in result && result.error) {
         setErrorMessage(result.error);
-      } else if (result.success) {
+      } else if ('success' in result && result.success) {
         setSuccessMessage(result.success);
         setTimeout(() => setSuccessMessage(null), 5000);
       }

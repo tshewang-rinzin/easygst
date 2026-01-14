@@ -54,7 +54,7 @@ export default async function AdminEmailSettingsPage() {
                   <Server className="h-5 w-5 text-gray-400" />
                   <span className="font-medium">Email Status</span>
                 </div>
-                {settings.isEnabled ? (
+                {settings.emailEnabled ? (
                   <Badge className="bg-green-100 text-green-700">
                     <CheckCircle className="h-3 w-3 mr-1" />
                     Enabled
@@ -78,11 +78,11 @@ export default async function AdminEmailSettingsPage() {
                 </div>
                 <div className="p-4 border rounded-lg">
                   <div className="text-sm text-gray-500 mb-1">From Email</div>
-                  <div className="font-medium">{settings.fromEmail || 'Not configured'}</div>
+                  <div className="font-medium">{settings.emailFrom || 'Not configured'}</div>
                 </div>
                 <div className="p-4 border rounded-lg">
                   <div className="text-sm text-gray-500 mb-1">From Name</div>
-                  <div className="font-medium">{settings.fromName || 'Not configured'}</div>
+                  <div className="font-medium">{settings.emailFromName || 'Not configured'}</div>
                 </div>
               </div>
 

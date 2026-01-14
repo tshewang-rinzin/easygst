@@ -29,7 +29,6 @@ export const resetPassword = validatedAction(resetPasswordSchema, async (data) =
   if (!user) {
     return {
       error: 'Invalid or expired reset link. Please request a new password reset.',
-      success: false,
     };
   }
 
@@ -37,7 +36,6 @@ export const resetPassword = validatedAction(resetPasswordSchema, async (data) =
   if (user.passwordResetTokenExpiry && new Date() > user.passwordResetTokenExpiry) {
     return {
       error: 'This reset link has expired. Please request a new password reset.',
-      success: false,
     };
   }
 
@@ -55,5 +53,5 @@ export const resetPassword = validatedAction(resetPasswordSchema, async (data) =
     })
     .where(eq(users.id, user.id));
 
-  return { success: true, error: '' };
+  return { success: 'Password reset successfully' };
 });
