@@ -1,7 +1,7 @@
 import { compare, hash } from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
-import { NewUser } from '@/lib/db/schema';
+import { NewUser, PlatformAdmin } from '@/lib/db/schema';
 
 const key = new TextEncoder().encode(process.env.AUTH_SECRET);
 const SALT_ROUNDS = 10;
@@ -17,8 +17,10 @@ export async function comparePasswords(
   return compare(plainTextPassword, hashedPassword);
 }
 
+// User session types
 type SessionData = {
-  user: { id: string };
+  user?: { id: string };
+  admin?: { id: string };
   expires: string;
 };
 
@@ -37,6 +39,7 @@ export async function verifyToken(input: string) {
   return payload as SessionData;
 }
 
+// User session functions
 export async function getSession() {
   const session = (await cookies()).get('session')?.value;
   if (!session) return null;
@@ -56,4 +59,30 @@ export async function setSession(user: NewUser) {
     secure: true,
     sameSite: 'lax',
   });
+}
+
+// Admin session functions
+export async function getAdminSession() {
+  const session = (await cookies()).get('admin_session')?.value;
+  if (!session) return null;
+  return await verifyToken(session);
+}
+
+export async function setAdminSession(admin: PlatformAdmin) {
+  const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const session: SessionData = {
+    admin: { id: admin.id },
+    expires: expiresInOneDay.toISOString(),
+  };
+  const encryptedSession = await signToken(session);
+  (await cookies()).set('admin_session', encryptedSession, {
+    expires: expiresInOneDay,
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+  });
+}
+
+export async function clearAdminSession() {
+  (await cookies()).delete('admin_session');
 }

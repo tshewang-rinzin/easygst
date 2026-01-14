@@ -22,7 +22,7 @@ import {
   FileSpreadsheet,
   ChevronDown,
   ChevronRight,
-  FileEdit
+  FileEdit,
 } from 'lucide-react';
 import {
   DropdownMenu,
