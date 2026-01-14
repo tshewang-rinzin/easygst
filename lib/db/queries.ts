@@ -1,6 +1,6 @@
 import { desc, and, eq, isNull } from 'drizzle-orm';
 import { db } from './drizzle';
-import { activityLogs, teamMembers, teams, users } from './schema';
+import { activityLogs, teamMembers, teams, users, platformAdmins } from './schema';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth/session';
 
@@ -99,4 +99,39 @@ export async function getTeamForUser() {
   });
 
   return result?.team || null;
+}
+
+/**
+ * Get platform admin from admin session cookie
+ */
+export async function getPlatformAdmin() {
+  const sessionCookie = (await cookies()).get('admin_session');
+  if (!sessionCookie || !sessionCookie.value) {
+    return null;
+  }
+
+  const sessionData = await verifyToken(sessionCookie.value);
+  if (
+    !sessionData ||
+    !sessionData.admin ||
+    typeof sessionData.admin.id !== 'string'
+  ) {
+    return null;
+  }
+
+  if (new Date(sessionData.expires) < new Date()) {
+    return null;
+  }
+
+  const admin = await db
+    .select()
+    .from(platformAdmins)
+    .where(eq(platformAdmins.id, sessionData.admin.id))
+    .limit(1);
+
+  if (admin.length === 0) {
+    return null;
+  }
+
+  return admin[0];
 }

@@ -22,7 +22,7 @@ export const users = pgTable('users', {
   name: varchar('name', { length: 100 }),
   email: varchar('email', { length: 255 }).notNull().unique(),
   passwordHash: text('password_hash').notNull(),
-  role: varchar('role', { length: 20 }).notNull().default('member'),
+  role: varchar('role', { length: 20 }).notNull().default('user'), // Legacy field - no longer used for platform admin (see platformAdmins table)
 
   // Email Verification
   emailVerified: boolean('email_verified').notNull().default(false),
@@ -1402,6 +1402,29 @@ export type SupplierBillWithDetails = SupplierBill & {
 };
 
 // ============================================================
+// PLATFORM ADMINISTRATION (Separate from tenant users)
+// ============================================================
+
+// Platform Admins - Completely separate from tenant users
+export const platformAdmins = pgTable('platform_admins', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
+  passwordHash: text('password_hash').notNull(),
+  name: varchar('name', { length: 100 }),
+
+  // Status
+  isActive: boolean('is_active').notNull().default(true),
+
+  // Metadata
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  lastLoginAt: timestamp('last_login_at'),
+});
+
+export type PlatformAdmin = typeof platformAdmins.$inferSelect;
+export type NewPlatformAdmin = typeof platformAdmins.$inferInsert;
+
+// ============================================================
 // GLOBAL SETTINGS
 // ============================================================
 
@@ -1435,6 +1458,23 @@ export type NewEmailSettings = typeof emailSettings.$inferInsert;
 // ============================================================
 // ENUMS
 // ============================================================
+
+/**
+ * @deprecated Platform admins are now stored in the separate `platformAdmins` table.
+ * This enum is kept for backward compatibility but should not be used for new code.
+ * Use the `platformAdmins` table and admin session instead.
+ */
+export enum PlatformRole {
+  USER = 'user',
+  PLATFORM_ADMIN = 'platform_admin',
+}
+
+// Team-level roles (teamMembers.role field)
+export enum TeamRole {
+  OWNER = 'owner',
+  ADMIN = 'admin',
+  MEMBER = 'member',
+}
 
 export enum ActivityType {
   // Auth & Account

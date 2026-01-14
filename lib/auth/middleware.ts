@@ -1,7 +1,30 @@
 import { z } from 'zod';
-import { TeamDataWithMembers, User } from '@/lib/db/schema';
-import { getTeamForUser, getUser } from '@/lib/db/queries';
+import { TeamDataWithMembers, User, PlatformAdmin } from '@/lib/db/schema';
+import { getTeamForUser, getUser, getPlatformAdmin } from '@/lib/db/queries';
 import { redirect } from 'next/navigation';
+
+/**
+ * Get the current platform admin from session
+ * Returns null if not authenticated as admin
+ */
+export async function getPlatformAdminFromSession(): Promise<PlatformAdmin | null> {
+  return getPlatformAdmin();
+}
+
+/**
+ * Require platform admin authentication
+ * Redirects to admin login if not authenticated
+ */
+export async function requirePlatformAdmin(): Promise<PlatformAdmin> {
+  const admin = await getPlatformAdmin();
+  if (!admin) {
+    redirect('/admin/login');
+  }
+  if (!admin.isActive) {
+    redirect('/admin/login?error=inactive');
+  }
+  return admin;
+}
 
 export type ActionState = {
   error?: string;
@@ -83,5 +106,48 @@ export function withTeam<T>(action: ActionWithTeamFunction<T>) {
     }
 
     return action(formData, team);
+  };
+}
+
+/**
+ * Wrapper for validated actions that require platform admin access
+ */
+type ValidatedActionWithPlatformAdminFunction<S extends z.ZodType<any, any>, T> = (
+  data: z.infer<S>,
+  formData: FormData | z.infer<S>,
+  admin: PlatformAdmin
+) => Promise<T>;
+
+export function validatedActionWithPlatformAdmin<S extends z.ZodType<any, any>, T>(
+  schema: S,
+  action: ValidatedActionWithPlatformAdminFunction<S, T>
+) {
+  return async (prevState: ActionState | z.infer<S>, formData?: FormData) => {
+    const admin = await getPlatformAdmin();
+    if (!admin) {
+      throw new Error('Admin is not authenticated');
+    }
+
+    if (!admin.isActive) {
+      throw new Error('Admin account is inactive');
+    }
+
+    // Handle direct object calls (no FormData)
+    let result;
+    if (!formData) {
+      result = schema.safeParse(prevState);
+      if (!result.success) {
+        return { error: result.error.errors[0].message };
+      }
+      return action(result.data, result.data, admin);
+    }
+
+    // Handle FormData calls (traditional form submissions)
+    result = schema.safeParse(Object.fromEntries(formData));
+    if (!result.success) {
+      return { error: result.error.errors[0].message };
+    }
+
+    return action(result.data, formData, admin);
   };
 }
