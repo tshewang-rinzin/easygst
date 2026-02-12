@@ -14,6 +14,7 @@ import { validatedActionWithUser } from '@/lib/auth/middleware';
 import nodemailer from 'nodemailer';
 import { getEmailSettings } from './queries';
 import { clearEmailSettingsCache } from './client';
+import { encrypt, decrypt, isEncrypted } from '@/lib/auth/crypto';
 
 /**
  * Send invoice email to customer
@@ -343,8 +344,8 @@ export const updateEmailSettings = validatedActionWithUser(
       const existing = await getEmailSettings();
 
       // Determine password: use new if provided, otherwise keep existing
-      const passwordToUse = data.smtpPassword && data.smtpPassword.length > 0
-        ? data.smtpPassword
+      let passwordToUse = data.smtpPassword && data.smtpPassword.length > 0
+        ? encrypt(data.smtpPassword)
         : existing?.smtpPassword;
 
       // Validate that we have a password (new or existing)
@@ -371,16 +372,16 @@ export const updateEmailSettings = validatedActionWithUser(
           .where(eq(emailSettings.id, existing.id));
       } else {
         // For new settings, password is required
-        if (!passwordToUse) {
+        if (!data.smtpPassword) {
           return { error: 'SMTP password is required' };
         }
 
-        // Create new settings
+        // Create new settings with encrypted password
         await db.insert(emailSettings).values({
           smtpHost: data.smtpHost,
           smtpPort: data.smtpPort,
           smtpUser: data.smtpUser,
-          smtpPassword: passwordToUse,
+          smtpPassword: encrypt(data.smtpPassword),
           smtpSecure: data.smtpSecure,
           emailFrom: data.emailFrom,
           emailFromName: data.emailFromName,
@@ -428,7 +429,9 @@ export const sendTestEmailAction = validatedActionWithUser(
         smtpHost = dbSettings.smtpHost || undefined;
         smtpPort = dbSettings.smtpPort || undefined;
         smtpUser = dbSettings.smtpUser || undefined;
-        smtpPassword = dbSettings.smtpPassword || undefined;
+        // Decrypt SMTP password if encrypted
+        const rawPassword = dbSettings.smtpPassword || undefined;
+        smtpPassword = rawPassword && isEncrypted(rawPassword) ? decrypt(rawPassword) : rawPassword;
         emailFrom = dbSettings.emailFrom || undefined;
         emailFromName = dbSettings.emailFromName || undefined;
         emailEnabled = dbSettings.emailEnabled;

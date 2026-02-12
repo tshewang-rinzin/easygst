@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { TeamDataWithMembers, User, PlatformAdmin } from '@/lib/db/schema';
-import { getTeamForUser, getUser, getPlatformAdmin } from '@/lib/db/queries';
+import { getTeamForUser, getUser, getPlatformAdmin, hasRole } from '@/lib/db/queries';
 import { redirect } from 'next/navigation';
 
 /**
@@ -79,6 +79,44 @@ export function validatedActionWithUser<S extends z.ZodType<any, any>, T>(
     }
 
     // Handle FormData calls (traditional form submissions)
+    result = schema.safeParse(Object.fromEntries(formData));
+    if (!result.success) {
+      return { error: result.error.errors[0].message };
+    }
+
+    return action(result.data, formData, user);
+  };
+}
+
+/**
+ * Wrapper for validated actions that require a minimum team role.
+ * Use for actions where only owners or admins should have access (e.g., delete, settings).
+ */
+export function validatedActionWithRole<S extends z.ZodType<any, any>, T>(
+  schema: S,
+  requiredRole: 'member' | 'admin' | 'owner',
+  action: ValidatedActionWithUserFunction<S, T>
+) {
+  return async (prevState: ActionState | z.infer<S>, formData?: FormData) => {
+    const user = await getUser();
+    if (!user) {
+      throw new Error('User is not authenticated');
+    }
+
+    const allowed = await hasRole(requiredRole);
+    if (!allowed) {
+      return { error: `This action requires ${requiredRole} or higher role` } as T;
+    }
+
+    let result;
+    if (!formData) {
+      result = schema.safeParse(prevState);
+      if (!result.success) {
+        return { error: result.error.errors[0].message };
+      }
+      return action(result.data, result.data, user);
+    }
+
     result = schema.safeParse(Object.fromEntries(formData));
     if (!result.success) {
       return { error: result.error.errors[0].message };

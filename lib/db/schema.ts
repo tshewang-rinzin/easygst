@@ -399,6 +399,11 @@ export const invoices = pgTable('invoices', {
   lockedAt: timestamp('locked_at'),
   lockedBy: uuid('locked_by').references(() => users.id),
 
+  // Cancellation
+  cancelledAt: timestamp('cancelled_at'),
+  cancelledReason: text('cancelled_reason'),
+  cancelledById: uuid('cancelled_by_id').references(() => users.id),
+
   // Metadata
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
@@ -645,6 +650,11 @@ export const supplierBills = pgTable('supplier_bills', {
   lockedAt: timestamp('locked_at'),
   lockedBy: uuid('locked_by').references(() => users.id),
 
+  // Cancellation
+  cancelledAt: timestamp('cancelled_at'),
+  cancelledReason: text('cancelled_reason'),
+  cancelledById: uuid('cancelled_by_id').references(() => users.id),
+
   // Metadata
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
@@ -757,6 +767,8 @@ export const supplierPayments = pgTable('supplier_payments', {
     .references(() => teams.id, { onDelete: 'cascade' }),
   billId: uuid('bill_id')
     .references(() => supplierBills.id), // Nullable for advances
+  supplierId: uuid('supplier_id')
+    .references(() => suppliers.id), // Required for advances
 
   // Payment Details
   amount: numeric('amount', { precision: 15, scale: 2 }).notNull(),
@@ -783,6 +795,12 @@ export const supplierPayments = pgTable('supplier_payments', {
   // Notes
   notes: text('notes'),
   receiptNumber: varchar('receipt_number', { length: 50 }),
+
+  // Reversal tracking
+  reversedAt: timestamp('reversed_at'),
+  reversedReason: text('reversed_reason'),
+  reversalOfId: uuid('reversal_of_id'), // Links to original payment being reversed
+  isReversal: boolean('is_reversal').notNull().default(false),
 
   // Metadata
   createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -959,6 +977,12 @@ export const customerPayments = pgTable('customer_payments', {
   // Notes
   notes: text('notes'),
 
+  // Reversal tracking
+  reversedAt: timestamp('reversed_at'),
+  reversedReason: text('reversed_reason'),
+  reversalOfId: uuid('reversal_of_id'), // Links to original payment being reversed
+  isReversal: boolean('is_reversal').notNull().default(false),
+
   // Metadata
   createdAt: timestamp('created_at').notNull().defaultNow(),
   createdBy: uuid('created_by')
@@ -1013,6 +1037,262 @@ export const customerAdvanceSequences = pgTable('customer_advance_sequences', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, (table) => ({
   teamCustomerAdvanceYearIdx: uniqueIndex('team_customer_advance_year_idx').on(table.teamId, table.year),
+}));
+
+// ============================================================
+// CREDIT NOTES (Sales adjustments/refunds)
+// ============================================================
+
+export const creditNotes = pgTable('credit_notes', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  customerId: uuid('customer_id')
+    .notNull()
+    .references(() => customers.id),
+  invoiceId: uuid('invoice_id')
+    .references(() => invoices.id), // Original invoice being credited (optional for standalone credits)
+
+  // Credit Note Identification
+  creditNoteNumber: varchar('credit_note_number', { length: 50 }).notNull(), // CN-2026-0001
+  creditNoteDate: timestamp('credit_note_date').notNull().defaultNow(),
+
+  // Financial
+  currency: varchar('currency', { length: 3 }).notNull().default('BTN'),
+  subtotal: numeric('subtotal', { precision: 15, scale: 2 }).notNull(),
+  totalTax: numeric('total_tax', { precision: 15, scale: 2 }).notNull().default('0'),
+  totalAmount: numeric('total_amount', { precision: 15, scale: 2 }).notNull(),
+
+  // Application tracking
+  appliedAmount: numeric('applied_amount', { precision: 15, scale: 2 }).notNull().default('0'), // Amount applied to invoices
+  unappliedAmount: numeric('unapplied_amount', { precision: 15, scale: 2 }).notNull(), // Remaining balance
+  refundedAmount: numeric('refunded_amount', { precision: 15, scale: 2 }).notNull().default('0'), // Amount refunded to customer
+
+  // Status
+  status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, issued, partial, applied, refunded, cancelled
+  reason: text('reason').notNull(), // Reason for credit note
+
+  // Notes
+  notes: text('notes'),
+  customerNotes: text('customer_notes'),
+
+  // Metadata
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdBy: uuid('created_by')
+    .notNull()
+    .references(() => users.id),
+}, (table) => ({
+  teamCreditNoteIdx: index('team_credit_note_idx').on(table.teamId),
+  creditNoteNumberIdx: uniqueIndex('credit_note_number_idx').on(table.teamId, table.creditNoteNumber),
+  customerCreditNoteIdx: index('customer_credit_note_idx').on(table.customerId),
+  invoiceCreditNoteIdx: index('invoice_credit_note_idx').on(table.invoiceId),
+  creditNoteDateIdx: index('credit_note_date_idx').on(table.creditNoteDate),
+}));
+
+// Credit Note Items
+export const creditNoteItems = pgTable('credit_note_items', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  creditNoteId: uuid('credit_note_id')
+    .notNull()
+    .references(() => creditNotes.id, { onDelete: 'cascade' }),
+  productId: uuid('product_id').references(() => products.id),
+
+  // Item Details
+  description: text('description').notNull(),
+  quantity: numeric('quantity', { precision: 15, scale: 4 }).notNull().default('1'),
+  unit: varchar('unit', { length: 50 }),
+  unitPrice: numeric('unit_price', { precision: 15, scale: 2 }).notNull(),
+
+  // Pricing Breakdown
+  lineTotal: numeric('line_total', { precision: 15, scale: 2 }).notNull(),
+
+  // Tax Configuration
+  taxRate: numeric('tax_rate', { precision: 5, scale: 2 }).notNull().default('0'),
+  taxAmount: numeric('tax_amount', { precision: 15, scale: 2 }).notNull().default('0'),
+  gstClassification: varchar('gst_classification', { length: 20 }).notNull().default('STANDARD'),
+
+  // Final
+  itemTotal: numeric('item_total', { precision: 15, scale: 2 }).notNull(),
+
+  // Display Order
+  sortOrder: integer('sort_order').notNull().default(0),
+
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  creditNoteItemIdx: index('credit_note_item_idx').on(table.creditNoteId),
+}));
+
+// Credit Note Applications (applying credit notes to invoices)
+export const creditNoteApplications = pgTable('credit_note_applications', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  creditNoteId: uuid('credit_note_id')
+    .notNull()
+    .references(() => creditNotes.id),
+  invoiceId: uuid('invoice_id')
+    .notNull()
+    .references(() => invoices.id),
+
+  // Application amount
+  appliedAmount: numeric('applied_amount', { precision: 15, scale: 2 }).notNull(),
+  applicationDate: timestamp('application_date').notNull().defaultNow(),
+
+  // Metadata
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdBy: uuid('created_by')
+    .notNull()
+    .references(() => users.id),
+}, (table) => ({
+  creditNoteApplicationIdx: index('credit_note_application_idx').on(table.creditNoteId),
+  invoiceApplicationIdx: index('invoice_application_idx').on(table.invoiceId),
+}));
+
+// Credit Note Sequences
+export const creditNoteSequences = pgTable('credit_note_sequences', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' })
+    .unique(),
+  year: integer('year').notNull(),
+  lastNumber: integer('last_number').notNull().default(0),
+  lockedAt: timestamp('locked_at'),
+  lockedBy: varchar('locked_by', { length: 100 }),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamCreditNoteYearIdx: uniqueIndex('team_credit_note_year_idx').on(table.teamId, table.year),
+}));
+
+// ============================================================
+// DEBIT NOTES (Purchase adjustments/returns)
+// ============================================================
+
+export const debitNotes = pgTable('debit_notes', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  supplierId: uuid('supplier_id')
+    .notNull()
+    .references(() => suppliers.id),
+  billId: uuid('bill_id')
+    .references(() => supplierBills.id), // Original bill being debited (optional)
+
+  // Debit Note Identification
+  debitNoteNumber: varchar('debit_note_number', { length: 50 }).notNull(), // DN-2026-0001
+  debitNoteDate: timestamp('debit_note_date').notNull().defaultNow(),
+
+  // Financial
+  currency: varchar('currency', { length: 3 }).notNull().default('BTN'),
+  subtotal: numeric('subtotal', { precision: 15, scale: 2 }).notNull(),
+  totalTax: numeric('total_tax', { precision: 15, scale: 2 }).notNull().default('0'),
+  totalAmount: numeric('total_amount', { precision: 15, scale: 2 }).notNull(),
+
+  // Application tracking
+  appliedAmount: numeric('applied_amount', { precision: 15, scale: 2 }).notNull().default('0'), // Amount applied to bills
+  unappliedAmount: numeric('unapplied_amount', { precision: 15, scale: 2 }).notNull(), // Remaining balance
+  refundedAmount: numeric('refunded_amount', { precision: 15, scale: 2 }).notNull().default('0'), // Amount refunded by supplier
+
+  // Status
+  status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, issued, partial, applied, refunded, cancelled
+  reason: text('reason').notNull(), // Reason for debit note
+
+  // Notes
+  notes: text('notes'),
+  supplierNotes: text('supplier_notes'),
+
+  // Metadata
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdBy: uuid('created_by')
+    .notNull()
+    .references(() => users.id),
+}, (table) => ({
+  teamDebitNoteIdx: index('team_debit_note_idx').on(table.teamId),
+  debitNoteNumberIdx: uniqueIndex('debit_note_number_idx').on(table.teamId, table.debitNoteNumber),
+  supplierDebitNoteIdx: index('supplier_debit_note_idx').on(table.supplierId),
+  billDebitNoteIdx: index('bill_debit_note_idx').on(table.billId),
+  debitNoteDateIdx: index('debit_note_date_idx').on(table.debitNoteDate),
+}));
+
+// Debit Note Items
+export const debitNoteItems = pgTable('debit_note_items', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  debitNoteId: uuid('debit_note_id')
+    .notNull()
+    .references(() => debitNotes.id, { onDelete: 'cascade' }),
+  productId: uuid('product_id').references(() => products.id),
+
+  // Item Details
+  description: text('description').notNull(),
+  quantity: numeric('quantity', { precision: 15, scale: 4 }).notNull().default('1'),
+  unit: varchar('unit', { length: 50 }),
+  unitPrice: numeric('unit_price', { precision: 15, scale: 2 }).notNull(),
+
+  // Pricing Breakdown
+  lineTotal: numeric('line_total', { precision: 15, scale: 2 }).notNull(),
+
+  // Tax Configuration
+  taxRate: numeric('tax_rate', { precision: 5, scale: 2 }).notNull().default('0'),
+  taxAmount: numeric('tax_amount', { precision: 15, scale: 2 }).notNull().default('0'),
+  gstClassification: varchar('gst_classification', { length: 20 }).notNull().default('STANDARD'),
+
+  // Final
+  itemTotal: numeric('item_total', { precision: 15, scale: 2 }).notNull(),
+
+  // Display Order
+  sortOrder: integer('sort_order').notNull().default(0),
+
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  debitNoteItemIdx: index('debit_note_item_idx').on(table.debitNoteId),
+}));
+
+// Debit Note Applications (applying debit notes to bills)
+export const debitNoteApplications = pgTable('debit_note_applications', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  debitNoteId: uuid('debit_note_id')
+    .notNull()
+    .references(() => debitNotes.id),
+  billId: uuid('bill_id')
+    .notNull()
+    .references(() => supplierBills.id),
+
+  // Application amount
+  appliedAmount: numeric('applied_amount', { precision: 15, scale: 2 }).notNull(),
+  applicationDate: timestamp('application_date').notNull().defaultNow(),
+
+  // Metadata
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdBy: uuid('created_by')
+    .notNull()
+    .references(() => users.id),
+}, (table) => ({
+  debitNoteApplicationIdx: index('debit_note_application_idx').on(table.debitNoteId),
+  billApplicationIdx: index('bill_application_idx').on(table.billId),
+}));
+
+// Debit Note Sequences
+export const debitNoteSequences = pgTable('debit_note_sequences', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' })
+    .unique(),
+  year: integer('year').notNull(),
+  lastNumber: integer('last_number').notNull().default(0),
+  lockedAt: timestamp('locked_at'),
+  lockedBy: varchar('locked_by', { length: 100 }),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamDebitNoteYearIdx: uniqueIndex('team_debit_note_year_idx').on(table.teamId, table.year),
 }));
 
 // ============================================================
@@ -1386,6 +1666,26 @@ export type NewGstReturn = typeof gstReturns.$inferInsert;
 export type GstPeriodLock = typeof gstPeriodLocks.$inferSelect;
 export type NewGstPeriodLock = typeof gstPeriodLocks.$inferInsert;
 
+// Credit Note types
+export type CreditNote = typeof creditNotes.$inferSelect;
+export type NewCreditNote = typeof creditNotes.$inferInsert;
+export type CreditNoteItem = typeof creditNoteItems.$inferSelect;
+export type NewCreditNoteItem = typeof creditNoteItems.$inferInsert;
+export type CreditNoteApplication = typeof creditNoteApplications.$inferSelect;
+export type NewCreditNoteApplication = typeof creditNoteApplications.$inferInsert;
+export type CreditNoteSequence = typeof creditNoteSequences.$inferSelect;
+export type NewCreditNoteSequence = typeof creditNoteSequences.$inferInsert;
+
+// Debit Note types
+export type DebitNote = typeof debitNotes.$inferSelect;
+export type NewDebitNote = typeof debitNotes.$inferInsert;
+export type DebitNoteItem = typeof debitNoteItems.$inferSelect;
+export type NewDebitNoteItem = typeof debitNoteItems.$inferInsert;
+export type DebitNoteApplication = typeof debitNoteApplications.$inferSelect;
+export type NewDebitNoteApplication = typeof debitNoteApplications.$inferInsert;
+export type DebitNoteSequence = typeof debitNoteSequences.$inferSelect;
+export type NewDebitNoteSequence = typeof debitNoteSequences.$inferInsert;
+
 // Complex types with relations
 export type TeamDataWithMembers = Team & {
   teamMembers: (TeamMember & {
@@ -1418,6 +1718,10 @@ export const platformAdmins = pgTable('platform_admins', {
 
   // Status
   isActive: boolean('is_active').notNull().default(true),
+
+  // Password Reset
+  passwordResetToken: varchar('password_reset_token', { length: 255 }),
+  passwordResetTokenExpiry: timestamp('password_reset_token_expiry'),
 
   // Metadata
   createdAt: timestamp('created_at').notNull().defaultNow(),

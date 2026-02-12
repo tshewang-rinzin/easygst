@@ -2,13 +2,14 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Edit, Trash2, Send, Download } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Send, Download, Ban, FileText } from 'lucide-react';
 import { getInvoiceWithDetails } from '@/lib/invoices/queries';
 import { notFound } from 'next/navigation';
 import { SendInvoiceDialog } from '@/components/invoices/send-invoice-dialog';
 import { EmailInvoiceButton } from '@/components/invoices/email-invoice-button';
 import { SendReminderButton } from '@/components/invoices/send-reminder-button';
 import { DeleteInvoiceDialog } from '@/components/invoices/delete-invoice-dialog';
+import { CancelInvoiceDialog } from '@/components/invoices/cancel-invoice-dialog';
 import { RecordPaymentDialog } from '@/components/payments/record-payment-dialog';
 import { getGSTClassification, getGSTClassificationLabel, getGSTClassificationColor } from '@/lib/invoices/gst-classification';
 
@@ -21,6 +22,8 @@ async function InvoiceDetails({ id }: { id: string }) {
 
   const isDraft = invoice.status === 'draft';
   const isLocked = invoice.isLocked;
+  const isCancelled = invoice.status === 'cancelled';
+  const hasPayments = parseFloat(invoice.amountPaid) > 0;
 
   return (
     <div className="space-y-6">
@@ -41,6 +44,8 @@ async function InvoiceDetails({ id }: { id: string }) {
                       ? 'bg-red-100 text-red-700'
                       : invoice.status === 'draft'
                       ? 'bg-gray-100 text-gray-700'
+                      : invoice.status === 'cancelled'
+                      ? 'bg-red-100 text-red-700'
                       : 'bg-yellow-100 text-yellow-700'
                   }`}
                 >
@@ -79,7 +84,7 @@ async function InvoiceDetails({ id }: { id: string }) {
                   />
                 </>
               )}
-              {!isDraft && (
+              {!isDraft && !isCancelled && (
                 <>
                   <EmailInvoiceButton
                     invoiceId={invoice.id}
@@ -92,18 +97,57 @@ async function InvoiceDetails({ id }: { id: string }) {
                     customerEmail={invoice.customer?.email}
                     paymentStatus={invoice.paymentStatus}
                   />
+                  <Link href={`/sales/credit-notes/new?invoiceId=${invoice.id}`}>
+                    <Button variant="outline" size="sm">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Credit Note
+                    </Button>
+                  </Link>
+                  <CancelInvoiceDialog
+                    invoiceId={invoice.id}
+                    invoiceNumber={invoice.invoiceNumber}
+                    hasPayments={hasPayments}
+                    amountPaid={invoice.amountPaid}
+                    currency={invoice.currency}
+                  />
                 </>
               )}
-              <a href={`/api/invoices/${id}/pdf`} download>
-                <Button variant="outline">
-                  <Download className="h-4 w-4 mr-2" />
-                  Download PDF
-                </Button>
-              </a>
+              {!isCancelled && (
+                <a href={`/api/invoices/${id}/pdf`} download>
+                  <Button variant="outline">
+                    <Download className="h-4 w-4 mr-2" />
+                    Download PDF
+                  </Button>
+                </a>
+              )}
             </div>
           </div>
         </CardHeader>
       </Card>
+
+      {/* Cancellation Notice */}
+      {isCancelled && (
+        <Card className="border-red-200 bg-red-50">
+          <CardHeader>
+            <CardTitle className="text-lg text-red-700 flex items-center gap-2">
+              <Ban className="h-5 w-5" />
+              Invoice Cancelled
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div>
+              <p className="text-sm text-red-600 font-medium">Reason:</p>
+              <p className="text-red-700">{invoice.cancelledReason || 'No reason provided'}</p>
+            </div>
+            {invoice.cancelledAt && (
+              <div>
+                <p className="text-sm text-red-600 font-medium">Cancelled on:</p>
+                <p className="text-red-700">{new Date(invoice.cancelledAt).toLocaleString()}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Customer & Dates */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

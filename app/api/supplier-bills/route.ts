@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getSupplierBills } from '@/lib/supplier-bills/queries';
 
-export async function GET() {
+export const GET = withAuth(async (request, { user, team }) => {
   try {
     const bills = await getSupplierBills();
     return NextResponse.json(bills);
@@ -12,4 +13,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

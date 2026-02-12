@@ -7,6 +7,7 @@ import { platformAdmins } from '@/lib/db/schema';
 import { comparePasswords, setAdminSession, clearAdminSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { validatedAction } from '@/lib/auth/middleware';
+import { checkRateLimit, RATE_LIMITS, getRateLimitKey } from '@/lib/auth/rate-limit';
 
 const adminSignInSchema = z.object({
   email: z.string().email().min(3).max(255),
@@ -15,6 +16,17 @@ const adminSignInSchema = z.object({
 
 export const adminSignIn = validatedAction(adminSignInSchema, async (data) => {
   const { email, password } = data;
+
+  // Rate limit by email
+  const rl = checkRateLimit(
+    getRateLimitKey('admin-sign-in', email.toLowerCase()),
+    RATE_LIMITS.signIn
+  );
+  if (!rl.allowed) {
+    return {
+      error: `Too many sign-in attempts. Please try again in ${rl.retryAfterSeconds} seconds.`,
+    };
+  }
 
   // Find admin by email
   const [admin] = await db

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getTaxClassifications } from '@/lib/tax-classifications/queries';
 
-export async function GET() {
+export const GET = withAuth(async (request, { user, team }) => {
   try {
     const classifications = await getTaxClassifications();
     return NextResponse.json(classifications);
@@ -12,4 +13,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

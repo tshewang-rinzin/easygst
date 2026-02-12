@@ -86,3 +86,9 @@ export const updateInvoiceStatusSchema = z.object({
     'cancelled',
   ]),
 });
+
+// Cancel invoice schema
+export const cancelInvoiceSchema = z.object({
+  id: z.string().uuid(),
+  reason: z.string().min(1, 'Cancellation reason is required').max(1000),
+});

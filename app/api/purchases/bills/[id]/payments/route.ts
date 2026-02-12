@@ -1,18 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getSupplierBillPayments } from '@/lib/supplier-payments/queries';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const GET = withAuth(async (request, { user, team, params }) => {
   try {
-    const resolvedParams = await params;
-
-    if (!resolvedParams || !resolvedParams.id) {
+    if (!params || !params.id) {
       return NextResponse.json({ error: 'Bill ID is required' }, { status: 400 });
     }
 
-    const billId = resolvedParams.id;
+    const billId = params.id;
 
     const payments = await getSupplierBillPayments(billId);
     return NextResponse.json(payments || []);
@@ -23,4 +19,4 @@ export async function GET(
       { status: 500 }
     );
   }
-}
+});

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getTeamMembers, getPendingInvitations } from '@/lib/users/queries';
 
-export async function GET() {
+export const GET = withAuth(async (request, { user, team }) => {
   try {
     const [members, invitations] = await Promise.all([
       getTeamMembers(),
@@ -16,4 +17,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

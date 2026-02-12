@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { allocateCustomerAdvance } from '@/lib/customer-payments/actions';
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const POST = withAuth(async (request, { user, team, params }) => {
   try {
-    const { id } = await params;
+    const { id } = params;
     const body = await request.json();
 
     const result = await allocateCustomerAdvance({
@@ -30,4 +28,4 @@ export async function POST(
       { status: 500 }
     );
   }
-}
+});

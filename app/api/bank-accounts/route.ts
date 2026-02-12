@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getBankAccounts } from '@/lib/bank-accounts/queries';
 
-export async function GET() {
+export const GET = withAuth(async (request, { user, team }) => {
   try {
     const accounts = await getBankAccounts();
     return NextResponse.json(accounts);
@@ -12,4 +13,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

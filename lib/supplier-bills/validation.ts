@@ -58,3 +58,9 @@ export const updateSupplierBillSchema = supplierBillSchema.extend({
 export const deleteSupplierBillSchema = z.object({
   id: z.string().uuid(),
 });
+
+// Cancel supplier bill schema
+export const cancelSupplierBillSchema = z.object({
+  id: z.string().uuid(),
+  reason: z.string().min(1, 'Cancellation reason is required').max(1000),
+});

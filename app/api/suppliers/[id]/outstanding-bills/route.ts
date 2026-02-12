@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getSupplierOutstandingBills } from '@/lib/supplier-payments/queries';
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const GET = withAuth(async (request, { user, team, params }) => {
   try {
-    const { id } = await params;
+    const { id } = params;
 
     const bills = await getSupplierOutstandingBills(id);
 
@@ -18,4 +16,4 @@ export async function GET(
       { status: 500 }
     );
   }
-}
+});

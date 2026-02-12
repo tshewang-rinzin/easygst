@@ -1,13 +1,11 @@
 import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getCustomerAdvanceById } from '@/lib/customer-payments/queries';
 import { deleteCustomerAdvance } from '@/lib/customer-payments/actions';
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const GET = withAuth(async (request, { user, team, params }) => {
   try {
-    const { id } = await params;
+    const { id } = params;
 
     const advance = await getCustomerAdvanceById(id);
 
@@ -23,14 +21,11 @@ export async function GET(
       { status: 500 }
     );
   }
-}
+});
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const DELETE = withAuth(async (request, { user, team, params }) => {
   try {
-    const { id } = await params;
+    const { id } = params;
 
     const result = await deleteCustomerAdvance({ id });
 
@@ -50,4 +45,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-}
+});

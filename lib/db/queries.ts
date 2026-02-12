@@ -102,6 +102,34 @@ export async function getTeamForUser() {
 }
 
 /**
+ * Get the current user's role in their team
+ */
+export async function getUserTeamRole(): Promise<string | null> {
+  const user = await getUser();
+  if (!user) return null;
+
+  const membership = await db
+    .select({ role: teamMembers.role })
+    .from(teamMembers)
+    .where(eq(teamMembers.userId, user.id))
+    .limit(1);
+
+  return membership[0]?.role || null;
+}
+
+/**
+ * Check if the current user has a specific role (or higher)
+ * Role hierarchy: owner > admin > member
+ */
+export async function hasRole(requiredRole: 'member' | 'admin' | 'owner'): Promise<boolean> {
+  const role = await getUserTeamRole();
+  if (!role) return false;
+
+  const hierarchy: Record<string, number> = { member: 1, admin: 2, owner: 3 };
+  return (hierarchy[role] || 0) >= (hierarchy[requiredRole] || 0);
+}
+
+/**
  * Get platform admin from admin session cookie
  */
 export async function getPlatformAdmin() {

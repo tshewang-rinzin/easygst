@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getSupplierAdvances } from '@/lib/supplier-payments/queries';
 import { recordSupplierAdvance } from '@/lib/supplier-payments/actions';
 
-export async function GET(request: Request) {
+export const GET = withAuth(async (request, { user, team }) => {
   try {
     const { searchParams } = new URL(request.url);
     const supplierId = searchParams.get('supplierId');
@@ -16,9 +17,9 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function POST(request: Request) {
+export const POST = withAuth(async (request, { user, team }) => {
   try {
     const body = await request.json();
     const result = await recordSupplierAdvance(body);
@@ -39,4 +40,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-}
+});

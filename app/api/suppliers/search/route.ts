@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { searchSuppliers } from '@/lib/suppliers/queries';
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request, { user, team }) => {
   try {
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get('q') || '';
@@ -19,4 +20,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

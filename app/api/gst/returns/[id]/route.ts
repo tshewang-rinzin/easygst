@@ -1,13 +1,11 @@
 import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getGstReturnById } from '@/lib/gst/queries';
 import { deleteGstReturn } from '@/lib/gst/actions';
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const GET = withAuth(async (request, { user, team, params }) => {
   try {
-    const { id } = await params;
+    const id = params.id;
     const gstReturn = await getGstReturnById(id);
 
     if (!gstReturn) {
@@ -22,14 +20,11 @@ export async function GET(
       { status: 500 }
     );
   }
-}
+});
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const DELETE = withAuth(async (request, { user, team, params }) => {
   try {
-    const { id } = await params;
+    const id = params.id;
     const result = await deleteGstReturn(id);
 
     if (result.error) {
@@ -44,4 +39,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-}
+});

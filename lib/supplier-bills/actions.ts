@@ -5,6 +5,7 @@ import {
   supplierBillSchema,
   updateSupplierBillSchema,
   deleteSupplierBillSchema,
+  cancelSupplierBillSchema,
 } from './validation';
 import { db } from '@/lib/db/drizzle';
 import {
@@ -12,9 +13,12 @@ import {
   supplierBillItems,
   activityLogs,
   ActivityType,
+  supplierPaymentAllocations,
+  supplierPayments,
+  gstPeriodLocks,
 } from '@/lib/db/schema';
 import { getTeamForUser } from '@/lib/db/queries';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, gte, lte } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { generateBillNumber } from './numbering';
 import { calculateBillItem, calculateBillTotals } from './calculations';
@@ -263,6 +267,127 @@ export const deleteSupplierBill = validatedActionWithUser(
     } catch (error) {
       console.error('Error deleting supplier bill:', error);
       return { error: 'Failed to delete supplier bill' };
+    }
+  }
+);
+
+/**
+ * Cancel a supplier bill
+ * - Checks if bill is in a locked GST period
+ * - Auto-reverses all payments allocated to this bill
+ * - Marks the bill as cancelled with reason
+ */
+export const cancelSupplierBill = validatedActionWithUser(
+  cancelSupplierBillSchema,
+  async (data, _, user) => {
+    try {
+      const team = await getTeamForUser();
+      if (!team) return { error: 'Team not found' };
+
+      // Get the bill
+      const [bill] = await db
+        .select()
+        .from(supplierBills)
+        .where(and(eq(supplierBills.id, data.id), eq(supplierBills.teamId, team.id)))
+        .limit(1);
+
+      if (!bill) {
+        return { error: 'Bill not found' };
+      }
+
+      // Check if already cancelled
+      if (bill.status === 'cancelled') {
+        return { error: 'Bill is already cancelled' };
+      }
+
+      // Check if bill is in a locked GST period
+      const billDate = new Date(bill.billDate);
+
+      const [periodLock] = await db
+        .select()
+        .from(gstPeriodLocks)
+        .where(
+          and(
+            eq(gstPeriodLocks.teamId, team.id),
+            lte(gstPeriodLocks.periodStart, billDate),
+            gte(gstPeriodLocks.periodEnd, billDate)
+          )
+        )
+        .limit(1);
+
+      if (periodLock) {
+        return {
+          error: 'Cannot cancel bill in a locked GST period. Please create a Debit Note instead.',
+        };
+      }
+
+      // Get all payment allocations for this bill
+      const allocations = await db
+        .select({
+          allocation: supplierPaymentAllocations,
+          payment: supplierPayments,
+        })
+        .from(supplierPaymentAllocations)
+        .innerJoin(supplierPayments, eq(supplierPaymentAllocations.supplierPaymentId, supplierPayments.id))
+        .where(eq(supplierPaymentAllocations.billId, bill.id));
+
+      // Cancel bill and reverse payments in a transaction
+      await db.transaction(async (tx) => {
+        // Reverse each payment allocation
+        for (const { allocation, payment } of allocations) {
+          const allocatedAmount = parseFloat(allocation.allocatedAmount);
+
+          // Update the supplier payment to return the allocated amount
+          const newAllocatedAmount = parseFloat(payment.allocatedAmount) - allocatedAmount;
+          const newUnallocatedAmount = parseFloat(payment.unallocatedAmount) + allocatedAmount;
+
+          await tx
+            .update(supplierPayments)
+            .set({
+              allocatedAmount: newAllocatedAmount.toFixed(2),
+              unallocatedAmount: newUnallocatedAmount.toFixed(2),
+              reversedAt: new Date(),
+              reversedReason: `Auto-reversed due to bill ${bill.billNumber} cancellation`,
+            })
+            .where(eq(supplierPayments.id, payment.id));
+
+          // Delete the allocation
+          await tx
+            .delete(supplierPaymentAllocations)
+            .where(eq(supplierPaymentAllocations.id, allocation.id));
+        }
+
+        // Update the bill to cancelled status
+        await tx
+          .update(supplierBills)
+          .set({
+            status: 'cancelled',
+            paymentStatus: 'unpaid',
+            amountPaid: '0.00',
+            amountDue: bill.totalAmount,
+            cancelledAt: new Date(),
+            cancelledReason: data.reason,
+            cancelledById: user.id,
+            updatedAt: new Date(),
+          })
+          .where(eq(supplierBills.id, bill.id));
+      });
+
+      // Log activity
+      await db.insert(activityLogs).values({
+        teamId: team.id,
+        userId: user.id,
+        action: `CANCEL_SUPPLIER_BILL: ${bill.billNumber} - ${data.reason}`,
+        timestamp: new Date(),
+      });
+
+      revalidatePath('/purchases/bills');
+      revalidatePath(`/purchases/bills/${data.id}`);
+      revalidatePath('/payments');
+      return { success: 'Bill cancelled successfully' };
+    } catch (error) {
+      console.error('Error cancelling bill:', error);
+      return { error: 'Failed to cancel bill' };
     }
   }
 );

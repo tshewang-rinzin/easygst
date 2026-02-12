@@ -7,6 +7,7 @@ import {
   deleteInvoiceSchema,
   lockInvoiceSchema,
   updateInvoiceStatusSchema,
+  cancelInvoiceSchema,
 } from './validation';
 import { db } from '@/lib/db/drizzle';
 import {
@@ -14,9 +15,12 @@ import {
   invoiceItems,
   activityLogs,
   ActivityType,
+  paymentAllocations,
+  customerPayments,
+  gstPeriodLocks,
 } from '@/lib/db/schema';
 import { getTeamForUser } from '@/lib/db/queries';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, gte, lte } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { generateInvoiceNumber } from './numbering';
 import { calculateLineItem, calculateInvoiceTotals } from './calculations';
@@ -356,6 +360,129 @@ export const updateInvoiceStatus = validatedActionWithUser(
     } catch (error) {
       console.error('Error updating invoice status:', error);
       return { error: 'Failed to update invoice status' };
+    }
+  }
+);
+
+/**
+ * Cancel an invoice
+ * - Checks if invoice is in a locked GST period
+ * - Auto-reverses all payments allocated to this invoice
+ * - Marks the invoice as cancelled with reason
+ */
+export const cancelInvoice = validatedActionWithUser(
+  cancelInvoiceSchema,
+  async (data, _, user) => {
+    try {
+      const team = await getTeamForUser();
+      if (!team) return { error: 'Team not found' };
+
+      // Get the invoice
+      const [invoice] = await db
+        .select()
+        .from(invoices)
+        .where(and(eq(invoices.id, data.id), eq(invoices.teamId, team.id)))
+        .limit(1);
+
+      if (!invoice) {
+        return { error: 'Invoice not found' };
+      }
+
+      // Check if already cancelled
+      if (invoice.status === 'cancelled') {
+        return { error: 'Invoice is already cancelled' };
+      }
+
+      // Check if invoice is in a locked GST period
+      const invoiceDate = new Date(invoice.invoiceDate);
+      const periodStart = new Date(invoiceDate.getFullYear(), invoiceDate.getMonth(), 1);
+      const periodEnd = new Date(invoiceDate.getFullYear(), invoiceDate.getMonth() + 1, 0);
+
+      const [periodLock] = await db
+        .select()
+        .from(gstPeriodLocks)
+        .where(
+          and(
+            eq(gstPeriodLocks.teamId, team.id),
+            lte(gstPeriodLocks.periodStart, invoiceDate),
+            gte(gstPeriodLocks.periodEnd, invoiceDate)
+          )
+        )
+        .limit(1);
+
+      if (periodLock) {
+        return {
+          error: 'Cannot cancel invoice in a locked GST period. Please create a Credit Note instead.',
+        };
+      }
+
+      // Get all payment allocations for this invoice
+      const allocations = await db
+        .select({
+          allocation: paymentAllocations,
+          payment: customerPayments,
+        })
+        .from(paymentAllocations)
+        .innerJoin(customerPayments, eq(paymentAllocations.customerPaymentId, customerPayments.id))
+        .where(eq(paymentAllocations.invoiceId, invoice.id));
+
+      // Cancel invoice and reverse payments in a transaction
+      await db.transaction(async (tx) => {
+        // Reverse each payment allocation
+        for (const { allocation, payment } of allocations) {
+          const allocatedAmount = parseFloat(allocation.allocatedAmount);
+
+          // Update the customer payment to return the allocated amount
+          const newAllocatedAmount = parseFloat(payment.allocatedAmount) - allocatedAmount;
+          const newUnallocatedAmount = parseFloat(payment.unallocatedAmount) + allocatedAmount;
+
+          await tx
+            .update(customerPayments)
+            .set({
+              allocatedAmount: newAllocatedAmount.toFixed(2),
+              unallocatedAmount: newUnallocatedAmount.toFixed(2),
+              reversedAt: new Date(),
+              reversedReason: `Auto-reversed due to invoice ${invoice.invoiceNumber} cancellation`,
+            })
+            .where(eq(customerPayments.id, payment.id));
+
+          // Delete the allocation
+          await tx
+            .delete(paymentAllocations)
+            .where(eq(paymentAllocations.id, allocation.id));
+        }
+
+        // Update the invoice to cancelled status
+        await tx
+          .update(invoices)
+          .set({
+            status: 'cancelled',
+            paymentStatus: 'unpaid',
+            amountPaid: '0.00',
+            amountDue: invoice.totalAmount,
+            cancelledAt: new Date(),
+            cancelledReason: data.reason,
+            cancelledById: user.id,
+            updatedAt: new Date(),
+          })
+          .where(eq(invoices.id, invoice.id));
+      });
+
+      // Log activity
+      await db.insert(activityLogs).values({
+        teamId: team.id,
+        userId: user.id,
+        action: `CANCEL_INVOICE: ${invoice.invoiceNumber} - ${data.reason}`,
+        timestamp: new Date(),
+      });
+
+      revalidatePath('/invoices');
+      revalidatePath(`/invoices/${data.id}`);
+      revalidatePath('/payments');
+      return { success: 'Invoice cancelled successfully' };
+    } catch (error) {
+      console.error('Error cancelling invoice:', error);
+      return { error: 'Failed to cancel invoice' };
     }
   }
 );

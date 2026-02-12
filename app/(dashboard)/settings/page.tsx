@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Building2, Receipt, CreditCard, Wallet, Mail } from 'lucide-react';
+import { Building2, Receipt, CreditCard, Wallet, Mail, Hash, Ruler, Tags, Users, Download } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function SettingsPage() {
@@ -33,6 +33,36 @@ export default function SettingsPage() {
       description: 'Configure default GST rates and tax settings for Bhutan DRC compliance',
       href: '/settings/tax',
       icon: Receipt,
+    },
+    {
+      title: 'Document Numbering',
+      description: 'Configure numbering format and prefixes for invoices, bills, and other documents',
+      href: '/settings/numbering',
+      icon: Hash,
+    },
+    {
+      title: 'Units of Measurement',
+      description: 'Manage units used for products and services (kg, pcs, hrs, etc.)',
+      href: '/settings/units',
+      icon: Ruler,
+    },
+    {
+      title: 'Tax Classifications',
+      description: 'Configure GST classifications (Standard, Zero-Rated, Exempt)',
+      href: '/settings/tax-classifications',
+      icon: Tags,
+    },
+    {
+      title: 'Team Members',
+      description: 'Manage team members, invite new users, and assign roles',
+      href: '/settings/users',
+      icon: Users,
+    },
+    {
+      title: 'Data Export',
+      description: 'Export your invoices, customers, suppliers, and other data as CSV',
+      href: '/settings/data-export',
+      icon: Download,
     },
   ];
 

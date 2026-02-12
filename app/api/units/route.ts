@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getUnits } from '@/lib/units/queries';
 
-export async function GET() {
+export const GET = withAuth(async (request, { user, team }) => {
   try {
     const units = await getUnits();
     return NextResponse.json(units);
@@ -9,4 +10,4 @@ export async function GET() {
     console.error('Error fetching units:', error);
     return NextResponse.json({ error: 'Failed to fetch units' }, { status: 500 });
   }
-}
+});

@@ -8,13 +8,20 @@ const protectedRoutes = [
   '/products',
   '/invoices',
   '/payments',
-  '/reports'
+  '/reports',
+  '/sales',
+  '/purchases',
+  '/adjustments',
+  '/gst',
+  '/settings',
+  '/suppliers'
 ];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const sessionCookie = request.cookies.get('session');
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+  const isProduction = process.env.NODE_ENV === 'production';
 
   if (isProtectedRoute && !sessionCookie) {
     return NextResponse.redirect(new URL('/sign-in', request.url));
@@ -34,8 +41,8 @@ export async function middleware(request: NextRequest) {
           expires: expiresInOneDay.toISOString()
         }),
         httpOnly: true,
-        secure: true,
-        sameSite: 'lax',
+        secure: isProduction,
+        sameSite: 'strict',
         expires: expiresInOneDay
       });
     } catch (error) {

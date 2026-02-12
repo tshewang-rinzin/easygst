@@ -1,13 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getCustomerPaymentWithDetails } from '@/lib/customer-payments/queries';
 
-type Context = {
-  params: Promise<{ id: string }>;
-};
-
-export async function GET(request: NextRequest, context: Context) {
+export const GET = withAuth(async (request, { user, team, params }) => {
   try {
-    const { id } = await context.params;
+    const { id } = params;
 
     const payment = await getCustomerPaymentWithDetails(id);
 
@@ -23,4 +20,4 @@ export async function GET(request: NextRequest, context: Context) {
       { status: 500 }
     );
   }
-}
+});

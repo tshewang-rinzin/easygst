@@ -162,6 +162,20 @@
       "when": 1768400383160,
       "tag": "0022_jazzy_martin_li",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1769112771035,
+      "tag": "0023_tiny_thunderbolts",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1739232000000,
+      "tag": "0024_financial_constraints",
+      "breakpoints": true
     }
   ]
 }

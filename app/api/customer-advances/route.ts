@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getCustomerAdvances } from '@/lib/customer-payments/queries';
 import { recordCustomerAdvance } from '@/lib/customer-payments/actions';
 
-export async function GET(request: Request) {
+export const GET = withAuth(async (request, { user, team }) => {
   try {
     const { searchParams } = new URL(request.url);
     const customerId = searchParams.get('customerId');
@@ -16,9 +17,9 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function POST(request: Request) {
+export const POST = withAuth(async (request, { user, team }) => {
   try {
     const body = await request.json();
     const result = await recordCustomerAdvance(body);
@@ -39,4 +40,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-}
+});

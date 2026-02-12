@@ -11,6 +11,7 @@ import {
   Settings,
   LayoutDashboard,
   ArrowLeft,
+  ScrollText,
 } from 'lucide-react';
 
 const adminNavigation = [
@@ -33,6 +34,11 @@ const adminNavigation = [
     name: 'Email Settings',
     href: '/admin/email-settings',
     icon: Mail,
+  },
+  {
+    name: 'Audit Log',
+    href: '/admin/audit-log',
+    icon: ScrollText,
   },
   {
     name: 'Platform Settings',

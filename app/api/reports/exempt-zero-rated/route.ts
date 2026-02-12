@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getExemptAndZeroRatedTransactions, getExemptZeroRatedSummary } from '@/lib/reports/exempt-zero-rated';
 
-export async function GET(request: Request) {
+export const GET = withAuth(async (request, { user, team }) => {
   try {
-    const { searchParams } = new URL(request.url);
+    const searchParams = request.nextUrl.searchParams;
     const startDate = searchParams.get('startDate') ? new Date(searchParams.get('startDate')!) : undefined;
     const endDate = searchParams.get('endDate') ? new Date(searchParams.get('endDate')!) : undefined;
 
@@ -20,4 +21,4 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
-}
+});

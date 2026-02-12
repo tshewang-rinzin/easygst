@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getUnpaidInvoices, getUnpaidInvoicesSummary } from '@/lib/reports/unpaid-invoices';
 
-export async function GET() {
+export const GET = withAuth(async (request, { user, team }) => {
   try {
     const [invoices, summary] = await Promise.all([
       getUnpaidInvoices(),
@@ -16,4 +17,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

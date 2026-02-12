@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 import { db } from '@/lib/db/drizzle';
 import { emailSettings } from '@/lib/db/schema';
+import { decrypt, isEncrypted } from '@/lib/auth/crypto';
 
 // Cache for email settings to avoid repeated DB queries
 let cachedSettings: {
@@ -48,13 +49,24 @@ export async function getEmailConfig() {
 
   // If database settings exist and are enabled, use them
   if (dbSettings && dbSettings.emailEnabled) {
+    // Decrypt SMTP password if it's encrypted
+    let smtpPassword = dbSettings.smtpPassword || undefined;
+    if (smtpPassword && isEncrypted(smtpPassword)) {
+      try {
+        smtpPassword = decrypt(smtpPassword);
+      } catch (error) {
+        console.error('[Email] Failed to decrypt SMTP password:', error);
+        smtpPassword = undefined;
+      }
+    }
+
     return {
       enabled: true,
       source: 'database' as const,
       smtpHost: dbSettings.smtpHost || undefined,
       smtpPort: dbSettings.smtpPort || undefined,
       smtpUser: dbSettings.smtpUser || undefined,
-      smtpPassword: dbSettings.smtpPassword || undefined,
+      smtpPassword,
       smtpSecure: dbSettings.smtpSecure ?? false,
       emailFrom: dbSettings.emailFrom || undefined,
       emailFromName: dbSettings.emailFromName || 'EasyGST',

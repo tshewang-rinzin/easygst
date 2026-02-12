@@ -18,7 +18,7 @@ import {
 } from '@/lib/db/schema';
 import { comparePasswords, hashPassword, setSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { getUser, getUserWithTeam } from '@/lib/db/queries';
 import {
   validatedAction,
@@ -29,6 +29,8 @@ import { seedDefaultTaxClassifications } from '@/lib/tax-classifications/actions
 import { randomBytes } from 'crypto';
 import { sendEmail } from '@/lib/email/utils';
 import VerifyEmail from '@/lib/email/templates/verify-email';
+import { hashToken } from '@/lib/auth/crypto';
+import { checkRateLimit, RATE_LIMITS, getRateLimitKey } from '@/lib/auth/rate-limit';
 
 async function logActivity(
   teamId: string | null | undefined,
@@ -55,6 +57,19 @@ const signInSchema = z.object({
 
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const { email, password } = data;
+
+  // Rate limit by email
+  const rl = checkRateLimit(
+    getRateLimitKey('sign-in', email.toLowerCase()),
+    RATE_LIMITS.signIn
+  );
+  if (!rl.allowed) {
+    return {
+      error: `Too many sign-in attempts. Please try again in ${rl.retryAfterSeconds} seconds.`,
+      email,
+      password
+    };
+  }
 
   const userWithTeam = await db
     .select({
@@ -107,15 +122,34 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
   redirect('/dashboard');
 });
 
+const passwordSchema = z.string()
+  .min(8, 'Password must be at least 8 characters')
+  .max(100)
+  .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+  .regex(/[0-9]/, 'Password must contain at least one number');
+
 const signUpSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
   email: z.string().email(),
-  password: z.string().min(8),
+  password: passwordSchema,
   inviteToken: z.string().optional()
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const { name, email, password, inviteToken } = data;
+
+  // Rate limit by email
+  const rl = checkRateLimit(
+    getRateLimitKey('sign-up', email.toLowerCase()),
+    RATE_LIMITS.signUp
+  );
+  if (!rl.allowed) {
+    return {
+      error: `Too many sign-up attempts. Please try again in ${rl.retryAfterSeconds} seconds.`,
+      email,
+      password
+    };
+  }
 
   const existingUser = await db
     .select()
@@ -144,7 +178,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     passwordHash,
     role: 'owner', // Default role, will be overridden if there's an invitation
     emailVerified: false,
-    verificationToken,
+    verificationToken: hashToken(verificationToken),
     verificationTokenExpiry
   };
 
@@ -286,11 +320,14 @@ const verifyEmailSchema = z.object({
 export const verifyEmail = validatedAction(verifyEmailSchema, async (data) => {
   const { token } = data;
 
+  // Hash the incoming token to compare with stored hash
+  const tokenHash = hashToken(token);
+
   // Find user with this verification token
   const [user] = await db
     .select()
     .from(users)
-    .where(eq(users.verificationToken, token))
+    .where(eq(users.verificationToken, tokenHash))
     .limit(1);
 
   if (!user) {
@@ -333,6 +370,15 @@ const resendVerificationSchema = z.object({
 export const resendVerificationEmail = validatedAction(resendVerificationSchema, async (data) => {
   const { email } = data;
 
+  // Rate limit by email
+  const rl = checkRateLimit(
+    getRateLimitKey('resend-verification', email.toLowerCase()),
+    RATE_LIMITS.resendVerification
+  );
+  if (!rl.allowed) {
+    return { error: `Too many requests. Please try again in ${rl.retryAfterSeconds} seconds.` };
+  }
+
   // Find user
   const [user] = await db
     .select()
@@ -357,11 +403,11 @@ export const resendVerificationEmail = validatedAction(resendVerificationSchema,
   const verificationTokenExpiry = new Date();
   verificationTokenExpiry.setHours(verificationTokenExpiry.getHours() + 24);
 
-  // Update user with new token
+  // Update user with hashed token
   await db
     .update(users)
     .set({
-      verificationToken,
+      verificationToken: hashToken(verificationToken),
       verificationTokenExpiry
     })
     .where(eq(users.id, user.id));
@@ -391,7 +437,7 @@ export const resendVerificationEmail = validatedAction(resendVerificationSchema,
 
 const updatePasswordSchema = z.object({
   currentPassword: z.string().min(8).max(100),
-  newPassword: z.string().min(8).max(100),
+  newPassword: passwordSchema,
   confirmPassword: z.string().min(8).max(100)
 });
 
@@ -443,8 +489,11 @@ export const updatePassword = validatedActionWithUser(
       logActivity(userWithTeam?.teamId, user.id, ActivityType.UPDATE_PASSWORD)
     ]);
 
+    // Invalidate current session to force re-login with new password
+    (await cookies()).delete('session');
+
     return {
-      success: 'Password updated successfully.'
+      success: 'Password updated successfully. Please sign in again.'
     };
   }
 );

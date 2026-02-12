@@ -6,8 +6,9 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Edit, FileText, Building2, DollarSign, Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit, FileText, Building2, DollarSign, Trash2, Ban } from 'lucide-react';
 import { RecordPaymentDialog } from '@/components/suppliers/record-payment-dialog';
+import { CancelBillDialog } from '@/components/bills/cancel-bill-dialog';
 import useSWR, { mutate } from 'swr';
 import { deleteSupplierPayment } from '@/lib/supplier-payments/actions';
 
@@ -416,6 +417,30 @@ export default function ViewSupplierBillPage() {
             </CardContent>
           </Card>
 
+          {/* Cancellation Notice */}
+          {bill.bill.status === 'cancelled' && (
+            <Card className="border-red-200 bg-red-50">
+              <CardHeader>
+                <CardTitle className="text-lg text-red-700 flex items-center gap-2">
+                  <Ban className="h-5 w-5" />
+                  Bill Cancelled
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div>
+                  <p className="text-sm text-red-600 font-medium">Reason:</p>
+                  <p className="text-red-700">{bill.bill.cancelledReason || 'No reason provided'}</p>
+                </div>
+                {bill.bill.cancelledAt && (
+                  <div>
+                    <p className="text-sm text-red-600 font-medium">Cancelled on:</p>
+                    <p className="text-red-700">{new Date(bill.bill.cancelledAt).toLocaleString()}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Actions */}
           <Card>
             <CardHeader>
@@ -432,11 +457,30 @@ export default function ViewSupplierBillPage() {
                   Edit Bill
                 </Button>
               )}
-              <Link href={`/adjustments/bills/new?billId=${billId}`}>
-                <Button variant="outline" className="w-full">
-                  Add Adjustment
-                </Button>
-              </Link>
+              {bill.bill.status !== 'cancelled' && (
+                <>
+                  <Link href={`/adjustments/bills/new?billId=${billId}`}>
+                    <Button variant="outline" className="w-full">
+                      Add Adjustment
+                    </Button>
+                  </Link>
+                  <Link href={`/purchases/debit-notes/new?billId=${billId}`}>
+                    <Button variant="outline" className="w-full">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Create Debit Note
+                    </Button>
+                  </Link>
+                  <div className="w-full">
+                    <CancelBillDialog
+                      billId={billId}
+                      billNumber={bill.bill.billNumber}
+                      hasPayments={parseFloat(bill.bill.amountPaid) > 0}
+                      amountPaid={bill.bill.amountPaid}
+                      currency={bill.bill.currency}
+                    />
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>

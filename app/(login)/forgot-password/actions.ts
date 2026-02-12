@@ -8,6 +8,8 @@ import { validatedAction } from '@/lib/auth/middleware';
 import { sendEmail } from '@/lib/email/utils';
 import PasswordResetEmail from '@/lib/email/templates/password-reset-email';
 import { randomBytes } from 'crypto';
+import { hashToken } from '@/lib/auth/crypto';
+import { checkRateLimit, RATE_LIMITS, getRateLimitKey } from '@/lib/auth/rate-limit';
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -15,6 +17,17 @@ const forgotPasswordSchema = z.object({
 
 export const requestPasswordReset = validatedAction(forgotPasswordSchema, async (data) => {
   const { email } = data;
+
+  // Rate limit by email
+  const rl = checkRateLimit(
+    getRateLimitKey('forgot-password', email.toLowerCase()),
+    RATE_LIMITS.forgotPassword
+  );
+  if (!rl.allowed) {
+    return {
+      error: `Too many requests. Please try again in ${rl.retryAfterSeconds} seconds.`,
+    };
+  }
 
   // Find the user by email
   const [user] = await db
@@ -27,7 +40,6 @@ export const requestPasswordReset = validatedAction(forgotPasswordSchema, async 
   const successMessage = 'If an account exists with this email, you will receive a password reset link shortly.';
 
   if (!user) {
-    // Don't reveal that the user doesn't exist
     return { success: successMessage };
   }
 
@@ -36,17 +48,17 @@ export const requestPasswordReset = validatedAction(forgotPasswordSchema, async 
   const resetTokenExpiry = new Date();
   resetTokenExpiry.setHours(resetTokenExpiry.getHours() + 1); // 1 hour expiry
 
-  // Update user with reset token
+  // Store hashed token in DB
   await db
     .update(users)
     .set({
-      passwordResetToken: resetToken,
+      passwordResetToken: hashToken(resetToken),
       passwordResetTokenExpiry: resetTokenExpiry,
       updatedAt: new Date(),
     })
     .where(eq(users.id, user.id));
 
-  // Send reset email
+  // Send reset email with plaintext token in URL
   const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
 
   try {
@@ -63,7 +75,6 @@ export const requestPasswordReset = validatedAction(forgotPasswordSchema, async 
     return { success: successMessage };
   } catch (error) {
     console.error('[ForgotPassword] Failed to send password reset email:', error);
-    // Still return success to prevent email enumeration
     return { success: successMessage };
   }
 });
