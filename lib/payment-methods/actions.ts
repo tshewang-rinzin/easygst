@@ -1,7 +1,7 @@
 'use server';
 
 import { z } from 'zod';
-import { validatedActionWithUser } from '@/lib/auth/middleware';
+import { validatedActionWithUser, validatedActionWithRole } from '@/lib/auth/middleware';
 import { db } from '@/lib/db/drizzle';
 import { paymentMethods, activityLogs, ActivityType } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
@@ -170,8 +170,9 @@ export const updatePaymentMethod = validatedActionWithUser(
 /**
  * Delete a payment method
  */
-export const deletePaymentMethod = validatedActionWithUser(
+export const deletePaymentMethod = validatedActionWithRole(
   z.object({ id: z.string().uuid() }),
+  'admin',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();

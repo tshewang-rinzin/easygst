@@ -1,24 +1,13 @@
 import React from 'react';
 import { NextRequest, NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getCustomerPaymentWithDetails } from '@/lib/customer-payments/queries';
-import { getTeamForUser } from '@/lib/db/queries';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { PaymentReceiptDocument } from '@/lib/pdf/templates/payment-receipt-template';
 
-type Context = {
-  params: Promise<{ id: string }>;
-};
-
-export async function GET(request: NextRequest, context: Context) {
+export const GET = withAuth(async (request: NextRequest, { team, params }) => {
   try {
-    const { id } = await context.params;
-
-    const team = await getTeamForUser();
-    if (!team) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const payment = await getCustomerPaymentWithDetails(id);
+    const payment = await getCustomerPaymentWithDetails(params.id);
 
     if (!payment) {
       return NextResponse.json({ error: 'Payment not found' }, { status: 404 });
@@ -42,4 +31,4 @@ export async function GET(request: NextRequest, context: Context) {
       { status: 500 }
     );
   }
-}
+});

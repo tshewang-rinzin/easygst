@@ -1,6 +1,6 @@
 'use server';
 
-import { validatedActionWithUser } from '@/lib/auth/middleware';
+import { validatedActionWithUser, validatedActionWithRole } from '@/lib/auth/middleware';
 import {
   customerSchema,
   updateCustomerSchema,
@@ -11,6 +11,7 @@ import { customers, activityLogs, ActivityType } from '@/lib/db/schema';
 import { getTeamForUser } from '@/lib/db/queries';
 import { eq, and } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+import { checkUsageLimit } from '@/lib/features/limits';
 
 /**
  * Create a new customer
@@ -21,6 +22,12 @@ export const createCustomer = validatedActionWithUser(
     try {
       const team = await getTeamForUser();
       if (!team) return { error: 'Team not found' };
+
+      // Check usage limit
+      const usageCheck = await checkUsageLimit('customers', team.id);
+      if (!usageCheck.allowed) {
+        return { error: `You've reached the maximum of ${usageCheck.limit} customers on your current plan. Current: ${usageCheck.current}.` };
+      }
 
       const [customer] = await db
         .insert(customers)
@@ -111,8 +118,9 @@ export const updateCustomer = validatedActionWithUser(
 /**
  * Delete a customer (soft delete by setting isActive = false)
  */
-export const deleteCustomer = validatedActionWithUser(
+export const deleteCustomer = validatedActionWithRole(
   deleteCustomerSchema,
+  'admin',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();

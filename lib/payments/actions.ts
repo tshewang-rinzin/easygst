@@ -1,6 +1,6 @@
 'use server';
 
-import { validatedActionWithUser } from '@/lib/auth/middleware';
+import { validatedActionWithUser, validatedActionWithRole } from '@/lib/auth/middleware';
 import { z } from 'zod';
 import { db } from '@/lib/db/drizzle';
 import { payments, invoices, activityLogs, ActivityType } from '@/lib/db/schema';
@@ -152,8 +152,9 @@ export const recordPayment = validatedActionWithUser(
 /**
  * Delete a payment and reverse the invoice amounts
  */
-export const deletePayment = validatedActionWithUser(
+export const deletePayment = validatedActionWithRole(
   deletePaymentSchema,
+  'admin',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();

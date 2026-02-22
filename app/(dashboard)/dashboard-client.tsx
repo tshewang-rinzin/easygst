@@ -19,6 +19,8 @@ import {
   ChevronDown,
   ChevronRight,
   FileEdit,
+  FolderKanban,
+  Warehouse,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -105,10 +107,19 @@ const navigation = [
     name: 'Sales',
     icon: ShoppingCart,
     children: [
+      { name: 'Quotations', href: '/quotations' },
       { name: 'Tax Invoices', href: '/sales/invoices' },
       { name: 'Cash Sales', href: '/sales/cash-sales' },
       { name: 'Customers', href: '/customers' },
       { name: 'Sales Register', href: '/sales/register' },
+    ]
+  },
+  {
+    name: 'Contracts',
+    icon: FolderKanban,
+    children: [
+      { name: 'All Contracts', href: '/contracts' },
+      { name: 'New Contract', href: '/contracts/new' },
     ]
   },
   {
@@ -164,8 +175,16 @@ const navigation = [
   },
   {
     name: 'Products',
-    href: '/products',
-    icon: Package
+    icon: Package,
+    children: [
+      { name: 'All Products', href: '/products' },
+      { name: 'Categories', href: '/products/categories' },
+    ],
+  },
+  {
+    name: 'Inventory',
+    href: '/inventory',
+    icon: Warehouse
   },
   {
     name: 'Settings',
@@ -181,6 +200,7 @@ const navigation = [
       { name: 'Users & Roles', href: '/settings/users' },
       { name: 'Data Backup', href: '/settings/backup' },
       { name: 'Templates', href: '/settings/templates' },
+      { name: 'Permissions', href: '/settings/permissions' },
     ]
   }
 ];
@@ -259,7 +279,7 @@ function Sidebar() {
                     <div className="ml-9 mt-1 space-y-1">
                       {item.children.map((child) => {
                         const isActive =
-                          pathname === child.href || pathname.startsWith(child.href + '/');
+                          pathname === child.href || (pathname.startsWith(child.href + '/') && !item.children!.some(s => s.href !== child.href && pathname.startsWith(s.href)));
                         return (
                           <Link
                             key={child.name}
@@ -405,7 +425,7 @@ function MobileMenu() {
                           <div className="ml-9 mt-1 space-y-1">
                             {item.children.map((child) => {
                               const isActive =
-                                pathname === child.href || pathname.startsWith(child.href + '/');
+                                pathname === child.href || (pathname.startsWith(child.href + '/') && !item.children!.some(s => s.href !== child.href && pathname.startsWith(s.href)));
                               return (
                                 <Link
                                   key={child.name}

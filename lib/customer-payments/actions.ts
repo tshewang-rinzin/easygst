@@ -10,7 +10,7 @@ import {
   invoices,
   customerAdvanceSequences,
 } from '@/lib/db/schema';
-import { validatedActionWithUser } from '@/lib/auth/middleware';
+import { validatedActionWithUser, validatedActionWithRole } from '@/lib/auth/middleware';
 import { getTeamForUser } from '@/lib/db/queries';
 import {
   customerPaymentSchema,
@@ -187,8 +187,9 @@ export const recordCustomerPayment = validatedActionWithUser(
   }
 );
 
-export const deleteCustomerPayment = validatedActionWithUser(
+export const deleteCustomerPayment = validatedActionWithRole(
   deleteCustomerPaymentSchema,
+  'admin',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();
@@ -326,7 +327,7 @@ export const recordCustomerAdvance = validatedActionWithUser(
             .returning();
         }
 
-        const advanceNumber = `ADV-C-${year}-${String(nextNumber).padStart(4, '0')}`;
+        const advanceNumber = `${team.customerAdvancePrefix || 'ADV-C'}-${year}-${String(nextNumber).padStart(4, '0')}`;
 
         // Insert customer advance (payment with type='advance')
         await tx.insert(customerPayments).values({
@@ -497,8 +498,9 @@ export const allocateCustomerAdvance = validatedActionWithUser(
   }
 );
 
-export const deleteCustomerAdvance = validatedActionWithUser(
+export const deleteCustomerAdvance = validatedActionWithRole(
   deleteCustomerAdvanceSchema,
+  'admin',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();

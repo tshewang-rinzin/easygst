@@ -1,6 +1,6 @@
-import { getTeamForUser } from '@/lib/db/queries';
+import { NextRequest, NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 
-export async function GET() {
-  const team = await getTeamForUser();
-  return Response.json(team);
-}
+export const GET = withAuth(async (request: NextRequest, { team }) => {
+  return NextResponse.json(team);
+});

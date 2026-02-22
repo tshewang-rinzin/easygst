@@ -1,6 +1,6 @@
 'use server';
 
-import { validatedActionWithUser } from '@/lib/auth/middleware';
+import { validatedActionWithUser, validatedActionWithRole } from '@/lib/auth/middleware';
 import {
   debitNoteSchema,
   updateDebitNoteSchema,
@@ -312,8 +312,9 @@ export const updateDebitNote = validatedActionWithUser(
 /**
  * Delete a debit note (only if draft)
  */
-export const deleteDebitNote = validatedActionWithUser(
+export const deleteDebitNote = validatedActionWithRole(
   deleteDebitNoteSchema,
+  'admin',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();

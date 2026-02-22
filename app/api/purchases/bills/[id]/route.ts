@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getSupplierBillById } from '@/lib/supplier-bills/queries';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const GET = withAuth(async (request: NextRequest, { params }) => {
   try {
-    const { id } = await params;
-
-    const bill = await getSupplierBillById(id);
+    const bill = await getSupplierBillById(params.id);
 
     if (!bill) {
       return NextResponse.json(
@@ -25,4 +21,4 @@ export async function GET(
       { status: 500 }
     );
   }
-}
+});

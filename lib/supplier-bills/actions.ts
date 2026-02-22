@@ -1,6 +1,6 @@
 'use server';
 
-import { validatedActionWithUser } from '@/lib/auth/middleware';
+import { validatedActionWithUser, validatedActionWithRole } from '@/lib/auth/middleware';
 import {
   supplierBillSchema,
   updateSupplierBillSchema,
@@ -223,8 +223,9 @@ export const updateSupplierBill = validatedActionWithUser(
 /**
  * Delete a supplier bill (soft delete)
  */
-export const deleteSupplierBill = validatedActionWithUser(
+export const deleteSupplierBill = validatedActionWithRole(
   deleteSupplierBillSchema,
+  'admin',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();
@@ -277,8 +278,9 @@ export const deleteSupplierBill = validatedActionWithUser(
  * - Auto-reverses all payments allocated to this bill
  * - Marks the bill as cancelled with reason
  */
-export const cancelSupplierBill = validatedActionWithUser(
+export const cancelSupplierBill = validatedActionWithRole(
   cancelSupplierBillSchema,
+  'admin',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();

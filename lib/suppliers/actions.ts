@@ -1,6 +1,6 @@
 'use server';
 
-import { validatedActionWithUser } from '@/lib/auth/middleware';
+import { validatedActionWithUser, validatedActionWithRole } from '@/lib/auth/middleware';
 import {
   supplierSchema,
   updateSupplierSchema,
@@ -119,8 +119,9 @@ export const updateSupplier = validatedActionWithUser(
 /**
  * Delete a supplier
  */
-export const deleteSupplier = validatedActionWithUser(
+export const deleteSupplier = validatedActionWithRole(
   deleteSupplierSchema,
+  'admin',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();

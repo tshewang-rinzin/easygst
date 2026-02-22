@@ -16,13 +16,19 @@ export default function DocumentNumberingPage() {
   const { data: team, mutate } = useSWR('/api/team', fetcher);
 
   const [invoicePrefix, setInvoicePrefix] = useState('');
+  const [billPrefix, setBillPrefix] = useState('');
+  const [customerAdvancePrefix, setCustomerAdvancePrefix] = useState('');
+  const [supplierAdvancePrefix, setSupplierAdvancePrefix] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Set initial values when team data loads
   useEffect(() => {
-    if (team?.invoicePrefix) {
-      setInvoicePrefix(team.invoicePrefix);
+    if (team) {
+      setInvoicePrefix(team.invoicePrefix || 'INV');
+      setBillPrefix(team.billPrefix || 'BILL');
+      setCustomerAdvancePrefix(team.customerAdvancePrefix || 'ADV-C');
+      setSupplierAdvancePrefix(team.supplierAdvancePrefix || 'ADV-S');
     }
   }, [team]);
 
@@ -33,6 +39,9 @@ export default function DocumentNumberingPage() {
     try {
       const result = await updateTeam({
         invoicePrefix: invoicePrefix || 'INV',
+        billPrefix: billPrefix || 'BILL',
+        customerAdvancePrefix: customerAdvancePrefix || 'ADV-C',
+        supplierAdvancePrefix: supplierAdvancePrefix || 'ADV-S',
       });
 
       if ('success' in result && result.success) {
@@ -49,6 +58,49 @@ export default function DocumentNumberingPage() {
     }
   };
 
+  const prefixConfigs = [
+    {
+      label: 'Invoice Prefix',
+      icon: FileText,
+      value: invoicePrefix,
+      setter: setInvoicePrefix,
+      default: 'INV',
+      description: 'Prefix for sales invoices and credit notes',
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-100',
+    },
+    {
+      label: 'Bill Prefix',
+      icon: ShoppingCart,
+      value: billPrefix,
+      setter: setBillPrefix,
+      default: 'BILL',
+      description: 'Prefix for supplier bills and purchase records',
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-100',
+    },
+    {
+      label: 'Customer Advance Prefix',
+      icon: ArrowDownCircle,
+      value: customerAdvancePrefix,
+      setter: setCustomerAdvancePrefix,
+      default: 'ADV-C',
+      description: 'Prefix for prepayments received from customers',
+      color: 'text-green-600',
+      bgColor: 'bg-green-100',
+    },
+    {
+      label: 'Supplier Advance Prefix',
+      icon: ArrowUpCircle,
+      value: supplierAdvancePrefix,
+      setter: setSupplierAdvancePrefix,
+      default: 'ADV-S',
+      description: 'Prefix for prepayments made to suppliers',
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-100',
+    },
+  ];
+
   const numberingFormats = [
     {
       type: 'Invoice',
@@ -62,8 +114,8 @@ export default function DocumentNumberingPage() {
     {
       type: 'Bill',
       icon: ShoppingCart,
-      format: 'BILL-YYYY-NNNN',
-      example: 'BILL-2026-0001',
+      format: `${billPrefix || 'BILL'}-YYYY-NNNN`,
+      example: `${billPrefix || 'BILL'}-2026-0001`,
       description: 'Supplier bills and purchase records',
       color: 'text-purple-600',
       bgColor: 'bg-purple-100',
@@ -71,8 +123,8 @@ export default function DocumentNumberingPage() {
     {
       type: 'Customer Advance',
       icon: ArrowDownCircle,
-      format: 'ADV-C-YYYY-NNNN',
-      example: 'ADV-C-2026-0001',
+      format: `${customerAdvancePrefix || 'ADV-C'}-YYYY-NNNN`,
+      example: `${customerAdvancePrefix || 'ADV-C'}-2026-0001`,
       description: 'Prepayments received from customers',
       color: 'text-green-600',
       bgColor: 'bg-green-100',
@@ -80,8 +132,8 @@ export default function DocumentNumberingPage() {
     {
       type: 'Supplier Advance',
       icon: ArrowUpCircle,
-      format: 'ADV-S-YYYY-NNNN',
-      example: 'ADV-S-2026-0001',
+      format: `${supplierAdvancePrefix || 'ADV-S'}-YYYY-NNNN`,
+      example: `${supplierAdvancePrefix || 'ADV-S'}-2026-0001`,
       description: 'Prepayments made to suppliers',
       color: 'text-orange-600',
       bgColor: 'bg-orange-100',
@@ -107,34 +159,46 @@ export default function DocumentNumberingPage() {
         </Card>
       )}
 
-      {/* Invoice Prefix Configuration */}
+      {/* Prefix Configuration */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Invoice Prefix
+            <Hash className="h-5 w-5" />
+            Document Prefixes
           </CardTitle>
           <CardDescription>
-            Customize the prefix for invoice numbers. Default is "INV"
+            Customize the prefix for each document type. Changes apply to new documents only.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <label className="text-sm font-medium mb-2 block">Invoice Prefix</label>
-            <input
-              type="text"
-              value={invoicePrefix}
-              onChange={(e) => setInvoicePrefix(e.target.value.toUpperCase())}
-              placeholder="INV"
-              maxLength={20}
-              className="w-full max-w-xs px-3 py-2 border rounded-md"
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Example: {invoicePrefix || 'INV'}-2026-0001
-            </p>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {prefixConfigs.map((config) => {
+              const Icon = config.icon;
+              return (
+                <div key={config.label} className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <div className={`p-1.5 ${config.bgColor} rounded`}>
+                      <Icon className={`h-4 w-4 ${config.color}`} />
+                    </div>
+                    {config.label}
+                  </label>
+                  <input
+                    type="text"
+                    value={config.value}
+                    onChange={(e) => config.setter(e.target.value.toUpperCase())}
+                    placeholder={config.default}
+                    maxLength={20}
+                    className="w-full px-3 py-2 border rounded-md"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Preview: <span className="font-mono font-medium">{config.value || config.default}-2026-0001</span>
+                  </p>
+                </div>
+              );
+            })}
           </div>
 
-          <Button onClick={handleSave} disabled={isSaving}>
+          <Button onClick={handleSave} disabled={isSaving} className="mt-4">
             <Save className="mr-2 h-4 w-4" />
             {isSaving ? 'Saving...' : 'Save Changes'}
           </Button>
@@ -199,7 +263,7 @@ export default function DocumentNumberingPage() {
             <li><code>YYYY</code> - Four-digit year (e.g., 2026)</li>
             <li><code>NNNN</code> - Four-digit sequential number (e.g., 0001, 0002)</li>
           </ul>
-          <p className="mt-4"><strong>Important:</strong> Changing the invoice prefix will apply to all new invoices. Existing invoices keep their original numbers.</p>
+          <p className="mt-4"><strong>Important:</strong> Changing prefixes will apply to all new documents. Existing documents keep their original numbers.</p>
         </CardContent>
       </Card>
 
@@ -216,22 +280,22 @@ export default function DocumentNumberingPage() {
             <h4 className="font-semibold mb-1">Invoice Numbering</h4>
             <p className="text-muted-foreground">
               Generated from <code className="bg-muted px-1 py-0.5 rounded">invoice_sequences</code> table.
-              Supports custom prefix per team. Reset annually.
+              Configurable prefix per team. Reset annually.
             </p>
           </div>
           <div>
             <h4 className="font-semibold mb-1">Bill Numbering</h4>
             <p className="text-muted-foreground">
               Generated from <code className="bg-muted px-1 py-0.5 rounded">supplier_bill_sequences</code> table.
-              Fixed "BILL" prefix. Reset annually.
+              Configurable prefix per team. Reset annually.
             </p>
           </div>
           <div>
             <h4 className="font-semibold mb-1">Advance Numbering</h4>
             <p className="text-muted-foreground">
-              Customer advances use <code className="bg-muted px-1 py-0.5 rounded">customer_advance_sequences</code> (ADV-C prefix).
-              Supplier advances use <code className="bg-muted px-1 py-0.5 rounded">supplier_advance_sequences</code> (ADV-S prefix).
-              Both reset annually.
+              Customer advances use <code className="bg-muted px-1 py-0.5 rounded">customer_advance_sequences</code>.
+              Supplier advances use <code className="bg-muted px-1 py-0.5 rounded">supplier_advance_sequences</code>.
+              Both have configurable prefixes and reset annually.
             </p>
           </div>
         </CardContent>

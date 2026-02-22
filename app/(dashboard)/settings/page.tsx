@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Building2, Receipt, CreditCard, Wallet, Mail, Hash, Ruler, Tags, Users, Download } from 'lucide-react';
+import { Building2, Receipt, CreditCard, Wallet, Hash, Ruler, Tags, Users, Download, Sparkles, Layout } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function SettingsPage() {
@@ -9,12 +9,6 @@ export default function SettingsPage() {
       description: 'Manage your business information, TPN, GST Number, address, and logo',
       href: '/settings/business',
       icon: Building2,
-    },
-    {
-      title: 'Email Settings',
-      description: 'Configure SMTP settings for sending invoices, receipts, and payment reminders',
-      href: '/settings/email',
-      icon: Mail,
     },
     {
       title: 'Bank Accounts',
@@ -57,6 +51,18 @@ export default function SettingsPage() {
       description: 'Manage team members, invite new users, and assign roles',
       href: '/settings/users',
       icon: Users,
+    },
+    {
+      title: 'Subscription',
+      description: 'Manage your plan, upgrade or downgrade, and view billing history',
+      href: '/settings/subscription',
+      icon: Sparkles,
+    },
+    {
+      title: 'Document Templates',
+      description: 'Customize invoice PDF styles, email templates, and SMS/WhatsApp message templates',
+      href: '/settings/templates',
+      icon: Layout,
     },
     {
       title: 'Data Export',

@@ -13,7 +13,7 @@ import {
   type UpdateTaxClassificationInput,
   type DeleteTaxClassificationInput,
 } from './validation';
-import { validatedActionWithUser } from '@/lib/auth/middleware';
+import { validatedActionWithUser, validatedActionWithRole } from '@/lib/auth/middleware';
 import { getTaxClassificationById, taxClassificationCodeExists } from './queries';
 import { getTeamForUser } from '@/lib/db/queries';
 
@@ -148,8 +148,9 @@ export const updateTaxClassification = validatedActionWithUser(
   }
 );
 
-export const deleteTaxClassification = validatedActionWithUser(
+export const deleteTaxClassification = validatedActionWithRole(
   deleteTaxClassificationSchema,
+  'admin',
   async (data: DeleteTaxClassificationInput, _, user) => {
     const team = await getTeamForUser();
     if (!team) {
@@ -247,8 +248,9 @@ export async function seedDefaultTaxClassifications(teamId: string, userId: stri
 /**
  * Reset tax classifications to defaults (removes all existing, adds defaults)
  */
-export const resetToDefaultTaxClassifications = validatedActionWithUser(
+export const resetToDefaultTaxClassifications = validatedActionWithRole(
   z.object({}),
+  'owner',
   async (_, __, user) => {
     try {
       const team = await getTeamForUser();

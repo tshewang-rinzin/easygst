@@ -1,6 +1,6 @@
 'use server';
 
-import { validatedActionWithUser } from '@/lib/auth/middleware';
+import { validatedActionWithUser, validatedActionWithRole } from '@/lib/auth/middleware';
 import {
   supplierPaymentSchema,
   deleteSupplierPaymentSchema,
@@ -119,8 +119,9 @@ export const recordSupplierPayment = validatedActionWithUser(
 /**
  * Delete a supplier payment
  */
-export const deleteSupplierPayment = validatedActionWithUser(
+export const deleteSupplierPayment = validatedActionWithRole(
   deleteSupplierPaymentSchema,
+  'admin',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();
@@ -261,7 +262,7 @@ export const recordSupplierAdvance = validatedActionWithUser(
             .returning();
         }
 
-        const advanceNumber = `ADV-S-${year}-${String(nextNumber).padStart(4, '0')}`;
+        const advanceNumber = `${team.supplierAdvancePrefix || 'ADV-S'}-${year}-${String(nextNumber).padStart(4, '0')}`;
 
         // Insert supplier advance (payment with type='advance', no billId)
         await tx.insert(supplierPayments).values({
@@ -452,8 +453,9 @@ export const allocateSupplierAdvance = validatedActionWithUser(
 /**
  * Delete a supplier advance
  */
-export const deleteSupplierAdvance = validatedActionWithUser(
+export const deleteSupplierAdvance = validatedActionWithRole(
   deleteSupplierAdvanceSchema,
+  'admin',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();

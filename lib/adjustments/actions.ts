@@ -1,6 +1,6 @@
 'use server';
 
-import { validatedActionWithUser } from '@/lib/auth/middleware';
+import { validatedActionWithUser, validatedActionWithRole } from '@/lib/auth/middleware';
 import { z } from 'zod';
 import { db } from '@/lib/db/drizzle';
 import { invoiceAdjustments, invoices, activityLogs, ActivityType } from '@/lib/db/schema';
@@ -105,8 +105,9 @@ export const createAdjustment = validatedActionWithUser(
 /**
  * Delete an adjustment and reverse the invoice amounts
  */
-export const deleteAdjustment = validatedActionWithUser(
+export const deleteAdjustment = validatedActionWithRole(
   deleteAdjustmentSchema,
+  'admin',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();

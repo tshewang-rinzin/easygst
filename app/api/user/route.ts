@@ -1,6 +1,6 @@
-import { getUser } from '@/lib/db/queries';
+import { NextRequest, NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 
-export async function GET() {
-  const user = await getUser();
-  return Response.json(user);
-}
+export const GET = withAuth(async (request: NextRequest, { user }) => {
+  return NextResponse.json(user);
+});

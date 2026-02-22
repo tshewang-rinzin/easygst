@@ -1,21 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { db } from '@/lib/db/drizzle';
 import { invoices } from '@/lib/db/schema';
-import { getTeamForUser } from '@/lib/db/queries';
 import { eq, and, desc } from 'drizzle-orm';
 
-type Context = {
-  params: Promise<{ id: string }>;
-};
-
-export async function GET(request: NextRequest, context: Context) {
+export const GET = withAuth(async (request: NextRequest, { team, params }) => {
   try {
-    const { id: customerId } = await context.params;
-    const team = await getTeamForUser();
-
-    if (!team) {
-      return NextResponse.json({ error: 'Team not found' }, { status: 401 });
-    }
+    const customerId = params.id;
 
     const customerInvoices = await db
       .select({
@@ -45,4 +36,4 @@ export async function GET(request: NextRequest, context: Context) {
       { status: 500 }
     );
   }
-}
+});

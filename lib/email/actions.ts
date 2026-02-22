@@ -5,12 +5,13 @@ import { sendEmail, isValidEmail } from './utils';
 import InvoiceEmail from './templates/invoice-email';
 import PaymentReceiptEmail from './templates/payment-receipt-email';
 import PaymentReminderEmail from './templates/payment-reminder-email';
+import QuotationEmail from './templates/quotation-email';
 import { db } from '@/lib/db/drizzle';
-import { invoices, invoiceItems, customers, customerPayments, teams, emailSettings } from '@/lib/db/schema';
+import { invoices, invoiceItems, customers, customerPayments, teams, emailSettings, quotations } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { getTeamForUser, getUser } from '@/lib/db/queries';
 import { revalidatePath } from 'next/cache';
-import { validatedActionWithUser } from '@/lib/auth/middleware';
+import { validatedActionWithUser, validatedActionWithRole } from '@/lib/auth/middleware';
 import nodemailer from 'nodemailer';
 import { getEmailSettings } from './queries';
 import { clearEmailSettingsCache } from './client';
@@ -317,6 +318,106 @@ export async function sendPaymentReminderEmail(
   }
 }
 
+/**
+ * Send quotation email to customer
+ */
+export async function sendQuotationEmail(
+  quotationId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Get team for auth
+    const team = await getTeamForUser();
+    if (!team) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    // Get quotation with customer and items
+    const quotation = await db.query.quotations.findFirst({
+      where: eq(quotations.id, quotationId),
+      with: {
+        customer: true,
+        items: true,
+        team: true,
+      },
+    });
+
+    if (!quotation) {
+      return { success: false, error: 'Quotation not found' };
+    }
+
+    if (quotation.teamId !== team.id) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    // Validate customer email
+    if (!quotation.customer.email) {
+      return { success: false, error: 'Customer email not found' };
+    }
+
+    if (!isValidEmail(quotation.customer.email)) {
+      return { success: false, error: 'Invalid customer email address' };
+    }
+
+    // Prepare email data
+    const items = quotation.items.map(item => ({
+      description: item.description,
+      quantity: item.quantity,
+      unitPrice: `${quotation.currency} ${parseFloat(item.unitPrice).toFixed(2)}`,
+      total: `${quotation.currency} ${parseFloat(item.lineTotal).toFixed(2)}`,
+    }));
+
+    const formatCurrency = (amount: string) =>
+      `${quotation.currency} ${parseFloat(amount).toFixed(2)}`;
+
+    // Generate view URL
+    const viewUrl = process.env.NEXT_PUBLIC_APP_URL
+      ? `${process.env.NEXT_PUBLIC_APP_URL}/quotations/${quotation.id}`
+      : undefined;
+
+    // Send email
+    const displayName = quotation.team.businessName || quotation.team.name;
+    const result = await sendEmail({
+      to: quotation.customer.email,
+      subject: `Quotation ${quotation.quotationNumber} from ${displayName}`,
+      template: QuotationEmail({
+        businessName: displayName,
+        customerName: quotation.customer.name,
+        quotationNumber: quotation.quotationNumber,
+        quotationDate: new Date(quotation.quotationDate).toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+        }),
+        validUntil: quotation.validUntil
+          ? new Date(quotation.validUntil).toLocaleDateString('en-GB', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric',
+            })
+          : 'Not specified',
+        totalAmount: formatCurrency(quotation.totalAmount),
+        currency: quotation.currency,
+        items,
+        subtotal: formatCurrency(quotation.subtotal),
+        totalTax: formatCurrency(quotation.totalTax),
+        viewUrl,
+      }),
+    });
+
+    if (!result.success) {
+      return { success: false, error: result.error };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('[Email] Error sending quotation email:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to send email',
+    };
+  }
+}
+
 // ============================================================
 // EMAIL SETTINGS ACTIONS
 // ============================================================
@@ -336,8 +437,9 @@ const emailSettingsSchema = z.object({
 /**
  * Update global email settings
  */
-export const updateEmailSettings = validatedActionWithUser(
+export const updateEmailSettings = validatedActionWithRole(
   emailSettingsSchema,
+  'owner',
   async (data, _, user) => {
     try {
       // Check if settings already exist

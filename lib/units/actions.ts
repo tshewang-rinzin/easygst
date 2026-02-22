@@ -1,7 +1,7 @@
 'use server';
 
 import { z } from 'zod';
-import { validatedActionWithUser } from '@/lib/auth/middleware';
+import { validatedActionWithUser, validatedActionWithRole } from '@/lib/auth/middleware';
 import { unitSchema, updateUnitSchema, deleteUnitSchema } from './validation';
 import { db } from '@/lib/db/drizzle';
 import { units, activityLogs, ActivityType } from '@/lib/db/schema';
@@ -32,6 +32,7 @@ export const createUnit = validatedActionWithUser(
           teamId: team.id,
           name: data.name,
           abbreviation: data.abbreviation,
+          category: data.category,
           description: data.description || null,
           isActive: data.isActive,
           sortOrder: data.sortOrder,
@@ -93,6 +94,7 @@ export const updateUnit = validatedActionWithUser(
         .set({
           name: data.name,
           abbreviation: data.abbreviation,
+          category: data.category,
           description: data.description || null,
           isActive: data.isActive,
           sortOrder: data.sortOrder,
@@ -122,8 +124,9 @@ export const updateUnit = validatedActionWithUser(
 /**
  * Delete a unit (soft delete by setting isActive to false)
  */
-export const deleteUnit = validatedActionWithUser(
+export const deleteUnit = validatedActionWithRole(
   deleteUnitSchema,
+  'admin',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();
@@ -171,18 +174,31 @@ export const deleteUnit = validatedActionWithUser(
  */
 export async function seedDefaultUnits(teamId: string, userId: string) {
   const defaultUnits = [
-    { name: 'Piece', abbreviation: 'pcs', description: 'Individual items', sortOrder: 1 },
-    { name: 'Packet', abbreviation: 'pkt', description: 'Packet or pack', sortOrder: 2 },
-    { name: 'Box', abbreviation: 'box', description: 'Box or carton', sortOrder: 3 },
-    { name: 'Kilogram', abbreviation: 'kg', description: 'Kilogram (weight)', sortOrder: 4 },
-    { name: 'Gram', abbreviation: 'g', description: 'Gram (weight)', sortOrder: 5 },
-    { name: 'Liter', abbreviation: 'L', description: 'Liter (volume)', sortOrder: 6 },
-    { name: 'Milliliter', abbreviation: 'ml', description: 'Milliliter (volume)', sortOrder: 7 },
-    { name: 'Meter', abbreviation: 'm', description: 'Meter (length)', sortOrder: 8 },
-    { name: 'Hour', abbreviation: 'hr', description: 'Hour (time)', sortOrder: 9 },
-    { name: 'Day', abbreviation: 'day', description: 'Day (time)', sortOrder: 10 },
-    { name: 'Month', abbreviation: 'mo', description: 'Month (time)', sortOrder: 11 },
-    { name: 'Service', abbreviation: 'svc', description: 'Service or consultation', sortOrder: 12 },
+    // Common (most used — top of every list)
+    { name: 'Piece', abbreviation: 'pcs', category: 'common', description: 'Individual items', sortOrder: 1 },
+    { name: 'Service', abbreviation: 'svc', category: 'common', description: 'Service or consultation', sortOrder: 2 },
+    { name: 'Unit', abbreviation: 'unit', category: 'common', description: 'Generic unit', sortOrder: 3 },
+    { name: 'Lot', abbreviation: 'lot', category: 'common', description: 'Lot or batch', sortOrder: 4 },
+    // Time
+    { name: 'Hour', abbreviation: 'hr', category: 'time', description: 'Hour', sortOrder: 10 },
+    { name: 'Day', abbreviation: 'day', category: 'time', description: 'Day', sortOrder: 11 },
+    { name: 'Month', abbreviation: 'mo', category: 'time', description: 'Month', sortOrder: 12 },
+    { name: 'Year', abbreviation: 'yr', category: 'time', description: 'Year', sortOrder: 13 },
+    // Quantity
+    { name: 'Packet', abbreviation: 'pkt', category: 'quantity', description: 'Packet or pack', sortOrder: 20 },
+    { name: 'Box', abbreviation: 'box', category: 'quantity', description: 'Box or carton', sortOrder: 21 },
+    { name: 'Set', abbreviation: 'set', category: 'quantity', description: 'Set of items', sortOrder: 22 },
+    { name: 'Pair', abbreviation: 'pair', category: 'quantity', description: 'Pair of items', sortOrder: 23 },
+    // Weight
+    { name: 'Kilogram', abbreviation: 'kg', category: 'weight', description: 'Kilogram', sortOrder: 30 },
+    { name: 'Gram', abbreviation: 'g', category: 'weight', description: 'Gram', sortOrder: 31 },
+    // Volume
+    { name: 'Liter', abbreviation: 'L', category: 'volume', description: 'Liter', sortOrder: 40 },
+    { name: 'Milliliter', abbreviation: 'ml', category: 'volume', description: 'Milliliter', sortOrder: 41 },
+    // Length
+    { name: 'Meter', abbreviation: 'm', category: 'length', description: 'Meter', sortOrder: 50 },
+    { name: 'Square Meter', abbreviation: 'sqm', category: 'length', description: 'Square meter (area)', sortOrder: 51 },
+    { name: 'Feet', abbreviation: 'ft', category: 'length', description: 'Feet', sortOrder: 52 },
   ];
 
   try {
@@ -191,6 +207,7 @@ export async function seedDefaultUnits(teamId: string, userId: string) {
         teamId,
         name: unit.name,
         abbreviation: unit.abbreviation,
+        category: unit.category,
         description: unit.description,
         sortOrder: unit.sortOrder,
         isActive: true,
@@ -205,8 +222,9 @@ export async function seedDefaultUnits(teamId: string, userId: string) {
 /**
  * Reset units to defaults (removes all existing, adds defaults)
  */
-export const resetToDefaultUnits = validatedActionWithUser(
+export const resetToDefaultUnits = validatedActionWithRole(
   z.object({}),
+  'owner',
   async (_, __, user) => {
     try {
       const team = await getTeamForUser();

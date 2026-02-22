@@ -1,14 +1,9 @@
-import { NextResponse } from 'next/server';
-import { getUser } from '@/lib/db/queries';
+import { NextRequest, NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getEmailSettings } from '@/lib/email/queries';
 
-export async function GET() {
+export const GET = withAuth(async (request: NextRequest, { user }) => {
   try {
-    const user = await getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const settings = await getEmailSettings();
 
     // Return settings without password for security
@@ -36,4 +31,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

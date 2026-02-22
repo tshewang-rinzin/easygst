@@ -176,6 +176,13 @@
       "when": 1739232000000,
       "tag": "0024_financial_constraints",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1771754759406,
+      "tag": "0025_quiet_jubilee",
+      "breakpoints": true
     }
   ]
 }

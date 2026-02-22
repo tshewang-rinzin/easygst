@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import {
   getInvoices,
   getTotalRevenue,
@@ -7,19 +8,13 @@ import {
 import { getCashSales } from '@/lib/invoices/cash-sales-queries';
 import { getCustomerAdvances } from '@/lib/customer-payments/queries';
 import { getSupplierAdvances } from '@/lib/supplier-payments/queries';
-import { getTeamForUser } from '@/lib/db/queries';
 import { db } from '@/lib/db/drizzle';
 import { invoices, supplierBills } from '@/lib/db/schema';
 import { eq, and, lt, ne } from 'drizzle-orm';
 import Decimal from 'decimal.js';
 
-export async function GET() {
+export const GET = withAuth(async (request: NextRequest, { team }) => {
   try {
-    const team = await getTeamForUser();
-    if (!team) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     console.log('[Dashboard] Team ID:', team.id);
 
     // Get all invoices
@@ -199,4 +194,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

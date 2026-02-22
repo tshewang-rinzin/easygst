@@ -1,6 +1,6 @@
 'use server';
 
-import { validatedActionWithUser } from '@/lib/auth/middleware';
+import { validatedActionWithUser, validatedActionWithRole } from '@/lib/auth/middleware';
 import {
   invoiceSchema,
   updateInvoiceSchema,
@@ -25,6 +25,7 @@ import { revalidatePath } from 'next/cache';
 import { generateInvoiceNumber } from './numbering';
 import { calculateLineItem, calculateInvoiceTotals } from './calculations';
 import { getGSTClassification } from './gst-classification';
+import { checkUsageLimit } from '@/lib/features/limits';
 
 /**
  * Create a new invoice with line items
@@ -35,6 +36,12 @@ export const createInvoice = validatedActionWithUser(
     try {
       const team = await getTeamForUser();
       if (!team) return { error: 'Team not found' };
+
+      // Check usage limit
+      const usageCheck = await checkUsageLimit('invoices', team.id);
+      if (!usageCheck.allowed) {
+        return { error: `You've reached the maximum of ${usageCheck.limit} invoices per month on your current plan. Current: ${usageCheck.current}.` };
+      }
 
       // Generate invoice number (concurrency-safe)
       const invoiceNumber = await generateInvoiceNumber(
@@ -255,8 +262,9 @@ export const updateInvoice = validatedActionWithUser(
 /**
  * Delete an invoice (soft delete, only drafts)
  */
-export const deleteInvoice = validatedActionWithUser(
+export const deleteInvoice = validatedActionWithRole(
   deleteInvoiceSchema,
+  'admin',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();
@@ -281,8 +289,51 @@ export const deleteInvoice = validatedActionWithUser(
         };
       }
 
-      // Delete invoice items and invoice in transaction
+      // Delete invoice items and invoice in transaction, update contract if linked
       await db.transaction(async (tx) => {
+        // If linked to a contract, reverse the contract totals
+        if (invoice.contractId) {
+          const { contracts, contractMilestones, contractBillingSchedule } = await import('@/lib/db/schema');
+
+          // Get the invoice subtotal (before tax) to reverse from contract
+          // Contract tracks GST-inclusive amounts, so use totalAmount
+          const invoiceAmount = parseFloat(invoice.subtotal) + parseFloat(invoice.totalTax);
+
+          const [contract] = await tx
+            .select()
+            .from(contracts)
+            .where(eq(contracts.id, invoice.contractId));
+
+          if (contract) {
+            const newTotalInvoiced = Math.max(0, parseFloat(contract.totalInvoiced) - invoiceAmount);
+            const newRemainingValue = parseFloat(contract.totalValue) - newTotalInvoiced;
+
+            await tx.update(contracts).set({
+              totalInvoiced: newTotalInvoiced.toFixed(2),
+              remainingValue: newRemainingValue.toFixed(2),
+              updatedAt: new Date(),
+            }).where(eq(contracts.id, invoice.contractId));
+          }
+
+          // Reset milestone status if linked
+          if (invoice.contractMilestoneId) {
+            await tx.update(contractMilestones).set({
+              status: 'pending',
+              invoiceId: null,
+              updatedAt: new Date(),
+            }).where(eq(contractMilestones.id, invoice.contractMilestoneId));
+          }
+
+          // Reset billing schedule status if linked
+          if (invoice.contractBillingScheduleId) {
+            await tx.update(contractBillingSchedule).set({
+              status: 'pending',
+              invoiceId: null,
+              updatedAt: new Date(),
+            }).where(eq(contractBillingSchedule.id, invoice.contractBillingScheduleId));
+          }
+        }
+
         await tx.delete(invoiceItems).where(eq(invoiceItems.invoiceId, data.id));
         await tx.delete(invoices).where(eq(invoices.id, data.id));
       });
@@ -296,6 +347,8 @@ export const deleteInvoice = validatedActionWithUser(
       });
 
       revalidatePath('/invoices');
+      revalidatePath('/contracts');
+      if (invoice.contractId) revalidatePath(`/contracts/${invoice.contractId}`);
       return { success: 'Invoice deleted successfully' };
     } catch (error) {
       console.error('Error deleting invoice:', error);
@@ -308,8 +361,9 @@ export const deleteInvoice = validatedActionWithUser(
  * Lock an invoice (prevent further edits)
  * This happens when an invoice is sent
  */
-export const lockInvoice = validatedActionWithUser(
+export const lockInvoice = validatedActionWithRole(
   lockInvoiceSchema,
+  'admin',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();
@@ -370,8 +424,9 @@ export const updateInvoiceStatus = validatedActionWithUser(
  * - Auto-reverses all payments allocated to this invoice
  * - Marks the invoice as cancelled with reason
  */
-export const cancelInvoice = validatedActionWithUser(
+export const cancelInvoice = validatedActionWithRole(
   cancelInvoiceSchema,
+  'admin',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();
@@ -466,6 +521,45 @@ export const cancelInvoice = validatedActionWithUser(
             updatedAt: new Date(),
           })
           .where(eq(invoices.id, invoice.id));
+
+        // If linked to a contract, reverse contract totals
+        if (invoice.contractId) {
+          const { contracts, contractMilestones, contractBillingSchedule } = await import('@/lib/db/schema');
+
+          const invoiceAmount = parseFloat(invoice.totalAmount);
+
+          const [contract] = await tx
+            .select()
+            .from(contracts)
+            .where(eq(contracts.id, invoice.contractId));
+
+          if (contract) {
+            const newTotalInvoiced = Math.max(0, parseFloat(contract.totalInvoiced) - invoiceAmount);
+            const newRemainingValue = parseFloat(contract.totalValue) - newTotalInvoiced;
+
+            await tx.update(contracts).set({
+              totalInvoiced: newTotalInvoiced.toFixed(2),
+              remainingValue: newRemainingValue.toFixed(2),
+              updatedAt: new Date(),
+            }).where(eq(contracts.id, invoice.contractId));
+          }
+
+          if (invoice.contractMilestoneId) {
+            await tx.update(contractMilestones).set({
+              status: 'pending',
+              invoiceId: null,
+              updatedAt: new Date(),
+            }).where(eq(contractMilestones.id, invoice.contractMilestoneId));
+          }
+
+          if (invoice.contractBillingScheduleId) {
+            await tx.update(contractBillingSchedule).set({
+              status: 'pending',
+              invoiceId: null,
+              updatedAt: new Date(),
+            }).where(eq(contractBillingSchedule.id, invoice.contractBillingScheduleId));
+          }
+        }
       });
 
       // Log activity
@@ -479,6 +573,8 @@ export const cancelInvoice = validatedActionWithUser(
       revalidatePath('/invoices');
       revalidatePath(`/invoices/${data.id}`);
       revalidatePath('/payments');
+      revalidatePath('/contracts');
+      if (invoice.contractId) revalidatePath(`/contracts/${invoice.contractId}`);
       return { success: 'Invoice cancelled successfully' };
     } catch (error) {
       console.error('Error cancelling invoice:', error);

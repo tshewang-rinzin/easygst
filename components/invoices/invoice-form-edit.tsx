@@ -33,6 +33,8 @@ interface Product {
   unit: string;
   defaultTaxRate: string;
   isTaxExempt: boolean;
+  variantId?: string;
+  variantName?: string;
 }
 
 interface LineItem {
@@ -44,6 +46,8 @@ interface LineItem {
   discountPercent: string;
   taxRate: string;
   isTaxExempt: boolean;
+  productId?: string;
+  variantId?: string;
 }
 
 interface InvoiceData {
@@ -139,6 +143,8 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
       discountPercent: parseFloat(item.discountPercent) || 0,
       taxRate: parseFloat(item.taxRate) || 0,
       isTaxExempt: item.isTaxExempt,
+      productId: item.productId || undefined,
+      variantId: item.variantId || undefined,
     }));
 
     // Create clean FormData with proper structure
@@ -210,6 +216,8 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
               unit: product.unit,
               taxRate: product.defaultTaxRate,
               isTaxExempt: product.isTaxExempt,
+              productId: product.id,
+              variantId: product.variantId,
             }
           : item
       )

@@ -1,28 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getInvoiceWithDetails } from '@/lib/invoices/queries';
-import { getTeamForUser } from '@/lib/db/queries';
 import { getActiveBankAccounts } from '@/lib/bank-accounts/queries';
-import { generateInvoicePDF, getInvoicePDFFilename } from '@/lib/pdf/generator';
+import { generateInvoicePDF, getInvoicePDFFilename, InvoiceTemplateType } from '@/lib/pdf/generator';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const GET = withAuth(async (request: NextRequest, { team, params }) => {
   try {
-    const { id } = await params;
-
-    const [invoice, team, bankAccounts] = await Promise.all([
-      getInvoiceWithDetails(id),
-      getTeamForUser(),
-      getActiveBankAccounts().catch(() => []), // Gracefully handle if no bank accounts
+    const [invoice, bankAccounts] = await Promise.all([
+      getInvoiceWithDetails(params.id),
+      getActiveBankAccounts().catch(() => []),
     ]);
 
     if (!invoice) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
-    }
-
-    if (!team) {
-      return NextResponse.json({ error: 'Team not found' }, { status: 404 });
     }
 
     // Generate verification URL using the request origin
@@ -97,8 +87,10 @@ export async function GET(
       verificationUrl,
     };
 
-    // Generate PDF
-    const pdfStream = await generateInvoicePDF(pdfData);
+    // Generate PDF with template settings
+    const templateType = (team.invoiceTemplate as InvoiceTemplateType) || 'classic';
+    const accentColor = team.invoiceAccentColor || '#1f2937';
+    const pdfStream = await generateInvoicePDF(pdfData, templateType, accentColor);
     const filename = getInvoicePDFFilename(invoice.invoiceNumber);
 
     // Convert stream to buffer
@@ -122,4 +114,4 @@ export async function GET(
       { status: 500 }
     );
   }
-}
+});

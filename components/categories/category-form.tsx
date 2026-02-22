@@ -2,6 +2,7 @@
 
 import { useState, useActionState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import useSWR from 'swr';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,6 +20,8 @@ import { Loader2 } from 'lucide-react';
 import type { productCategories } from '@/lib/db/schema';
 import type { InferSelectModel } from 'drizzle-orm';
 
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 type Category = InferSelectModel<typeof productCategories>;
 
 type ActionState = {
@@ -34,6 +37,10 @@ interface CategoryFormProps {
 export function CategoryForm({ category, mode }: CategoryFormProps) {
   const router = useRouter();
   const [isActive, setIsActive] = useState(category?.isActive ?? true);
+  const [parentId, setParentId] = useState(category?.parentId || '');
+
+  // Fetch all categories for parent selector
+  const { data: categories } = useSWR<Array<{ id: string; name: string; depth: number; parentId: string | null }>>('/api/categories?format=dropdown', fetcher);
 
   const action = mode === 'create' ? createCategory : updateCategory;
 
@@ -50,11 +57,20 @@ export function CategoryForm({ category, mode }: CategoryFormProps) {
 
   const handleSubmit = (formData: FormData) => {
     formData.set('isActive', String(isActive));
+    formData.set('parentId', parentId || '');
     if (mode === 'edit' && category) {
       formData.set('id', String(category.id));
     }
     formAction(formData);
   };
+
+  // Filter out current category and its children from parent options
+  const availableParents = categories?.filter((c) => {
+    if (mode === 'edit' && category) {
+      return c.id !== category.id;
+    }
+    return true;
+  });
 
   return (
     <form action={handleSubmit}>
@@ -80,6 +96,27 @@ export function CategoryForm({ category, mode }: CategoryFormProps) {
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="parentId">Parent Category</Label>
+            <select
+              id="parentId"
+              name="parentId"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              value={parentId}
+              onChange={(e) => setParentId(e.target.value)}
+            >
+              <option value="">— None (Top Level) —</option>
+              {availableParents?.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {'—'.repeat(cat.depth)}{cat.depth > 0 ? ' ' : ''}{cat.name}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500">
+              Optional — select a parent to create a subcategory
+            </p>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
@@ -88,6 +125,19 @@ export function CategoryForm({ category, mode }: CategoryFormProps) {
               placeholder="Optional description for this category"
               rows={3}
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="sortOrder">Sort Order</Label>
+              <Input
+                id="sortOrder"
+                name="sortOrder"
+                type="number"
+                min="0"
+                defaultValue={category?.sortOrder ?? 0}
+              />
+            </div>
           </div>
 
           <div className="flex items-center space-x-2">

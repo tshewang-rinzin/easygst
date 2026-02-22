@@ -1,20 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { getCustomerById } from '@/lib/customers/queries';
-import { getUser } from '@/lib/db/queries';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const GET = withAuth(async (request: NextRequest, { params }) => {
   try {
-    const user = await getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { id } = await params;
-
-    const customer = await getCustomerById(id);
+    const customer = await getCustomerById(params.id);
 
     if (!customer) {
       return NextResponse.json({ error: 'Customer not found' }, { status: 404 });
@@ -28,4 +18,4 @@ export async function GET(
       { status: 500 }
     );
   }
-}
+});

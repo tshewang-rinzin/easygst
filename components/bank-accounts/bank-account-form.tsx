@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useActionState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { createBankAccount, updateBankAccount } from '@/lib/bank-accounts/actions';
-import { PAYMENT_METHODS, ACCOUNT_TYPES } from '@/lib/bank-accounts/validation';
+import { ACCOUNT_TYPES } from '@/lib/bank-accounts/validation';
 import { Loader2, AlertCircle, CheckCircle2, Upload, X } from 'lucide-react';
 import type { BankAccount } from '@/lib/db/schema';
 import Image from 'next/image';
@@ -40,22 +40,34 @@ interface BankAccountFormProps {
 export function BankAccountForm({ account, onSuccess }: BankAccountFormProps) {
   const [isDefault, setIsDefault] = useState(account?.isDefault ?? false);
   const [isActive, setIsActive] = useState(account?.isActive ?? true);
-  const [paymentMethod, setPaymentMethod] = useState(account?.paymentMethod || 'bank_transfer');
   const [accountType, setAccountType] = useState(account?.accountType || 'savings');
   const [qrCodePreview, setQrCodePreview] = useState<string | null>(account?.qrCodeUrl || null);
   const [qrCodeFile, setQrCodeFile] = useState<File | null>(null);
 
-  const action = account ? updateBankAccount : createBankAccount;
-  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
-    async (prevState: ActionState, formData: FormData) => {
-      const result = await action(formData);
-      if ('success' in result && result.success && onSuccess) {
-        onSuccess();
-      }
-      return result;
-    },
-    {}
-  );
+  const serverAction = account ? updateBankAccount : createBankAccount;
+  const [state, setState] = useState<ActionState>({});
+  const [isPending, setIsPending] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsPending(true);
+    setState({});
+
+    const formData = new FormData(e.currentTarget);
+    // Ensure checkboxes are included
+    if (!formData.has('isDefault')) formData.append('isDefault', 'false');
+    if (!formData.has('isActive')) formData.append('isActive', 'true');
+
+    const result = await serverAction({}, formData);
+    setIsPending(false);
+
+    if (result && 'success' in result && result.success) {
+      setState({ success: typeof result.success === 'string' ? result.success : 'Saved successfully' });
+      if (onSuccess) onSuccess();
+    } else if (result && 'error' in result) {
+      setState({ error: typeof result.error === 'string' ? result.error : 'Failed to save' });
+    }
+  };
 
   const handleQrCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -89,7 +101,7 @@ export function BankAccountForm({ account, onSuccess }: BankAccountFormProps) {
   };
 
   return (
-    <form action={formAction}>
+    <form onSubmit={handleSubmit}>
       {account && <input type="hidden" name="id" value={account.id} />}
 
       <Card>
@@ -188,32 +200,7 @@ export function BankAccountForm({ account, onSuccess }: BankAccountFormProps) {
             </div>
           </div>
 
-          {/* Payment Method */}
-          <div>
-            <Label htmlFor="paymentMethod" className="mb-2">
-              Payment Method <span className="text-red-500">*</span>
-            </Label>
-            <Select
-              name="paymentMethod"
-              value={paymentMethod}
-              onValueChange={setPaymentMethod}
-              required
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select payment method" />
-              </SelectTrigger>
-              <SelectContent>
-                {PAYMENT_METHODS.map((method) => (
-                  <SelectItem key={method.value} value={method.value}>
-                    {method.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-gray-500 mt-1">
-              Choose the payment method this account is associated with
-            </p>
-          </div>
+          <input type="hidden" name="paymentMethod" value="bank_transfer" />
 
           {/* QR Code Upload */}
           <div>

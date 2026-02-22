@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getTeamForUser } from '@/lib/db/queries';
+import { withAuth } from '@/lib/auth/with-auth';
 import { db } from '@/lib/db/drizzle';
 import { customers } from '@/lib/db/schema';
 import { eq, and, or, ilike } from 'drizzle-orm';
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request: NextRequest, { team }) => {
   try {
-    const team = await getTeamForUser();
-    if (!team) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get('q') || '';
 
@@ -43,4 +38,4 @@ export async function GET(request: NextRequest) {
     console.error('Customer search error:', error);
     return NextResponse.json({ error: 'Failed to search customers' }, { status: 500 });
   }
-}
+});

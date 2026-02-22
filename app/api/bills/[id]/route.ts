@@ -1,29 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/with-auth';
 import { db } from '@/lib/db/drizzle';
 import { supplierBills, supplierBillItems } from '@/lib/db/schema';
-import { getTeamForUser } from '@/lib/db/queries';
 import { eq, and } from 'drizzle-orm';
 
-type Context = {
-  params: Promise<{ id: string }>;
-};
-
-export async function GET(request: NextRequest, context: Context) {
+export const GET = withAuth(async (request: NextRequest, { team, params }) => {
   try {
-    const { id } = await context.params;
-    const team = await getTeamForUser();
-
-    if (!team) {
-      return NextResponse.json({ error: 'Team not found' }, { status: 401 });
-    }
-
     // Get bill
     const [bill] = await db
       .select()
       .from(supplierBills)
       .where(
         and(
-          eq(supplierBills.id, id),
+          eq(supplierBills.id, params.id),
           eq(supplierBills.teamId, team.id)
         )
       )
@@ -37,7 +26,7 @@ export async function GET(request: NextRequest, context: Context) {
     const items = await db
       .select()
       .from(supplierBillItems)
-      .where(eq(supplierBillItems.billId, id))
+      .where(eq(supplierBillItems.billId, params.id))
       .orderBy(supplierBillItems.sortOrder);
 
     return NextResponse.json({ bill, items });
@@ -48,4 +37,4 @@ export async function GET(request: NextRequest, context: Context) {
       { status: 500 }
     );
   }
-}
+});

@@ -1,18 +1,66 @@
 'use client';
 
+import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Customer } from '@/lib/db/schema';
+import { Building2, User, Landmark } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface CustomerFormProps {
   customer?: Customer | null;
 }
 
+const customerTypes = [
+  { value: 'individual', label: 'Individual', icon: User, description: 'Person with CID' },
+  { value: 'business', label: 'Business', icon: Building2, description: 'Company or firm' },
+  { value: 'government', label: 'Government', icon: Landmark, description: 'Government agency' },
+] as const;
+
+type CustomerType = (typeof customerTypes)[number]['value'];
+
 export function CustomerForm({ customer }: CustomerFormProps) {
+  const [customerType, setCustomerType] = useState<CustomerType>(
+    (customer?.customerType as CustomerType) || 'business'
+  );
+
   return (
     <div className="space-y-6">
+      {/* Customer Type */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Customer Type</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <input type="hidden" name="customerType" value={customerType} />
+          <div className="grid grid-cols-3 gap-3">
+            {customerTypes.map((type) => {
+              const Icon = type.icon;
+              const isSelected = customerType === type.value;
+              return (
+                <button
+                  key={type.value}
+                  type="button"
+                  onClick={() => setCustomerType(type.value)}
+                  className={cn(
+                    'flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors',
+                    isSelected
+                      ? 'border-orange-500 bg-orange-50 text-orange-700'
+                      : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                  )}
+                >
+                  <Icon className="h-6 w-6" />
+                  <span className="font-medium text-sm">{type.label}</span>
+                  <span className="text-xs text-gray-500">{type.description}</span>
+                </button>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Basic Information */}
       <Card>
         <CardHeader>
@@ -21,25 +69,46 @@ export function CustomerForm({ customer }: CustomerFormProps) {
         <CardContent className="space-y-4">
           <div>
             <Label htmlFor="name" className="mb-2">
-              Customer Name <span className="text-red-500">*</span>
+              {customerType === 'individual' ? 'Full Name' : customerType === 'government' ? 'Agency / Organization Name' : 'Business Name'}{' '}
+              <span className="text-red-500">*</span>
             </Label>
             <Input
               id="name"
               name="name"
-              placeholder="ABC Company Ltd."
+              placeholder={
+                customerType === 'individual'
+                  ? 'Dorji Wangchuk'
+                  : customerType === 'government'
+                  ? 'Department of Revenue & Customs'
+                  : 'ABC Company Ltd.'
+              }
               defaultValue={customer?.name || ''}
               required
             />
           </div>
 
+          {customerType === 'government' && (
+            <div>
+              <Label htmlFor="department" className="mb-2">
+                Department / Division
+              </Label>
+              <Input
+                id="department"
+                name="department"
+                placeholder="e.g., IT Division, Finance Section"
+                defaultValue={customer?.department || ''}
+              />
+            </div>
+          )}
+
           <div>
             <Label htmlFor="contactPerson" className="mb-2">
-              Contact Person
+              {customerType === 'individual' ? 'Alternate Contact' : 'Contact Person'}
             </Label>
             <Input
               id="contactPerson"
               name="contactPerson"
-              placeholder="John Doe"
+              placeholder={customerType === 'government' ? 'Focal person name' : 'Contact name'}
               defaultValue={customer?.contactPerson || ''}
             />
           </div>
@@ -53,26 +122,69 @@ export function CustomerForm({ customer }: CustomerFormProps) {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="customer@example.bt"
+                placeholder={customerType === 'government' ? 'department@gov.bt' : 'customer@example.bt'}
                 defaultValue={customer?.email || ''}
               />
             </div>
             <div>
-              <Label htmlFor="tpn" className="mb-2">
-                TPN (Tax Payer Number)
-              </Label>
-              <Input
-                id="tpn"
-                name="tpn"
-                placeholder="e.g., 123456789"
-                maxLength={20}
-                defaultValue={customer?.tpn || ''}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Optional (if registered with DRC)
-              </p>
+              {customerType === 'individual' ? (
+                <>
+                  <Label htmlFor="cidNumber" className="mb-2">
+                    CID Number
+                  </Label>
+                  <Input
+                    id="cidNumber"
+                    name="cidNumber"
+                    placeholder="e.g., 11205001234"
+                    maxLength={20}
+                    defaultValue={customer?.cidNumber || ''}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Citizen Identity Card number
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Label htmlFor="tpn" className="mb-2">
+                    TPN (Tax Payer Number)
+                  </Label>
+                  <Input
+                    id="tpn"
+                    name="tpn"
+                    placeholder="e.g., 123456789"
+                    maxLength={20}
+                    defaultValue={customer?.tpn || ''}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {customerType === 'government'
+                      ? 'Government agency TPN'
+                      : 'Optional (if registered with DRC)'}
+                  </p>
+                </>
+              )}
             </div>
           </div>
+
+          {/* Show TPN for individuals too, just less prominent */}
+          {customerType === 'individual' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="tpn" className="mb-2">
+                  TPN (Tax Payer Number)
+                </Label>
+                <Input
+                  id="tpn"
+                  name="tpn"
+                  placeholder="If registered"
+                  maxLength={20}
+                  defaultValue={customer?.tpn || ''}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Optional — only if registered with DRC
+                </p>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -88,7 +200,7 @@ export function CustomerForm({ customer }: CustomerFormProps) {
             </div>
             <div>
               <Label htmlFor="mobile" className="mb-2">
-                Mobile Number (for SMS/WhatsApp)
+                Mobile Number
               </Label>
               <Input
                 id="mobile"
@@ -114,7 +226,7 @@ export function CustomerForm({ customer }: CustomerFormProps) {
             <Textarea
               id="address"
               name="address"
-              placeholder="Building name, street, area..."
+              placeholder={customerType === 'government' ? 'Office address...' : 'Building name, street, area...'}
               defaultValue={customer?.address || ''}
               rows={2}
             />
@@ -134,7 +246,7 @@ export function CustomerForm({ customer }: CustomerFormProps) {
             </div>
             <div>
               <Label htmlFor="dzongkhag" className="mb-2">
-                Dzongkhag (District)
+                Dzongkhag
               </Label>
               <Input
                 id="dzongkhag"
@@ -171,12 +283,16 @@ export function CustomerForm({ customer }: CustomerFormProps) {
             <Textarea
               id="notes"
               name="notes"
-              placeholder="Any special requirements, payment terms, or notes about this customer..."
+              placeholder={
+                customerType === 'government'
+                  ? 'Payment terms, PO requirements, billing contact...'
+                  : 'Any special requirements, payment terms, or notes...'
+              }
               defaultValue={customer?.notes || ''}
               rows={4}
             />
             <p className="text-xs text-gray-500 mt-1">
-              These notes are internal and won't be visible to the customer
+              These notes are internal and won&apos;t be visible to the customer
             </p>
           </div>
         </CardContent>

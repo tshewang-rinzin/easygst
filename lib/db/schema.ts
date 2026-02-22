@@ -67,13 +67,28 @@ export const teams = pgTable('teams', {
 
   // Invoice Settings
   invoicePrefix: varchar('invoice_prefix', { length: 20 }).default('INV'),
+  billPrefix: varchar('bill_prefix', { length: 20 }).default('BILL'),
+  customerAdvancePrefix: varchar('customer_advance_prefix', { length: 20 }).default('ADV-C'),
+  supplierAdvancePrefix: varchar('supplier_advance_prefix', { length: 20 }).default('ADV-S'),
   invoiceTerms: text('invoice_terms'), // Default terms & conditions
   invoiceFooter: text('invoice_footer'),
   logoUrl: text('logo_url'),
 
+  // Invoice Template Settings
+  invoiceTemplate: varchar('invoice_template', { length: 50 }).default('classic'),
+  invoiceAccentColor: varchar('invoice_accent_color', { length: 7 }).default('#1f2937'),
+  showLogo: boolean('show_logo').notNull().default(true),
+  showPaymentTerms: boolean('show_payment_terms').notNull().default(true),
+  showCustomerNotes: boolean('show_customer_notes').notNull().default(true),
+  showTermsAndConditions: boolean('show_terms_and_conditions').notNull().default(true),
+  invoiceFooterText: text('invoice_footer_text'),
+
   // Tax Settings
   defaultGstRate: numeric('default_gst_rate', { precision: 5, scale: 2 }).notNull().default('0'), // Default GST rate for all products
   gstRegistered: boolean('gst_registered').notNull().default(false), // Whether business is GST registered
+
+  // Subscription — references plans table (no FK constraint to avoid circular dep)
+  planId: uuid('plan_id'),
 });
 
 export const teamMembers = pgTable('team_members', {
@@ -163,6 +178,7 @@ export const paymentMethods = pgTable('payment_methods', {
   code: varchar('code', { length: 50 }).notNull(), // mbob, mpay, epay, cash, cheque, bank_transfer, etc.
   name: varchar('name', { length: 100 }).notNull(), // Display name
   description: text('description'),
+  category: varchar('category', { length: 50 }).notNull().default('other'), // cash, mobile_banking, bank_transfer, cheque, online
 
   // Settings
   isEnabled: boolean('is_enabled').notNull().default(true),
@@ -188,8 +204,11 @@ export const customers = pgTable('customers', {
     .references(() => teams.id, { onDelete: 'cascade' }),
 
   // Customer Details
+  customerType: varchar('customer_type', { length: 20 }).notNull().default('business'), // 'individual' | 'business' | 'government'
   name: varchar('name', { length: 255 }).notNull(),
   contactPerson: varchar('contact_person', { length: 255 }),
+  department: varchar('department', { length: 255 }), // For government agencies
+  cidNumber: varchar('cid_number', { length: 20 }), // Citizen Identity Card for individuals
   email: varchar('email', { length: 255 }),
   phone: varchar('phone', { length: 20 }),
   mobile: varchar('mobile', { length: 20 }), // For SMS/WhatsApp
@@ -200,6 +219,10 @@ export const customers = pgTable('customers', {
   city: varchar('city', { length: 100 }),
   dzongkhag: varchar('dzongkhag', { length: 100 }),
   postalCode: varchar('postal_code', { length: 10 }),
+
+  // POS fields
+  creditLimit: numeric('credit_limit', { precision: 10, scale: 2 }),
+  isWalkIn: boolean('is_walk_in').notNull().default(false),
 
   // Metadata
   notes: text('notes'),
@@ -261,6 +284,10 @@ export const productCategories = pgTable('product_categories', {
   name: varchar('name', { length: 100 }).notNull(),
   description: text('description'),
 
+  // Hierarchy
+  parentId: uuid('parent_id'), // Self-referencing for subcategories
+  sortOrder: integer('sort_order').notNull().default(0),
+
   // Metadata
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -268,6 +295,7 @@ export const productCategories = pgTable('product_categories', {
 }, (table) => ({
   teamCategoryIdx: index('team_category_idx').on(table.teamId),
   categoryNameIdx: index('category_name_idx').on(table.teamId, table.name),
+  categoryParentIdx: index('category_parent_idx').on(table.parentId),
 }));
 
 // Units of Measurement
@@ -279,6 +307,7 @@ export const units = pgTable('units', {
 
   name: varchar('name', { length: 100 }).notNull(), // piece, kg, liter, hour, etc.
   abbreviation: varchar('abbreviation', { length: 20 }).notNull(), // pcs, kg, L, hr, etc.
+  category: varchar('category', { length: 50 }).default('other'), // 'common', 'time', 'weight', 'volume', 'length', 'quantity', 'other'
   description: text('description'),
   isActive: boolean('is_active').notNull().default(true),
   sortOrder: integer('sort_order').notNull().default(0),
@@ -330,6 +359,9 @@ export const products = pgTable('products', {
   sku: varchar('sku', { length: 100 }), // Stock Keeping Unit
   unit: varchar('unit', { length: 50 }).default('piece'), // piece, kg, liter, hour, etc.
 
+  // Product Type
+  productType: varchar('product_type', { length: 20 }).notNull().default('product'), // 'product' | 'service'
+
   // Pricing (stored in team's default currency)
   unitPrice: numeric('unit_price', { precision: 15, scale: 2 }).notNull(),
 
@@ -342,6 +374,14 @@ export const products = pgTable('products', {
   categoryId: uuid('category_id').references(() => productCategories.id),
   category: varchar('category', { length: 100 }), // Kept for backward compatibility and manual entry
 
+  // Inventory (for non-variant products)
+  trackInventory: boolean('track_inventory').notNull().default(false),
+  stockQuantity: integer('stock_quantity').notNull().default(0),
+  lowStockThreshold: integer('low_stock_threshold').notNull().default(5),
+
+  // Barcode (for POS scanning)
+  barcode: varchar('barcode', { length: 100 }),
+
   // Metadata
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -350,6 +390,89 @@ export const products = pgTable('products', {
 }, (table) => ({
   teamProductIdx: index('team_product_idx').on(table.teamId),
   productSkuIdx: index('product_sku_idx').on(table.sku),
+  productTypeIdx: index('product_type_idx').on(table.productType),
+  productBarcodeIdx: index('product_barcode_idx').on(table.barcode),
+}));
+
+// Product Attribute Definitions (for variants)
+export const productAttributeDefinitions = pgTable('product_attribute_definitions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  productId: uuid('product_id')
+    .notNull()
+    .references(() => products.id, { onDelete: 'cascade' }),
+
+  name: varchar('name', { length: 100 }).notNull(), // e.g., "Color", "Size"
+  values: jsonb('values').notNull(), // JSON array: ["Red", "Blue", "Green"]
+  sortOrder: integer('sort_order').notNull().default(0),
+
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  productAttrIdx: index('product_attr_idx').on(table.productId),
+  teamAttrIdx: index('team_attr_idx').on(table.teamId),
+}));
+
+// Product Variants
+export const productVariants = pgTable('product_variants', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  productId: uuid('product_id')
+    .notNull()
+    .references(() => products.id, { onDelete: 'cascade' }),
+
+  name: varchar('name', { length: 255 }).notNull(), // Auto-generated like "Red / Large"
+  sku: varchar('sku', { length: 100 }), // Unique per team
+  barcode: varchar('barcode', { length: 100 }),
+  attributeValues: jsonb('attribute_values').notNull(), // {"Color": "Red", "Size": "Large"}
+
+  // Pricing (nullable — falls back to product price)
+  unitPrice: numeric('unit_price', { precision: 15, scale: 2 }),
+  costPrice: numeric('cost_price', { precision: 15, scale: 2 }),
+
+  // Inventory
+  stockQuantity: integer('stock_quantity').notNull().default(0),
+  lowStockThreshold: integer('low_stock_threshold').notNull().default(0),
+
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  productVariantIdx: index('product_variant_idx').on(table.productId),
+  teamVariantIdx: index('team_variant_idx').on(table.teamId),
+  variantSkuIdx: index('variant_sku_idx').on(table.teamId, table.sku),
+  variantBarcodeIdx: index('variant_barcode_idx').on(table.teamId, table.barcode),
+}));
+
+// Inventory Movements
+export const inventoryMovements = pgTable('inventory_movements', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  productId: uuid('product_id')
+    .notNull()
+    .references(() => products.id),
+  variantId: uuid('variant_id').references(() => productVariants.id),
+
+  type: varchar('type', { length: 20 }).notNull(), // 'in' | 'out' | 'adjustment'
+  quantity: integer('quantity').notNull(),
+  reason: varchar('reason', { length: 255 }),
+  referenceType: varchar('reference_type', { length: 20 }), // 'invoice' | 'manual' | 'purchase' | 'return'
+  referenceId: uuid('reference_id'),
+  notes: text('notes'),
+
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdBy: uuid('created_by')
+    .notNull()
+    .references(() => users.id),
+}, (table) => ({
+  teamMovementIdx: index('team_movement_idx').on(table.teamId),
+  productMovementIdx: index('product_movement_idx').on(table.productId),
+  variantMovementIdx: index('variant_movement_idx').on(table.variantId),
+  movementTypeIdx: index('movement_type_idx').on(table.type),
 }));
 
 // Invoices
@@ -361,6 +484,11 @@ export const invoices = pgTable('invoices', {
   customerId: uuid('customer_id')
     .notNull()
     .references(() => customers.id),
+
+  // Contract linkage (optional — for project/AMC invoicing)
+  contractId: uuid('contract_id'),
+  contractMilestoneId: uuid('contract_milestone_id'),
+  contractBillingScheduleId: uuid('contract_billing_schedule_id'),
 
   // Invoice Identification
   publicId: uuid('public_id').defaultRandom().notNull().unique(), // UUID for public verification URL
@@ -604,6 +732,143 @@ export const invoiceSequences = pgTable('invoice_sequences', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, (table) => ({
   teamYearIdx: uniqueIndex('team_year_idx').on(table.teamId, table.year),
+}));
+
+// ============================================================
+// CONTRACTS (Projects & AMC)
+// ============================================================
+
+// Contracts - Unified module for project billing and AMC
+export const contracts = pgTable('contracts', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  customerId: uuid('customer_id')
+    .notNull()
+    .references(() => customers.id),
+
+  // Contract Identification
+  contractNumber: varchar('contract_number', { length: 50 }).notNull(), // CTR-2026-0001
+  type: varchar('type', { length: 20 }).notNull(), // 'project' | 'amc'
+  name: varchar('name', { length: 255 }).notNull(), // "ERP System Development" / "Annual Server Maintenance"
+  description: text('description'),
+
+  // Financial
+  totalValue: numeric('total_value', { precision: 15, scale: 2 }).notNull(), // Always stored GST-inclusive
+  currency: varchar('currency', { length: 3 }).notNull().default('BTN'),
+  gstRate: numeric('gst_rate', { precision: 5, scale: 2 }).notNull().default('0'),
+  isGstInclusive: boolean('is_gst_inclusive').notNull().default(true),
+
+  // Tracking (auto-calculated)
+  totalInvoiced: numeric('total_invoiced', { precision: 15, scale: 2 }).notNull().default('0'),
+  totalPaid: numeric('total_paid', { precision: 15, scale: 2 }).notNull().default('0'),
+  remainingValue: numeric('remaining_value', { precision: 15, scale: 2 }).notNull(), // totalValue - totalInvoiced
+
+  // Timeline
+  startDate: timestamp('start_date'),
+  endDate: timestamp('end_date'),
+
+  // AMC-specific
+  billingFrequency: varchar('billing_frequency', { length: 20 }), // monthly, quarterly, half_yearly, yearly, custom (null for projects)
+  nextBillingDate: timestamp('next_billing_date'),
+
+  // Status
+  status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, active, completed, cancelled
+
+  // Notes & Terms
+  notes: text('notes'),
+  terms: text('terms'),
+
+  // Metadata
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdBy: uuid('created_by')
+    .notNull()
+    .references(() => users.id),
+}, (table) => ({
+  teamContractIdx: index('team_contract_idx').on(table.teamId),
+  contractNumberIdx: uniqueIndex('contract_number_idx').on(table.teamId, table.contractNumber),
+  customerContractIdx: index('customer_contract_idx').on(table.customerId),
+  contractStatusIdx: index('contract_status_idx').on(table.status),
+  contractTypeIdx: index('contract_type_idx').on(table.type),
+}));
+
+// Contract Milestones (for projects — optional, can invoice ad-hoc without milestones)
+export const contractMilestones = pgTable('contract_milestones', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  contractId: uuid('contract_id')
+    .notNull()
+    .references(() => contracts.id, { onDelete: 'cascade' }),
+
+  // Milestone Details
+  name: varchar('name', { length: 255 }).notNull(), // "Phase 1 - Requirements"
+  description: text('description'),
+
+  // Billing
+  percentage: numeric('percentage', { precision: 5, scale: 2 }), // 20.00 (nullable — can use fixed amount instead)
+  amount: numeric('amount', { precision: 15, scale: 2 }).notNull(), // Calculated from percentage or manual
+  dueDate: timestamp('due_date'), // Expected completion date
+
+  // Status
+  status: varchar('status', { length: 20 }).notNull().default('pending'), // pending, invoiced, paid
+  invoiceId: uuid('invoice_id').references(() => invoices.id), // Linked when invoiced
+
+  // Display
+  sortOrder: integer('sort_order').notNull().default(0),
+
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  contractMilestoneIdx: index('contract_milestone_idx').on(table.contractId),
+}));
+
+// Contract Billing Schedule (for AMC — auto-generated or manually defined periods)
+export const contractBillingSchedule = pgTable('contract_billing_schedule', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  contractId: uuid('contract_id')
+    .notNull()
+    .references(() => contracts.id, { onDelete: 'cascade' }),
+
+  // Period
+  periodLabel: varchar('period_label', { length: 100 }), // "Q1 2026", "Jan 2026", etc.
+  periodStart: timestamp('period_start').notNull(),
+  periodEnd: timestamp('period_end').notNull(),
+
+  // Billing
+  amount: numeric('amount', { precision: 15, scale: 2 }).notNull(),
+  dueDate: timestamp('due_date'),
+
+  // Status
+  status: varchar('status', { length: 20 }).notNull().default('pending'), // pending, invoiced, paid
+  invoiceId: uuid('invoice_id').references(() => invoices.id), // Linked when invoiced
+
+  // Display
+  sortOrder: integer('sort_order').notNull().default(0),
+
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  contractBillingIdx: index('contract_billing_idx').on(table.contractId),
+  billingDueDateIdx: index('billing_due_date_idx').on(table.dueDate),
+}));
+
+// Contract Sequences (gap-free numbering for contracts)
+export const contractSequences = pgTable('contract_sequences', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' })
+    .unique(),
+
+  year: integer('year').notNull(),
+  lastNumber: integer('last_number').notNull().default(0),
+
+  lockedAt: timestamp('locked_at'),
+  lockedBy: varchar('locked_by', { length: 100 }),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamContractYearIdx: uniqueIndex('team_contract_year_idx').on(table.teamId, table.year),
 }));
 
 // ============================================================
@@ -1296,10 +1561,262 @@ export const debitNoteSequences = pgTable('debit_note_sequences', {
 }));
 
 // ============================================================
+// QUOTATIONS
+// ============================================================
+
+export const quotations = pgTable('quotations', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  customerId: uuid('customer_id')
+    .notNull()
+    .references(() => customers.id),
+
+  // Quotation Identification
+  quotationNumber: varchar('quotation_number', { length: 50 }).notNull(),
+  quotationDate: timestamp('quotation_date').notNull().defaultNow(),
+  validUntil: timestamp('valid_until'),
+
+  // Financial
+  currency: varchar('currency', { length: 3 }).notNull().default('BTN'),
+  subtotal: numeric('subtotal', { precision: 15, scale: 2 }).notNull(),
+  totalTax: numeric('total_tax', { precision: 15, scale: 2 }).notNull().default('0'),
+  totalDiscount: numeric('total_discount', { precision: 15, scale: 2 }).notNull().default('0'),
+  totalAmount: numeric('total_amount', { precision: 15, scale: 2 }).notNull(),
+
+  // Status
+  status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, accepted, rejected, expired, converted
+
+  // Conversion
+  convertedToInvoiceId: uuid('converted_to_invoice_id').references(() => invoices.id),
+
+  // Notes
+  notes: text('notes'),
+  customerNotes: text('customer_notes'),
+  termsAndConditions: text('terms_and_conditions'),
+
+  // Metadata
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdBy: uuid('created_by')
+    .notNull()
+    .references(() => users.id),
+}, (table) => ({
+  teamQuotationIdx: index('team_quotation_idx').on(table.teamId),
+  quotationNumberIdx: uniqueIndex('quotation_number_idx').on(table.teamId, table.quotationNumber),
+  customerQuotationIdx: index('customer_quotation_idx').on(table.customerId),
+  quotationStatusIdx: index('quotation_status_idx').on(table.status),
+}));
+
+export const quotationItems = pgTable('quotation_items', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  quotationId: uuid('quotation_id')
+    .notNull()
+    .references(() => quotations.id, { onDelete: 'cascade' }),
+  productId: uuid('product_id').references(() => products.id),
+
+  // Item Details
+  description: text('description').notNull(),
+  quantity: numeric('quantity', { precision: 15, scale: 4 }).notNull().default('1'),
+  unit: varchar('unit', { length: 50 }),
+  unitPrice: numeric('unit_price', { precision: 15, scale: 2 }).notNull(),
+
+  // Pricing Breakdown
+  lineTotal: numeric('line_total', { precision: 15, scale: 2 }).notNull(),
+  discountPercent: numeric('discount_percent', { precision: 5, scale: 2 }).default('0'),
+  discountAmount: numeric('discount_amount', { precision: 15, scale: 2 }).default('0'),
+
+  // Tax
+  taxRate: numeric('tax_rate', { precision: 5, scale: 2 }).notNull().default('0'),
+  taxAmount: numeric('tax_amount', { precision: 15, scale: 2 }).notNull().default('0'),
+  isTaxExempt: boolean('is_tax_exempt').notNull().default(false),
+  gstClassification: varchar('gst_classification', { length: 20 }).notNull().default('STANDARD'),
+
+  // Final
+  itemTotal: numeric('item_total', { precision: 15, scale: 2 }).notNull(),
+
+  // Display
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  quotationItemIdx: index('quotation_item_idx').on(table.quotationId),
+}));
+
+export const quotationSequences = pgTable('quotation_sequences', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' })
+    .unique(),
+
+  year: integer('year').notNull(),
+  lastNumber: integer('last_number').notNull().default(0),
+  prefix: varchar('prefix', { length: 20 }).default('QT'),
+
+  lockedAt: timestamp('locked_at'),
+  lockedBy: varchar('locked_by', { length: 100 }),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  teamQuotationYearIdx: uniqueIndex('team_quotation_year_idx').on(table.teamId, table.year),
+}));
+
+// ============================================================
+// BANK QR PAYMENT INTEGRATION
+// ============================================================
+
+// Payment QR codes generated for invoices
+export const paymentQrCodes = pgTable('payment_qr_codes', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  invoiceId: uuid('invoice_id').notNull().references(() => invoices.id, { onDelete: 'cascade' }),
+  provider: varchar('provider', { length: 50 }).notNull(), // 'dk_bank', 'bob', 'bnb', etc.
+  qrData: text('qr_data').notNull(), // The raw QR code payload
+  qrImageUrl: text('qr_image_url'), // Optional: URL to QR image if provider returns one
+  amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
+  currency: varchar('currency', { length: 3 }).notNull().default('BTN'),
+  referenceId: varchar('reference_id', { length: 255 }), // Bank's reference/transaction ID
+  status: varchar('status', { length: 20 }).notNull().default('pending'), // pending, paid, expired, cancelled
+  expiresAt: timestamp('expires_at'),
+  paidAt: timestamp('paid_at'),
+  metadata: jsonb('metadata'), // Provider-specific data
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamQrIdx: index('payment_qr_team_idx').on(table.teamId),
+  invoiceQrIdx: index('payment_qr_invoice_idx').on(table.invoiceId),
+  referenceQrIdx: index('payment_qr_reference_idx').on(table.referenceId),
+}));
+
+// Bank integration settings per team
+export const bankIntegrations = pgTable('bank_integrations', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  provider: varchar('provider', { length: 50 }).notNull(), // 'dk_bank'
+  isActive: boolean('is_active').notNull().default(false),
+  accountNumber: varchar('account_number', { length: 50 }),
+  accountName: varchar('account_name', { length: 255 }),
+  merchantId: varchar('merchant_id', { length: 255 }), // Bank-assigned merchant ID
+  apiKey: text('api_key'), // Encrypted API key
+  apiSecret: text('api_secret'), // Encrypted API secret
+  webhookSecret: text('webhook_secret'), // For payment notifications
+  config: jsonb('config'), // Provider-specific config
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamProviderIdx: uniqueIndex('bank_integration_team_provider_idx').on(table.teamId, table.provider),
+}));
+
+// ============================================================
+// SUBSCRIPTIONS & SUBSCRIPTION PAYMENTS
+// ============================================================
+
+export const subscriptions = pgTable('subscriptions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  planId: uuid('plan_id').notNull().references(() => plans.id),
+  status: varchar('status', { length: 20 }).notNull().default('active'), // active, cancelled, expired, past_due
+  billingCycle: varchar('billing_cycle', { length: 10 }).notNull(), // monthly, yearly
+  currentPeriodStart: timestamp('current_period_start').notNull(),
+  currentPeriodEnd: timestamp('current_period_end').notNull(),
+  cancelledAt: timestamp('cancelled_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamSubIdx: index('subscription_team_idx').on(table.teamId),
+  statusSubIdx: index('subscription_status_idx').on(table.status),
+}));
+
+export const subscriptionPayments = pgTable('subscription_payments', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  subscriptionId: uuid('subscription_id').notNull().references(() => subscriptions.id, { onDelete: 'cascade' }),
+  teamId: uuid('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
+  currency: varchar('currency', { length: 3 }).notNull().default('BTN'),
+  status: varchar('status', { length: 20 }).notNull().default('pending'), // pending, completed, failed, refunded
+  paymentMethod: varchar('payment_method', { length: 50 }), // rma_gateway, bank_transfer, manual
+  transactionId: varchar('transaction_id', { length: 255 }),
+  gatewayResponse: jsonb('gateway_response'),
+  paidAt: timestamp('paid_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  subPaymentIdx: index('sub_payment_subscription_idx').on(table.subscriptionId),
+  teamSubPaymentIdx: index('sub_payment_team_idx').on(table.teamId),
+  txnIdx: index('sub_payment_txn_idx').on(table.transactionId),
+}));
+
+// ============================================================
+// RELATIONS (continued below)
+// ============================================================
+
+// ============================================================
+// SUBSCRIPTION PLANS & FEATURE FLAGS
+// ============================================================
+
+export const plans = pgTable('plans', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: varchar('name', { length: 100 }).notNull(),
+  description: text('description'),
+  isDefault: boolean('is_default').notNull().default(false),
+  isActive: boolean('is_active').notNull().default(true),
+  sortOrder: integer('sort_order').notNull().default(0),
+  maxUsers: integer('max_users'),
+  maxInvoicesPerMonth: integer('max_invoices_per_month'),
+  maxProducts: integer('max_products'),
+  maxCustomers: integer('max_customers'),
+  monthlyPrice: numeric('monthly_price', { precision: 10, scale: 2 }).default('0'),
+  yearlyPrice: numeric('yearly_price', { precision: 10, scale: 2 }).default('0'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  planNameIdx: uniqueIndex('plan_name_idx').on(table.name),
+}));
+
+export const features = pgTable('features', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  code: varchar('code', { length: 100 }).notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  module: varchar('module', { length: 100 }).notNull(),
+  isActive: boolean('is_active').notNull().default(true),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  featureCodeIdx: uniqueIndex('feature_code_idx').on(table.code),
+  featureModuleIdx: index('feature_module_idx').on(table.module),
+}));
+
+export const planFeatures = pgTable('plan_features', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  planId: uuid('plan_id').notNull().references(() => plans.id, { onDelete: 'cascade' }),
+  featureId: uuid('feature_id').notNull().references(() => features.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  planFeatureIdx: uniqueIndex('plan_feature_idx').on(table.planId, table.featureId),
+  planIdx: index('pf_plan_idx').on(table.planId),
+  featureIdx: index('pf_feature_idx').on(table.featureId),
+}));
+
+export const teamFeatureOverrides = pgTable('team_feature_overrides', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  featureCode: varchar('feature_code', { length: 100 }).notNull(),
+  enabled: boolean('enabled').notNull(),
+  reason: text('reason'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdBy: uuid('created_by'),
+}, (table) => ({
+  teamFeatureIdx: uniqueIndex('team_feature_override_idx').on(table.teamId, table.featureCode),
+  teamOverrideIdx: index('tfo_team_idx').on(table.teamId),
+}));
+
+// ============================================================
 // RELATIONS
 // ============================================================
 
-export const teamsRelations = relations(teams, ({ many }) => ({
+export const teamsRelations = relations(teams, ({ one, many }) => ({
+  plan: one(plans, { fields: [teams.planId], references: [plans.id] }),
   teamMembers: many(teamMembers),
   activityLogs: many(activityLogs),
   invitations: many(invitations),
@@ -1313,6 +1830,8 @@ export const teamsRelations = relations(teams, ({ many }) => ({
   customerPayments: many(customerPayments),
   paymentAllocations: many(paymentAllocations),
   taxSettings: many(taxSettings),
+  subscriptions: many(subscriptions),
+  subscriptionPayments: many(subscriptionPayments),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -1361,12 +1880,75 @@ export const customersRelations = relations(customers, ({ one, many }) => ({
   invoices: many(invoices),
 }));
 
+export const productCategoriesRelations = relations(productCategories, ({ one, many }) => ({
+  team: one(teams, {
+    fields: [productCategories.teamId],
+    references: [teams.id],
+  }),
+  parent: one(productCategories, {
+    fields: [productCategories.parentId],
+    references: [productCategories.id],
+    relationName: 'categoryParent',
+  }),
+  children: many(productCategories, { relationName: 'categoryParent' }),
+  products: many(products),
+}));
+
 export const productsRelations = relations(products, ({ one, many }) => ({
   team: one(teams, {
     fields: [products.teamId],
     references: [teams.id],
   }),
+  categoryRef: one(productCategories, {
+    fields: [products.categoryId],
+    references: [productCategories.id],
+  }),
   invoiceItems: many(invoiceItems),
+  attributeDefinitions: many(productAttributeDefinitions),
+  variants: many(productVariants),
+  inventoryMovements: many(inventoryMovements),
+}));
+
+export const productAttributeDefinitionsRelations = relations(productAttributeDefinitions, ({ one }) => ({
+  team: one(teams, {
+    fields: [productAttributeDefinitions.teamId],
+    references: [teams.id],
+  }),
+  product: one(products, {
+    fields: [productAttributeDefinitions.productId],
+    references: [products.id],
+  }),
+}));
+
+export const productVariantsRelations = relations(productVariants, ({ one, many }) => ({
+  team: one(teams, {
+    fields: [productVariants.teamId],
+    references: [teams.id],
+  }),
+  product: one(products, {
+    fields: [productVariants.productId],
+    references: [products.id],
+  }),
+  inventoryMovements: many(inventoryMovements),
+}));
+
+export const inventoryMovementsRelations = relations(inventoryMovements, ({ one }) => ({
+  team: one(teams, {
+    fields: [inventoryMovements.teamId],
+    references: [teams.id],
+  }),
+  product: one(products, {
+    fields: [inventoryMovements.productId],
+    references: [products.id],
+  }),
+  variant: one(productVariants, {
+    fields: [inventoryMovements.variantId],
+    references: [productVariants.id],
+  }),
+  createdByUser: one(users, {
+    fields: [inventoryMovements.createdBy],
+    references: [users.id],
+  }),
 }));
 
 export const invoicesRelations = relations(invoices, ({ one, many }) => ({
@@ -1562,6 +2144,84 @@ export const gstPeriodLocksRelations = relations(gstPeriodLocks, ({ one }) => ({
   }),
 }));
 
+export const quotationsRelations = relations(quotations, ({ one, many }) => ({
+  team: one(teams, {
+    fields: [quotations.teamId],
+    references: [teams.id],
+  }),
+  customer: one(customers, {
+    fields: [quotations.customerId],
+    references: [customers.id],
+  }),
+  items: many(quotationItems),
+  convertedInvoice: one(invoices, {
+    fields: [quotations.convertedToInvoiceId],
+    references: [invoices.id],
+  }),
+}));
+
+export const quotationItemsRelations = relations(quotationItems, ({ one }) => ({
+  quotation: one(quotations, {
+    fields: [quotationItems.quotationId],
+    references: [quotations.id],
+  }),
+  product: one(products, {
+    fields: [quotationItems.productId],
+    references: [products.id],
+  }),
+}));
+
+export const quotationSequencesRelations = relations(quotationSequences, ({ one }) => ({
+  team: one(teams, {
+    fields: [quotationSequences.teamId],
+    references: [teams.id],
+  }),
+}));
+
+export const paymentQrCodesRelations = relations(paymentQrCodes, ({ one }) => ({
+  team: one(teams, {
+    fields: [paymentQrCodes.teamId],
+    references: [teams.id],
+  }),
+  invoice: one(invoices, {
+    fields: [paymentQrCodes.invoiceId],
+    references: [invoices.id],
+  }),
+}));
+
+export const bankIntegrationsRelations = relations(bankIntegrations, ({ one }) => ({
+  team: one(teams, {
+    fields: [bankIntegrations.teamId],
+    references: [teams.id],
+  }),
+}));
+
+export const plansRelations = relations(plans, ({ many }) => ({
+  planFeatures: many(planFeatures),
+  teams: many(teams),
+  subscriptions: many(subscriptions),
+}));
+
+export const subscriptionsRelations = relations(subscriptions, ({ one, many }) => ({
+  team: one(teams, { fields: [subscriptions.teamId], references: [teams.id] }),
+  plan: one(plans, { fields: [subscriptions.planId], references: [plans.id] }),
+  payments: many(subscriptionPayments),
+}));
+
+export const subscriptionPaymentsRelations = relations(subscriptionPayments, ({ one }) => ({
+  subscription: one(subscriptions, { fields: [subscriptionPayments.subscriptionId], references: [subscriptions.id] }),
+  team: one(teams, { fields: [subscriptionPayments.teamId], references: [teams.id] }),
+}));
+
+export const featuresRelations = relations(features, ({ many }) => ({
+  planFeatures: many(planFeatures),
+}));
+
+export const planFeaturesRelations = relations(planFeatures, ({ one }) => ({
+  plan: one(plans, { fields: [planFeatures.planId], references: [plans.id] }),
+  feature: one(features, { fields: [planFeatures.featureId], references: [features.id] }),
+}));
+
 // ============================================================
 // TYPE EXPORTS
 // ============================================================
@@ -1609,6 +2269,22 @@ export type NewTaxClassification = typeof taxClassifications.$inferInsert;
 // Product types
 export type Product = typeof products.$inferSelect;
 export type NewProduct = typeof products.$inferInsert;
+
+// Product Category types
+export type ProductCategory = typeof productCategories.$inferSelect;
+export type NewProductCategory = typeof productCategories.$inferInsert;
+
+// Product Attribute Definition types
+export type ProductAttributeDefinition = typeof productAttributeDefinitions.$inferSelect;
+export type NewProductAttributeDefinition = typeof productAttributeDefinitions.$inferInsert;
+
+// Product Variant types
+export type ProductVariant = typeof productVariants.$inferSelect;
+export type NewProductVariant = typeof productVariants.$inferInsert;
+
+// Inventory Movement types
+export type InventoryMovement = typeof inventoryMovements.$inferSelect;
+export type NewInventoryMovement = typeof inventoryMovements.$inferInsert;
 
 // Invoice types
 export type Invoice = typeof invoices.$inferSelect;
@@ -1686,6 +2362,22 @@ export type NewDebitNoteApplication = typeof debitNoteApplications.$inferInsert;
 export type DebitNoteSequence = typeof debitNoteSequences.$inferSelect;
 export type NewDebitNoteSequence = typeof debitNoteSequences.$inferInsert;
 
+// Quotation types
+export type Quotation = typeof quotations.$inferSelect;
+export type NewQuotation = typeof quotations.$inferInsert;
+export type QuotationItem = typeof quotationItems.$inferSelect;
+export type NewQuotationItem = typeof quotationItems.$inferInsert;
+export type QuotationSequence = typeof quotationSequences.$inferSelect;
+export type NewQuotationSequence = typeof quotationSequences.$inferInsert;
+
+// Payment QR types
+export type PaymentQrCode = typeof paymentQrCodes.$inferSelect;
+export type NewPaymentQrCode = typeof paymentQrCodes.$inferInsert;
+
+// Bank Integration types
+export type BankIntegration = typeof bankIntegrations.$inferSelect;
+export type NewBankIntegration = typeof bankIntegrations.$inferInsert;
+
 // Complex types with relations
 export type TeamDataWithMembers = Team & {
   teamMembers: (TeamMember & {
@@ -1761,7 +2453,65 @@ export const emailSettings = pgTable('email_settings', {
 });
 
 export type EmailSettings = typeof emailSettings.$inferSelect;
+
+// ============================================================
+// MESSAGE LOG (SMS, WhatsApp, Email audit trail)
+// ============================================================
+
+export const messageLog = pgTable('message_log', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  invoiceId: uuid('invoice_id').references(() => invoices.id),
+  channel: varchar('channel', { length: 20 }).notNull(), // 'sms', 'whatsapp', 'email'
+  recipient: varchar('recipient', { length: 255 }).notNull(), // phone or email
+  messageType: varchar('message_type', { length: 50 }).notNull(), // 'invoice', 'receipt', 'reminder', 'quotation'
+  status: varchar('status', { length: 20 }).notNull().default('sent'), // sent, delivered, failed, read
+  providerMessageId: varchar('provider_message_id', { length: 255 }),
+  content: text('content'),
+  error: text('error'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  teamMsgIdx: index('team_msg_idx').on(table.teamId),
+  invoiceMsgIdx: index('invoice_msg_idx').on(table.invoiceId),
+}));
+
+export const messageLogRelations = relations(messageLog, ({ one }) => ({
+  team: one(teams, {
+    fields: [messageLog.teamId],
+    references: [teams.id],
+  }),
+  invoice: one(invoices, {
+    fields: [messageLog.invoiceId],
+    references: [invoices.id],
+  }),
+}));
+
+export type MessageLog = typeof messageLog.$inferSelect;
+export type NewMessageLog = typeof messageLog.$inferInsert;
 export type NewEmailSettings = typeof emailSettings.$inferInsert;
+
+// Contracts
+export type Contract = typeof contracts.$inferSelect;
+export type NewContract = typeof contracts.$inferInsert;
+export type ContractMilestone = typeof contractMilestones.$inferSelect;
+export type NewContractMilestone = typeof contractMilestones.$inferInsert;
+export type ContractBillingScheduleEntry = typeof contractBillingSchedule.$inferSelect;
+export type NewContractBillingScheduleEntry = typeof contractBillingSchedule.$inferInsert;
+export type ContractSequence = typeof contractSequences.$inferSelect;
+
+// Plan & Feature types
+export type Plan = typeof plans.$inferSelect;
+export type NewPlan = typeof plans.$inferInsert;
+export type Feature = typeof features.$inferSelect;
+export type NewFeature = typeof features.$inferInsert;
+export type PlanFeature = typeof planFeatures.$inferSelect;
+export type TeamFeatureOverride = typeof teamFeatureOverrides.$inferSelect;
+
+// Subscription types
+export type Subscription = typeof subscriptions.$inferSelect;
+export type NewSubscription = typeof subscriptions.$inferInsert;
+export type SubscriptionPayment = typeof subscriptionPayments.$inferSelect;
+export type NewSubscriptionPayment = typeof subscriptionPayments.$inferInsert;
 
 // ============================================================
 // ENUMS
@@ -1822,6 +2572,13 @@ export enum ActivityType {
   CREATE_PRODUCT = 'CREATE_PRODUCT',
   UPDATE_PRODUCT = 'UPDATE_PRODUCT',
   DELETE_PRODUCT = 'DELETE_PRODUCT',
+
+  // Contract Operations
+  CREATE_CONTRACT = 'CREATE_CONTRACT',
+  UPDATE_CONTRACT = 'UPDATE_CONTRACT',
+  DELETE_CONTRACT = 'DELETE_CONTRACT',
+  COMPLETE_CONTRACT = 'COMPLETE_CONTRACT',
+  CANCEL_CONTRACT = 'CANCEL_CONTRACT',
 
   // Bank Account Operations
   CREATE_BANK_ACCOUNT = 'CREATE_BANK_ACCOUNT',

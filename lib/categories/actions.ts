@@ -6,7 +6,7 @@ import { productCategories } from '@/lib/db/schema';
 import { and, eq, ne } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { validatedAction, validatedActionWithUser } from '@/lib/auth/middleware';
+import { validatedAction, validatedActionWithUser, validatedActionWithRole } from '@/lib/auth/middleware';
 import { getTeamForUser } from '@/lib/db/queries';
 import { categorySchema } from './validation';
 import { booleanCoerce } from '@/lib/validation-helpers';
@@ -44,6 +44,8 @@ export const createCategory = validatedActionWithUser(
         teamId: team.id,
         name: data.name,
         description: data.description,
+        parentId: data.parentId || null,
+        sortOrder: data.sortOrder ?? 0,
         isActive: data.isActive,
       })
       .returning();
@@ -105,6 +107,8 @@ export const updateCategory = validatedActionWithUser(
       .set({
         name: data.name,
         description: data.description,
+        parentId: data.parentId || null,
+        sortOrder: data.sortOrder ?? 0,
         isActive: data.isActive,
         updatedAt: new Date(),
       })
@@ -120,8 +124,9 @@ export const updateCategory = validatedActionWithUser(
 /**
  * Delete (deactivate) a product category
  */
-export const deleteCategory = validatedActionWithUser(
+export const deleteCategory = validatedActionWithRole(
   z.object({ id: z.string().uuid() }),
+  'admin',
   async (data, _, user) => {
     const team = await getTeamForUser();
     if (!team) {

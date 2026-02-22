@@ -11,7 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { PlusCircle, Search, Tag, Eye, Edit } from 'lucide-react';
+import { PlusCircle, Search, Tag, Eye, Edit, Package, Briefcase } from 'lucide-react';
 import { getProducts } from '@/lib/products/queries';
 import { getGSTClassificationLabel, getGSTClassificationColor } from '@/lib/invoices/gst-classification';
 
@@ -47,6 +47,7 @@ async function ProductList({ searchTerm }: { searchTerm?: string }) {
           <TableHeader>
             <TableRow>
               <TableHead>Name / SKU</TableHead>
+              <TableHead>Type</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Unit</TableHead>
               <TableHead className="text-right">Price</TableHead>
@@ -61,7 +62,14 @@ async function ProductList({ searchTerm }: { searchTerm?: string }) {
               <TableRow key={product.id}>
                 <TableCell>
                   <div>
-                    <div className="font-medium">{product.name}</div>
+                    <div className="font-medium flex items-center gap-2">
+                      {product.name}
+                      {Number(product.variantCount) > 0 && (
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-orange-50 text-orange-700 border-orange-200">
+                          {product.variantCount} variant{Number(product.variantCount) !== 1 ? 's' : ''}
+                        </Badge>
+                      )}
+                    </div>
                     {product.sku && (
                       <div className="flex items-center text-xs text-gray-500 mt-0.5">
                         <Tag className="h-3 w-3 mr-1" />
@@ -69,6 +77,19 @@ async function ProductList({ searchTerm }: { searchTerm?: string }) {
                       </div>
                     )}
                   </div>
+                </TableCell>
+                <TableCell>
+                  {product.productType === 'service' ? (
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                      <Briefcase className="h-3 w-3 mr-1" />
+                      Service
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      <Package className="h-3 w-3 mr-1" />
+                      Product
+                    </Badge>
+                  )}
                 </TableCell>
                 <TableCell className="max-w-xs">
                   <div className="text-sm text-gray-600 line-clamp-2">
@@ -133,6 +154,7 @@ function ProductListSkeleton() {
           <TableHeader>
             <TableRow>
               <TableHead>Name / SKU</TableHead>
+              <TableHead>Type</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Unit</TableHead>
               <TableHead className="text-right">Price</TableHead>

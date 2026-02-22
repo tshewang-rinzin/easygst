@@ -1,6 +1,6 @@
 'use server';
 
-import { validatedActionWithUser } from '@/lib/auth/middleware';
+import { validatedActionWithRole } from '@/lib/auth/middleware';
 import { db } from '@/lib/db/drizzle';
 import { teamMembers, invitations, activityLogs, ActivityType, users, teams } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
@@ -19,8 +19,9 @@ import TeamInvitationEmail from '@/lib/email/templates/team-invitation-email';
 /**
  * Invite a new user to the team
  */
-export const inviteUser = validatedActionWithUser(
+export const inviteUser = validatedActionWithRole(
   inviteUserSchema,
+  'owner',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();
@@ -164,8 +165,9 @@ export const inviteUser = validatedActionWithUser(
 /**
  * Update a team member's role
  */
-export const updateMemberRole = validatedActionWithUser(
+export const updateMemberRole = validatedActionWithRole(
   updateMemberRoleSchema,
+  'owner',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();
@@ -214,8 +216,9 @@ export const updateMemberRole = validatedActionWithUser(
 /**
  * Remove a team member
  */
-export const removeMember = validatedActionWithUser(
+export const removeMember = validatedActionWithRole(
   removeMemberSchema,
+  'owner',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();
@@ -271,8 +274,9 @@ export const removeMember = validatedActionWithUser(
 /**
  * Cancel a pending invitation
  */
-export const cancelInvitation = validatedActionWithUser(
+export const cancelInvitation = validatedActionWithRole(
   cancelInvitationSchema,
+  'owner',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();
@@ -313,8 +317,9 @@ export const cancelInvitation = validatedActionWithUser(
 /**
  * Resend an invitation email
  */
-export const resendInvitation = validatedActionWithUser(
+export const resendInvitation = validatedActionWithRole(
   cancelInvitationSchema, // Reuse same schema (invitationId)
+  'owner',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();

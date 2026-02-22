@@ -1,11 +1,13 @@
 import { db } from '@/lib/db/drizzle';
-import { teams, teamMembers, users, invoices } from '@/lib/db/schema';
+import { teams, teamMembers, users, invoices, plans } from '@/lib/db/schema';
 import { eq, count, desc } from 'drizzle-orm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Building2, Users, FileText, Calendar } from 'lucide-react';
+import { Building2, Users, FileText, Calendar, Crown } from 'lucide-react';
+import Link from 'next/link';
 import { getPlatformAdmin } from '@/lib/db/queries';
 import { redirect } from 'next/navigation';
+import { PlanSelector } from '@/components/admin/plan-selector';
 
 async function getTeams() {
   const allTeams = await db
@@ -18,6 +20,10 @@ async function getTeams() {
     .groupBy(teams.id)
     .orderBy(desc(teams.createdAt));
 
+  // Get all plans for lookup
+  const allPlans = await db.select().from(plans);
+  const planMap = Object.fromEntries(allPlans.map(p => [p.id, p]));
+
   // Get invoice counts for each team
   const teamsWithInvoices = await Promise.all(
     allTeams.map(async (t) => {
@@ -29,6 +35,7 @@ async function getTeams() {
       return {
         ...t,
         invoiceCount: invoiceCount.count,
+        plan: t.team.planId ? planMap[t.team.planId] : null,
       };
     })
   );
@@ -79,6 +86,9 @@ export default async function AdminTeamsPage() {
                     <th className="text-center px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Invoices
                     </th>
+                    <th className="text-center px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Plan
+                    </th>
                     <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
                       TPN
                     </th>
@@ -118,6 +128,13 @@ export default async function AdminTeamsPage() {
                           <FileText className="h-4 w-4 text-gray-400" />
                           <span className="font-medium">{row.invoiceCount}</span>
                         </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <PlanSelector
+                          teamId={row.team.id}
+                          currentPlanId={row.team.planId}
+                          currentPlanName={row.plan?.name || null}
+                        />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {row.team.tpn ? (

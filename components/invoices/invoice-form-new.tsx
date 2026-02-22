@@ -13,6 +13,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { Plus, Trash2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { createInvoice } from '@/lib/invoices/actions';
+import { ContractInvoiceSection } from './contract-invoice-section';
 import useSWR from 'swr';
 import type { Unit, TaxClassification } from '@/lib/db/schema';
 
@@ -34,6 +35,8 @@ interface Product {
   unit: string;
   defaultTaxRate: string;
   isTaxExempt: boolean;
+  variantId?: string;
+  variantName?: string;
 }
 
 interface LineItem {
@@ -45,6 +48,8 @@ interface LineItem {
   discountPercent: string;
   taxRate: string;
   isTaxExempt: boolean;
+  productId?: string;
+  variantId?: string;
 }
 
 export function InvoiceFormNew({ defaultGstRate }: { defaultGstRate: string }) {
@@ -117,6 +122,8 @@ export function InvoiceFormNew({ defaultGstRate }: { defaultGstRate: string }) {
       discountPercent: parseFloat(item.discountPercent) || 0,
       taxRate: parseFloat(item.taxRate) || 0,
       isTaxExempt: item.isTaxExempt,
+      productId: item.productId || undefined,
+      variantId: item.variantId || undefined,
     }));
 
     // Create clean FormData with proper structure
@@ -187,6 +194,8 @@ export function InvoiceFormNew({ defaultGstRate }: { defaultGstRate: string }) {
               unit: product.unit,
               taxRate: product.defaultTaxRate,
               isTaxExempt: product.isTaxExempt,
+              productId: product.id,
+              variantId: product.variantId,
             }
           : item
       )
@@ -359,6 +368,32 @@ export function InvoiceFormNew({ defaultGstRate }: { defaultGstRate: string }) {
             </div>
           </div>
         </div>
+
+        {/* Contract Invoice Section */}
+        {selectedCustomer && (
+          <ContractInvoiceSection
+            customerId={selectedCustomer.id}
+            onApply={(data) => {
+              // Add a line item from the contract
+              const newItem: LineItem = {
+                id: crypto.randomUUID(),
+                description: data.description,
+                quantity: '1',
+                unit: 'service',
+                unitPrice: data.unitPrice.toFixed(2),
+                discountPercent: '0',
+                taxRate: defaultGstRate,
+                isTaxExempt: false,
+              };
+              // Replace empty first row or add new
+              if (lineItems.length === 1 && !lineItems[0].description && !lineItems[0].unitPrice) {
+                setLineItems([newItem]);
+              } else {
+                setLineItems([...lineItems, newItem]);
+              }
+            }}
+          />
+        )}
 
         {/* Line Items */}
         <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">

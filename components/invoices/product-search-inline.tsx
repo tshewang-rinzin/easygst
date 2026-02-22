@@ -4,6 +4,18 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Input } from '@/components/ui/input';
 
+interface ProductVariant {
+  id: string;
+  productId: string;
+  name: string;
+  sku: string | null;
+  barcode: string | null;
+  unitPrice: string | null;
+  costPrice: string | null;
+  attributeValues: unknown;
+  isActive: boolean;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -13,6 +25,9 @@ interface Product {
   unit: string;
   defaultTaxRate: string;
   isTaxExempt: boolean;
+  variants?: ProductVariant[];
+  variantId?: string;
+  variantName?: string;
 }
 
 interface ProductSearchInlineProps {
@@ -96,9 +111,32 @@ export function ProductSearchInline({
   }, [query]);
 
   const handleSelect = (product: Product) => {
-    setQuery(product.name);
-    onChange(product.name);
-    onSelect(product);
+    const displayName = product.variantName
+      ? `${product.name} - ${product.variantName}`
+      : product.name;
+    setQuery(displayName);
+    onChange(displayName);
+    onSelect({
+      ...product,
+      name: displayName,
+    });
+    setIsOpen(false);
+  };
+
+  const handleVariantSelect = (product: Product, variant: ProductVariant) => {
+    const displayName = `${product.name} - ${variant.name}`;
+    const selectedProduct: Product = {
+      ...product,
+      name: displayName,
+      unitPrice: variant.unitPrice || product.unitPrice,
+      sku: variant.sku,
+      variantId: variant.id,
+      variantName: variant.name,
+      variants: undefined,
+    };
+    setQuery(displayName);
+    onChange(displayName);
+    onSelect(selectedProduct);
     setIsOpen(false);
   };
 
@@ -125,23 +163,61 @@ export function ProductSearchInline({
               zIndex: 9999,
             }}
           >
-            {results.map((product) => (
-              <button
-                key={product.id}
-                type="button"
-                onClick={() => handleSelect(product)}
-                className="w-full px-3 py-2 text-left hover:bg-orange-50 border-b last:border-b-0 transition-colors focus:bg-orange-50 focus:outline-none"
-              >
-                <div className="font-semibold text-sm text-gray-900">{product.name}</div>
-                <div className="text-xs text-gray-600 mt-0.5">
-                  {product.sku && <span className="mr-2">SKU: {product.sku}</span>}
-                  <span>Price: {parseFloat(product.unitPrice).toFixed(2)}</span>
-                  {product.description && (
-                    <div className="text-xs text-gray-500 mt-1 truncate">{product.description}</div>
-                  )}
+            {results.map((product) => {
+              const hasVariants = product.variants && product.variants.length > 0;
+
+              if (!hasVariants) {
+                // Products without variants — same as before
+                return (
+                  <button
+                    key={product.id}
+                    type="button"
+                    onClick={() => handleSelect(product)}
+                    className="w-full px-3 py-2 text-left hover:bg-orange-50 border-b last:border-b-0 transition-colors focus:bg-orange-50 focus:outline-none"
+                  >
+                    <div className="font-semibold text-sm text-gray-900">{product.name}</div>
+                    <div className="text-xs text-gray-600 mt-0.5">
+                      {product.sku && <span className="mr-2">SKU: {product.sku}</span>}
+                      <span>Price: {parseFloat(product.unitPrice).toFixed(2)}</span>
+                      {product.description && (
+                        <div className="text-xs text-gray-500 mt-1 truncate">{product.description}</div>
+                      )}
+                    </div>
+                  </button>
+                );
+              }
+
+              // Products with variants — show header + variant rows
+              return (
+                <div key={product.id} className="border-b last:border-b-0">
+                  <div className="px-3 py-2 bg-gray-50">
+                    <div className="font-semibold text-sm text-gray-900">{product.name}</div>
+                    {product.sku && (
+                      <div className="text-xs text-gray-500">SKU: {product.sku}</div>
+                    )}
+                  </div>
+                  {product.variants!.map((variant) => (
+                    <button
+                      key={variant.id}
+                      type="button"
+                      onClick={() => handleVariantSelect(product, variant)}
+                      className="w-full pl-6 pr-3 py-1.5 text-left hover:bg-orange-50 transition-colors focus:bg-orange-50 focus:outline-none"
+                    >
+                      <div className="text-sm text-gray-700">
+                        <span className="text-gray-400 mr-1">↳</span>
+                        {variant.name}
+                      </div>
+                      <div className="text-xs text-gray-500 ml-4">
+                        {variant.sku && <span className="mr-2">SKU: {variant.sku}</span>}
+                        <span>
+                          Price: {parseFloat(variant.unitPrice || product.unitPrice).toFixed(2)}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
                 </div>
-              </button>
-            ))}
+              );
+            })}
           </div>
         )}
 

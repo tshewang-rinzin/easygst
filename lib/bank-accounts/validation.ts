@@ -1,5 +1,16 @@
 import { z } from 'zod';
 
+// Coerce checkbox values from FormData ("on", "true", true) to boolean
+const checkboxBoolean = (defaultVal: boolean) =>
+  z.preprocess(
+    (val) => {
+      if (val === undefined || val === null || val === '' || val === 'false') return defaultVal;
+      if (val === 'on' || val === 'true' || val === true) return true;
+      return defaultVal;
+    },
+    z.boolean().default(defaultVal)
+  );
+
 // Bank Account Form Validation Schema
 export const bankAccountSchema = z.object({
   bankName: z.string().min(1, 'Bank name is required').max(100),
@@ -7,11 +18,11 @@ export const bankAccountSchema = z.object({
   accountName: z.string().min(1, 'Account name is required').max(100),
   branch: z.string().max(100).optional().or(z.literal('')),
   accountType: z.string().max(50).optional().or(z.literal('')),
-  paymentMethod: z.string().min(1, 'Payment method is required').max(50),
+  paymentMethod: z.string().max(50).default('bank_transfer'),
   qrCodeUrl: z.string().optional().or(z.literal('')),
-  isDefault: z.boolean().default(false),
-  isActive: z.boolean().default(true),
-  sortOrder: z.number().int().default(0),
+  isDefault: checkboxBoolean(false),
+  isActive: checkboxBoolean(true),
+  sortOrder: z.coerce.number().int().default(0),
   notes: z.string().max(1000).optional().or(z.literal('')),
 });
 

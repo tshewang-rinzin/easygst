@@ -1,5 +1,7 @@
 import { renderToStream } from '@react-pdf/renderer';
 import { InvoiceTemplate } from './templates/invoice-template';
+import { InvoiceTemplateModern } from './templates/invoice-template-modern';
+import { InvoiceTemplateMinimal } from './templates/invoice-template-minimal';
 import React from 'react';
 import QRCode from 'qrcode';
 
@@ -13,10 +15,8 @@ interface InvoiceData {
   address?: string | null;
   city?: string | null;
   dzongkhag?: string | null;
-  // Legacy bank fields (deprecated)
   bankName?: string | null;
   bankAccountNumber?: string | null;
-  // Bank Accounts (new)
   bankAccounts?: Array<{
     id: string;
     bankName: string;
@@ -73,9 +73,6 @@ interface InvoiceData {
   verificationUrl?: string | null;
 }
 
-/**
- * Generate a QR code data URL for the verification URL
- */
 async function generateQRCodeDataUrl(url: string): Promise<string> {
   try {
     const qrCodeDataUrl = await QRCode.toDataURL(url, {
@@ -94,11 +91,16 @@ async function generateQRCodeDataUrl(url: string): Promise<string> {
   }
 }
 
+export type InvoiceTemplateType = 'classic' | 'modern' | 'minimal';
+
 /**
  * Generate a PDF invoice as a readable stream
  */
-export async function generateInvoicePDF(data: InvoiceData): Promise<NodeJS.ReadableStream> {
-  // Generate QR code if verification URL is provided
+export async function generateInvoicePDF(
+  data: InvoiceData,
+  template: InvoiceTemplateType = 'classic',
+  accentColor: string = '#1f2937'
+): Promise<NodeJS.ReadableStream> {
   let qrCodeDataUrl: string | null = null;
   if (data.verificationUrl) {
     qrCodeDataUrl = await generateQRCodeDataUrl(data.verificationUrl);
@@ -109,7 +111,18 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<NodeJS.Read
     qrCodeDataUrl,
   };
 
-  const document = React.createElement(InvoiceTemplate, { data: templateData }) as any;
+  const templates = {
+    classic: InvoiceTemplate,
+    modern: InvoiceTemplateModern,
+    minimal: InvoiceTemplateMinimal,
+  };
+
+  const TemplateComponent = templates[template] || InvoiceTemplate;
+  const document = React.createElement(TemplateComponent, {
+    data: templateData,
+    accentColor,
+  }) as any;
+
   const stream = await renderToStream(document);
   return stream;
 }

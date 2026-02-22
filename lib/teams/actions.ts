@@ -1,7 +1,7 @@
 'use server';
 
 import { z } from 'zod';
-import { validatedActionWithUser } from '@/lib/auth/middleware';
+import { validatedActionWithUser, validatedActionWithRole } from '@/lib/auth/middleware';
 import { db } from '@/lib/db/drizzle';
 import { teams, activityLogs, ActivityType } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
@@ -45,10 +45,21 @@ export type BusinessSettingsFormData = z.infer<typeof businessSettingsSchema>;
 // Partial Team Update Schema (for simple settings updates)
 const partialTeamUpdateSchema = z.object({
   invoicePrefix: z.string().max(20).optional(),
+  billPrefix: z.string().max(20).optional(),
+  customerAdvancePrefix: z.string().max(20).optional(),
+  supplierAdvancePrefix: z.string().max(20).optional(),
   invoiceTerms: z.string().max(5000).optional(),
   invoiceFooter: z.string().max(1000).optional(),
   logoUrl: z.string().optional(),
   defaultCurrency: z.enum(['BTN', 'INR', 'USD']).optional(),
+  // Template settings
+  invoiceTemplate: z.enum(['classic', 'modern', 'minimal']).optional(),
+  invoiceAccentColor: z.string().max(7).optional(),
+  showLogo: z.boolean().optional(),
+  showPaymentTerms: z.boolean().optional(),
+  showCustomerNotes: z.boolean().optional(),
+  showTermsAndConditions: z.boolean().optional(),
+  invoiceFooterText: z.string().max(2000).optional(),
 });
 
 export type PartialTeamUpdateData = z.infer<typeof partialTeamUpdateSchema>;
@@ -74,6 +85,15 @@ export const updateTeam = validatedActionWithUser(
       if (data.invoicePrefix !== undefined) {
         updateData.invoicePrefix = data.invoicePrefix;
       }
+      if (data.billPrefix !== undefined) {
+        updateData.billPrefix = data.billPrefix;
+      }
+      if (data.customerAdvancePrefix !== undefined) {
+        updateData.customerAdvancePrefix = data.customerAdvancePrefix;
+      }
+      if (data.supplierAdvancePrefix !== undefined) {
+        updateData.supplierAdvancePrefix = data.supplierAdvancePrefix;
+      }
       if (data.invoiceTerms !== undefined) {
         updateData.invoiceTerms = data.invoiceTerms || null;
       }
@@ -85,6 +105,27 @@ export const updateTeam = validatedActionWithUser(
       }
       if (data.defaultCurrency !== undefined) {
         updateData.defaultCurrency = data.defaultCurrency;
+      }
+      if (data.invoiceTemplate !== undefined) {
+        updateData.invoiceTemplate = data.invoiceTemplate;
+      }
+      if (data.invoiceAccentColor !== undefined) {
+        updateData.invoiceAccentColor = data.invoiceAccentColor;
+      }
+      if (data.showLogo !== undefined) {
+        updateData.showLogo = data.showLogo;
+      }
+      if (data.showPaymentTerms !== undefined) {
+        updateData.showPaymentTerms = data.showPaymentTerms;
+      }
+      if (data.showCustomerNotes !== undefined) {
+        updateData.showCustomerNotes = data.showCustomerNotes;
+      }
+      if (data.showTermsAndConditions !== undefined) {
+        updateData.showTermsAndConditions = data.showTermsAndConditions;
+      }
+      if (data.invoiceFooterText !== undefined) {
+        updateData.invoiceFooterText = data.invoiceFooterText || null;
       }
 
       await db.update(teams).set(updateData).where(eq(teams.id, team.id));
@@ -99,6 +140,7 @@ export const updateTeam = validatedActionWithUser(
 
       revalidatePath('/settings');
       revalidatePath('/settings/numbering');
+      revalidatePath('/settings/templates');
 
       return { success: true, message: 'Settings updated successfully' };
     } catch (error) {
@@ -112,8 +154,9 @@ export const updateTeam = validatedActionWithUser(
  * Update business settings for DRC compliance
  * Includes TPN, banking details, invoice configuration
  */
-export const updateBusinessSettings = validatedActionWithUser(
+export const updateBusinessSettings = validatedActionWithRole(
   businessSettingsSchema,
+  'owner',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();

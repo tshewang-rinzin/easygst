@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   ArrowLeft,
   ScrollText,
+  Crown,
 } from 'lucide-react';
 
 const adminNavigation = [
@@ -29,6 +30,11 @@ const adminNavigation = [
     name: 'Teams',
     href: '/admin/teams',
     icon: Building2,
+  },
+  {
+    name: 'Plans & Features',
+    href: '/admin/plans',
+    icon: Crown,
   },
   {
     name: 'Email Settings',

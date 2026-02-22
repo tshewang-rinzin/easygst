@@ -4,8 +4,10 @@ import { useActionState, useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ProductForm } from '@/components/products/product-form';
-import { updateProduct, deleteProduct } from '@/lib/products/actions';
-import { ArrowLeft, Trash2 } from 'lucide-react';
+import { VariantBuilder } from '@/components/products/variant-builder';
+import { FeatureGate } from '@/components/feature-gate';
+import { updateProduct, deleteProduct, duplicateProduct } from '@/lib/products/actions';
+import { ArrowLeft, Trash2, Copy } from 'lucide-react';
 import Link from 'next/link';
 import useSWR from 'swr';
 import type { Product, Team } from '@/lib/db/schema';
@@ -20,6 +22,18 @@ export default function EditProductPage({
   const { id } = use(params);
   const router = useRouter();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
+
+  const handleDuplicate = async () => {
+    setDuplicating(true);
+    const result = await duplicateProduct(id);
+    if (result && 'productId' in result) {
+      router.push(`/products/${result.productId}`);
+    } else {
+      alert(result?.error || 'Failed to duplicate');
+      setDuplicating(false);
+    }
+  };
 
   const { data: product, error } = useSWR<Product>(
     `/api/products/${id}`,
@@ -94,14 +108,24 @@ export default function EditProductPage({
               Update product details and pricing
             </p>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => setShowDeleteConfirm(true)}
-            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete Product
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={handleDuplicate}
+              disabled={duplicating}
+            >
+              <Copy className="h-4 w-4 mr-2" />
+              {duplicating ? 'Duplicating...' : 'Duplicate'}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Product
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -166,6 +190,20 @@ export default function EditProductPage({
           </Link>
         </div>
       </form>
+
+      {/* Variant Builder - only for saved products of type 'product' */}
+      {product.productType !== 'service' && (
+        <FeatureGate feature="product_variants">
+          <div className="mt-8">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Product Variants</h2>
+            <VariantBuilder
+              productId={id}
+              productSku={product.sku || ''}
+              trackInventory={product.trackInventory}
+            />
+          </div>
+        </FeatureGate>
+      )}
     </section>
   );
 }

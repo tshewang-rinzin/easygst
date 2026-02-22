@@ -1,5 +1,6 @@
 'use client';
 
+import { FeatureGate } from '@/components/feature-gate';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -63,6 +64,7 @@ export default function FiledReturnsPage() {
   };
 
   return (
+    <FeatureGate feature="gst_returns">
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
@@ -210,5 +212,6 @@ export default function FiledReturnsPage() {
         </Card>
       )}
     </div>
+    </FeatureGate>
   );
 }

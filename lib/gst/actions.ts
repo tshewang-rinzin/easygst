@@ -11,7 +11,7 @@ import {
   amendGstReturnSchema,
 } from './validation';
 import { calculateGstForPeriod, generateReturnNumber, isPeriodLocked } from './queries';
-import { validatedAction, validatedActionWithUser } from '@/lib/auth/middleware';
+import { validatedAction, validatedActionWithUser, validatedActionWithRole } from '@/lib/auth/middleware';
 import { eq, and } from 'drizzle-orm';
 import Decimal from 'decimal.js';
 
@@ -88,8 +88,9 @@ export const createGstReturn = validatedActionWithUser(
 /**
  * File a GST return (mark as submitted)
  */
-export const fileGstReturn = validatedActionWithUser(
+export const fileGstReturn = validatedActionWithRole(
   fileGstReturnSchema,
+  'owner',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();
@@ -272,8 +273,9 @@ export async function deleteGstReturn(returnId: string) {
 /**
  * Create a period lock
  */
-export const createPeriodLock = validatedActionWithUser(
+export const createPeriodLock = validatedActionWithRole(
   createPeriodLockSchema,
+  'owner',
   async (data, _, user) => {
     try {
       const team = await getTeamForUser();

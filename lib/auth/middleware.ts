@@ -73,15 +73,21 @@ export function validatedActionWithUser<S extends z.ZodType<any, any>, T>(
       // prevState is actually the data object in this case
       result = schema.safeParse(prevState);
       if (!result.success) {
-        return { error: result.error.errors[0].message };
+        const e = result.error.errors[0];
+        const field = e.path.join('.');
+        return { error: field ? `${field}: ${e.message}` : e.message };
       }
       return action(result.data, result.data, user);
     }
 
     // Handle FormData calls (traditional form submissions)
-    result = schema.safeParse(Object.fromEntries(formData));
+    const formDataObj = Object.fromEntries(formData);
+    result = schema.safeParse(formDataObj);
     if (!result.success) {
-      return { error: result.error.errors[0].message };
+      console.error('[Validation Error] Fields:', Object.keys(formDataObj), 'Errors:', result.error.errors.map(e => ({ path: e.path, msg: e.message })));
+      const e = result.error.errors[0];
+      const field = e.path.join('.');
+      return { error: field ? `${field}: ${e.message}` : e.message };
     }
 
     return action(result.data, formData, user);
@@ -112,14 +118,20 @@ export function validatedActionWithRole<S extends z.ZodType<any, any>, T>(
     if (!formData) {
       result = schema.safeParse(prevState);
       if (!result.success) {
-        return { error: result.error.errors[0].message };
+        const e = result.error.errors[0];
+        const field = e.path.join('.');
+        return { error: field ? `${field}: ${e.message}` : e.message };
       }
       return action(result.data, result.data, user);
     }
 
-    result = schema.safeParse(Object.fromEntries(formData));
+    const formDataObj2 = Object.fromEntries(formData);
+    result = schema.safeParse(formDataObj2);
     if (!result.success) {
-      return { error: result.error.errors[0].message };
+      console.error('[Validation Error] Fields:', Object.keys(formDataObj2), 'Errors:', result.error.errors.map(e => ({ path: e.path, msg: e.message })));
+      const e = result.error.errors[0];
+      const field = e.path.join('.');
+      return { error: field ? `${field}: ${e.message}` : e.message };
     }
 
     return action(result.data, formData, user);

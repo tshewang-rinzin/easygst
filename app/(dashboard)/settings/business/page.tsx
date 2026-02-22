@@ -16,6 +16,116 @@ import Image from 'next/image';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
+interface BankAccount {
+  id: string;
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+  branch: string | null;
+  paymentMethod: string;
+  isDefault: boolean;
+  isActive: boolean;
+}
+
+function DefaultBankAccountCard() {
+  const { data: bankAccounts, mutate } = useSWR<BankAccount[]>('/api/bank-accounts', fetcher);
+  const [saving, setSaving] = useState(false);
+
+  const activeAccounts = bankAccounts?.filter((a) => a.isActive) || [];
+  const defaultAccount = activeAccounts.find((a) => a.isDefault);
+
+  const handleSetDefault = async (accountId: string) => {
+    setSaving(true);
+    try {
+      await fetch(`/api/bank-accounts`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ defaultAccountId: accountId }),
+      });
+      mutate();
+    } catch (err) {
+      console.error('Failed to set default bank account:', err);
+    }
+    setSaving(false);
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle>Default Bank Account</CardTitle>
+            <p className="text-sm text-gray-600 mt-1">
+              This bank account will be displayed on invoices for customer payments
+            </p>
+          </div>
+          <Link href="/settings/bank-accounts">
+            <Button variant="outline" size="sm">
+              Manage Bank Accounts
+            </Button>
+          </Link>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {activeAccounts.length === 0 ? (
+          <div className="text-center py-6 text-gray-400">
+            <p className="mb-3">No bank accounts configured yet.</p>
+            <Link href="/settings/bank-accounts">
+              <Button variant="outline" size="sm">
+                Add Bank Account
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {activeAccounts.map((account) => (
+              <div
+                key={account.id}
+                className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
+                  account.isDefault
+                    ? 'border-orange-500 bg-orange-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-gray-900">{account.bankName}</p>
+                    {account.branch && (
+                      <span className="text-xs text-gray-500">({account.branch})</span>
+                    )}
+                    {account.isDefault && (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
+                        Default
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {account.accountName} · ****{account.accountNumber.slice(-4)}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {account.paymentMethod.replace('_', ' ')}
+                  </p>
+                </div>
+                {!account.isDefault && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={saving}
+                    onClick={() => handleSetDefault(account.id)}
+                  >
+                    Set as Default
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 type ActionState = {
   error?: string;
   success?: string;
@@ -221,66 +331,8 @@ function BusinessForm({ state, team }: BusinessFormProps) {
         </CardContent>
       </Card>
 
-      {/* Banking Information Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Banking Information</CardTitle>
-          <p className="text-sm text-gray-600">
-            Bank details will be displayed on invoices for customer payments
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="bankName" className="mb-2">
-                Bank Name
-              </Label>
-              <Input
-                id="bankName"
-                name="bankName"
-                placeholder="Bank of Bhutan"
-                defaultValue={team?.bankName || ''}
-              />
-            </div>
-            <div>
-              <Label htmlFor="bankBranch" className="mb-2">
-                Bank Branch
-              </Label>
-              <Input
-                id="bankBranch"
-                name="bankBranch"
-                placeholder="Thimphu Main Branch"
-                defaultValue={team?.bankBranch || ''}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="bankAccountName" className="mb-2">
-                Account Name
-              </Label>
-              <Input
-                id="bankAccountName"
-                name="bankAccountName"
-                placeholder="Your Business Name"
-                defaultValue={team?.bankAccountName || ''}
-              />
-            </div>
-            <div>
-              <Label htmlFor="bankAccountNumber" className="mb-2">
-                Account Number
-              </Label>
-              <Input
-                id="bankAccountNumber"
-                name="bankAccountNumber"
-                placeholder="XXXXXXXXXX"
-                defaultValue={team?.bankAccountNumber || ''}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Default Bank Account Card */}
+      <DefaultBankAccountCard />
 
       {/* Invoice Settings Card */}
       <Card>

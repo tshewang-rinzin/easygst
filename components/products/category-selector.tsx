@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import useSWR from 'swr';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -10,9 +10,11 @@ import Link from 'next/link';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-interface Category {
+interface CategoryDropdownItem {
   id: string;
   name: string;
+  depth: number;
+  parentId: string | null;
 }
 
 interface CategorySelectorProps {
@@ -21,7 +23,7 @@ interface CategorySelectorProps {
 }
 
 export function CategorySelector({ defaultCategoryId, defaultCategoryName }: CategorySelectorProps) {
-  const { data: categories } = useSWR<Category[]>('/api/categories', fetcher);
+  const { data: categories } = useSWR<CategoryDropdownItem[]>('/api/categories?format=dropdown', fetcher);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>(
     defaultCategoryId?.toString() || ''
   );
@@ -30,7 +32,6 @@ export function CategorySelector({ defaultCategoryId, defaultCategoryName }: Cat
   );
   const [useManual, setUseManual] = useState(!defaultCategoryId && !!defaultCategoryName);
 
-  // Update manual category when dropdown changes to "manual"
   const handleCategoryChange = (value: string) => {
     setSelectedCategoryId(value);
     if (value === 'manual') {
@@ -68,7 +69,7 @@ export function CategorySelector({ defaultCategoryId, defaultCategoryName }: Cat
         <option value="">-- Select Category --</option>
         {categories?.map((cat) => (
           <option key={cat.id} value={cat.id}>
-            {cat.name}
+            {'—'.repeat(cat.depth)}{cat.depth > 0 ? ' ' : ''}{cat.name}
           </option>
         ))}
         <option value="manual">✏️ Enter manually</option>

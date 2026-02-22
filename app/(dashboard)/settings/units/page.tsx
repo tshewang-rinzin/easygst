@@ -93,42 +93,72 @@ export default function UnitsSettingsPage() {
           />
         )}
 
-        {/* Units List */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Existing Units</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
+        {/* Units List — grouped by category */}
+        {isLoading ? (
+          <Card>
+            <CardContent className="pt-6">
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="h-16 bg-gray-100 rounded animate-pulse" />
                 ))}
               </div>
-            ) : units && units.length > 0 ? (
-              <div className="space-y-2">
-                {units.map((unit) =>
-                  editingId === unit.id ? (
-                    <UnitForm
-                      key={unit.id}
-                      unit={unit}
-                      onCancel={() => setEditingId(null)}
-                      onSuccess={() => {
-                        setEditingId(null);
-                        mutate('/api/units');
-                      }}
-                    />
-                  ) : (
-                    <UnitRow
-                      key={unit.id}
-                      unit={unit}
-                      onEdit={() => setEditingId(unit.id)}
-                      onDelete={() => mutate('/api/units')}
-                    />
-                  )
-                )}
-              </div>
-            ) : (
+            </CardContent>
+          </Card>
+        ) : units && units.length > 0 ? (
+          (() => {
+            const categoryLabels: Record<string, string> = {
+              common: '⭐ Common',
+              time: '🕐 Time',
+              quantity: '📦 Quantity',
+              weight: '⚖️ Weight',
+              volume: '🧪 Volume',
+              length: '📏 Length / Area',
+              other: '📋 Other',
+            };
+            const categoryOrder = ['common', 'time', 'quantity', 'weight', 'volume', 'length', 'other'];
+            const grouped = units.reduce<Record<string, Unit[]>>((acc, unit) => {
+              const cat = (unit as any).category || 'other';
+              if (!acc[cat]) acc[cat] = [];
+              acc[cat].push(unit);
+              return acc;
+            }, {});
+            return categoryOrder
+              .filter((cat) => grouped[cat]?.length)
+              .map((cat) => (
+                <Card key={cat}>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">{categoryLabels[cat] || cat}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {grouped[cat].map((unit) =>
+                        editingId === unit.id ? (
+                          <UnitForm
+                            key={unit.id}
+                            unit={unit}
+                            onCancel={() => setEditingId(null)}
+                            onSuccess={() => {
+                              setEditingId(null);
+                              mutate('/api/units');
+                            }}
+                          />
+                        ) : (
+                          <UnitRow
+                            key={unit.id}
+                            unit={unit}
+                            onEdit={() => setEditingId(unit.id)}
+                            onDelete={() => mutate('/api/units')}
+                          />
+                        )
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ));
+          })()
+        ) : (
+          <Card>
+            <CardContent className="pt-6">
               <div className="text-center py-12">
                 <Package className="h-12 w-12 text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-500">No units added yet</p>
@@ -136,9 +166,9 @@ export default function UnitsSettingsPage() {
                   Add your first unit to get started
                 </p>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </section>
   );
@@ -265,6 +295,24 @@ function UnitForm({
                 required
               />
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="category">Category</Label>
+            <select
+              id="category"
+              name="category"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              defaultValue={(unit as any)?.category || 'other'}
+            >
+              <option value="common">⭐ Common</option>
+              <option value="time">🕐 Time</option>
+              <option value="quantity">📦 Quantity</option>
+              <option value="weight">⚖️ Weight</option>
+              <option value="volume">🧪 Volume</option>
+              <option value="length">📏 Length / Area</option>
+              <option value="other">📋 Other</option>
+            </select>
           </div>
 
           <div>

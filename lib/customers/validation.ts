@@ -3,8 +3,11 @@ import { booleanCoerce } from '@/lib/validation-helpers';
 
 // Customer validation schema
 export const customerSchema = z.object({
+  customerType: z.enum(['individual', 'business', 'government']).default('business'),
   name: z.string().min(1, 'Customer name is required').max(255),
   contactPerson: z.string().max(255).optional(),
+  department: z.string().max(255).optional(),
+  cidNumber: z.string().max(20).optional(),
   email: z.string().email('Invalid email').optional().or(z.literal('')),
   phone: z.string().max(20).optional(),
   mobile: z.string().max(20).optional(),

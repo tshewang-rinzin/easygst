@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useActionState, useEffect } from 'react';
+import { FeatureGate } from '@/components/feature-gate';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -72,6 +73,7 @@ export default function PeriodLockPage() {
   };
 
   return (
+    <FeatureGate feature="period_lock">
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
@@ -277,5 +279,6 @@ export default function PeriodLockPage() {
         </CardContent>
       </Card>
     </div>
+    </FeatureGate>
   );
 }

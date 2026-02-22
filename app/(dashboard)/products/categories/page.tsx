@@ -1,4 +1,4 @@
-import { getCategories } from '@/lib/categories/queries';
+import { getCategoryTree, type CategoryWithChildren } from '@/lib/categories/queries';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -9,11 +9,64 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { PlusCircle, Edit, Trash2 } from 'lucide-react';
+import { PlusCircle, Edit, ChevronRight } from 'lucide-react';
 import { CategoryActions } from '@/components/categories/category-actions';
 
+function CategoryNode({ category, depth = 0 }: { category: CategoryWithChildren; depth?: number }) {
+  return (
+    <>
+      <Card className={depth > 0 ? 'ml-6 border-l-4 border-l-orange-200' : ''}>
+        <CardHeader className="py-3">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                {depth > 0 && <ChevronRight className="h-4 w-4 text-gray-400" />}
+                <CardTitle className="text-lg">{category.name}</CardTitle>
+              </div>
+              {category.description && (
+                <CardDescription className="mt-1">
+                  {category.description}
+                </CardDescription>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge
+                variant={category.isActive ? 'default' : 'secondary'}
+                className={
+                  category.isActive
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-800'
+                }
+              >
+                {category.isActive ? 'Active' : 'Inactive'}
+              </Badge>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0 pb-3">
+          <div className="flex items-center gap-2">
+            <Link href={`/products/categories/${category.id}/edit`}>
+              <Button variant="outline" size="sm">
+                <Edit className="mr-2 h-4 w-4" />
+                Edit
+              </Button>
+            </Link>
+            <CategoryActions
+              categoryId={category.id}
+              isActive={category.isActive}
+            />
+          </div>
+        </CardContent>
+      </Card>
+      {category.children?.map((child) => (
+        <CategoryNode key={child.id} category={child} depth={depth + 1} />
+      ))}
+    </>
+  );
+}
+
 export default async function CategoriesPage() {
-  const categories = await getCategories(true); // Include inactive
+  const categoryTree = await getCategoryTree(true);
 
   return (
     <section className="flex-1 p-4 lg:p-8">
@@ -34,7 +87,7 @@ export default async function CategoriesPage() {
         </Link>
       </div>
 
-      {categories.length === 0 ? (
+      {categoryTree.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <p className="text-muted-foreground mb-4">No categories yet</p>
@@ -47,46 +100,9 @@ export default async function CategoriesPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {categories.map((category) => (
-            <Card key={category.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{category.name}</CardTitle>
-                    {category.description && (
-                      <CardDescription className="mt-1">
-                        {category.description}
-                      </CardDescription>
-                    )}
-                  </div>
-                  <Badge
-                    variant={category.isActive ? 'default' : 'secondary'}
-                    className={
-                      category.isActive
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800'
-                    }
-                  >
-                    {category.isActive ? 'Active' : 'Inactive'}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-2">
-                  <Link href={`/products/categories/${category.id}/edit`}>
-                    <Button variant="outline" size="sm">
-                      <Edit className="mr-2 h-4 w-4" />
-                      Edit
-                    </Button>
-                  </Link>
-                  <CategoryActions
-                    categoryId={category.id}
-                    isActive={category.isActive}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+        <div className="space-y-3">
+          {categoryTree.map((category) => (
+            <CategoryNode key={category.id} category={category} />
           ))}
         </div>
       )}

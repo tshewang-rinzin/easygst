@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Mail, CheckCircle2, AlertCircle } from 'lucide-react';
 import { sendInvoiceEmail } from '@/lib/email/actions';
+import { FeatureGate } from '@/components/feature-gate';
 
 interface EmailInvoiceButtonProps {
   invoiceId: string;
@@ -57,6 +58,7 @@ export function EmailInvoiceButton({
   }
 
   return (
+    <FeatureGate feature="email_invoices" fallback={null}>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant={variant}>
@@ -120,5 +122,6 @@ export function EmailInvoiceButton({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    </FeatureGate>
   );
 }
