@@ -7,7 +7,7 @@ const syncSaleSchema = z.object({
   localId: z.string(),
   items: z.array(
     z.object({
-      productId: z.string().uuid().optional(),
+      productId: z.string().uuid().nullish(),
       description: z.string().min(1),
       quantity: z.number().positive(),
       unitPrice: z.number().min(0),
@@ -17,13 +17,14 @@ const syncSaleSchema = z.object({
       unit: z.string().default('piece'),
     })
   ).min(1),
-  customerId: z.string().uuid().optional(),
-  paymentMethod: z.enum(['cash', 'card', 'bank_transfer', 'qr']).default('cash'),
+  customerId: z.string().uuid().nullish(),
+  paymentMethod: z.string().min(1).default('cash'),
   isCredit: z.boolean().default(false),
-  amountTendered: z.number().optional(),
-  transactionId: z.string().optional(),
-  notes: z.string().optional(),
-  createdAt: z.string().datetime().optional(),
+  paymentReference: z.string().nullish(),
+  amountTendered: z.number().nullish(),
+  transactionId: z.string().nullish(),
+  notes: z.string().nullish(),
+  createdAt: z.string().datetime().nullish(),
 });
 
 const syncSchema = z.object({
@@ -42,7 +43,8 @@ export const POST = withMobileAuth(async (request: NextRequest, context: MobileA
 
     for (const sale of parsed.data.sales) {
       try {
-        const { localId, ...saleData } = sale;
+        const { localId, paymentReference, ...saleData } = sale;
+        if (paymentReference) (saleData as any).paymentReference = paymentReference;
         const result = await processSale(saleData as SaleInput, context);
         results.push({
           localId,
@@ -61,7 +63,16 @@ export const POST = withMobileAuth(async (request: NextRequest, context: MobileA
       }
     }
 
-    return NextResponse.json({ results });
+    const synced = results.filter(r => r.success).map(r => ({
+      localId: r.localId,
+      serverId: r.serverId!,
+      invoiceNumber: r.invoiceNumber!,
+    }));
+    const errors = results.filter(r => !r.success).map(r => ({
+      localId: r.localId,
+      error: r.error || 'Unknown error',
+    }));
+    return NextResponse.json({ synced, errors });
   } catch (error) {
     console.error('[pos/sync] Error:', error);
     return NextResponse.json({ error: 'Failed to sync sales' }, { status: 500 });

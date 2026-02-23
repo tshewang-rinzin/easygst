@@ -11,6 +11,8 @@ import { SendReminderButton } from '@/components/invoices/send-reminder-button';
 import { DeleteInvoiceDialog } from '@/components/invoices/delete-invoice-dialog';
 import { CancelInvoiceDialog } from '@/components/invoices/cancel-invoice-dialog';
 import { RecordPaymentDialog } from '@/components/payments/record-payment-dialog';
+import { FileAttachments } from '@/components/file-attachments';
+import { FeatureGate } from '@/components/feature-gate';
 import { getGSTClassification, getGSTClassificationLabel, getGSTClassificationColor } from '@/lib/invoices/gst-classification';
 
 async function InvoiceDetails({ id }: { id: string }) {
@@ -409,17 +411,19 @@ async function InvoiceDetails({ id }: { id: string }) {
       )}
 
       {/* Payments */}
-      {invoice.paymentStatus !== 'paid' && parseFloat(invoice.amountDue) > 0 && (
+      {((invoice.payments && invoice.payments.length > 0) || (invoice.paymentStatus !== 'paid' && parseFloat(invoice.amountDue) > 0)) && (
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle className="text-lg">Payments</CardTitle>
-              <RecordPaymentDialog
-                invoiceId={invoice.id}
-                invoiceNumber={invoice.invoiceNumber}
-                currency={invoice.currency}
-                amountDue={invoice.amountDue}
-              />
+              {invoice.paymentStatus !== 'paid' && parseFloat(invoice.amountDue) > 0 && (
+                <RecordPaymentDialog
+                  invoiceId={invoice.id}
+                  invoiceNumber={invoice.invoiceNumber}
+                  currency={invoice.currency}
+                  amountDue={invoice.amountDue}
+                />
+              )}
             </div>
           </CardHeader>
           <CardContent>
@@ -461,7 +465,7 @@ async function InvoiceDetails({ id }: { id: string }) {
                       )}
                       <p className="text-sm text-gray-600 mt-1">
                         {new Date(payment.paymentDate).toLocaleDateString()} •{' '}
-                        {payment.paymentMethod.replace('_', ' ')}
+                        {payment.paymentMethodName || payment.paymentMethod.replace('_', ' ')}
                       </p>
                       {payment.transactionId && (
                         <p className="text-xs text-gray-500">
@@ -484,6 +488,16 @@ async function InvoiceDetails({ id }: { id: string }) {
           </CardContent>
         </Card>
       )}
+
+      {/* File Attachments */}
+      <FeatureGate feature="file_attachments" fallback={null}>
+        <FileAttachments
+          entityType="invoice"
+          entityId={invoice.id}
+          folder="invoices"
+          title="Attachments"
+        />
+      </FeatureGate>
     </div>
   );
 }

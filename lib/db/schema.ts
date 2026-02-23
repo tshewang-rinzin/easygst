@@ -2490,6 +2490,53 @@ export type MessageLog = typeof messageLog.$inferSelect;
 export type NewMessageLog = typeof messageLog.$inferInsert;
 export type NewEmailSettings = typeof emailSettings.$inferInsert;
 
+// ─── File Attachments ───────────────────────────────────────────────────────
+
+export const fileAttachments = pgTable('file_attachments', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+
+  // Storage
+  storageKey: varchar('storage_key', { length: 500 }).notNull(), // R2 object key
+  filename: varchar('filename', { length: 255 }).notNull(), // Original filename
+  contentType: varchar('content_type', { length: 100 }).notNull(),
+  fileSize: integer('file_size').notNull(), // bytes
+
+  // Categorization
+  folder: varchar('folder', { length: 50 }).notNull().default('uploads'), // receipts, bills, payment-proofs, logos, etc.
+
+  // Polymorphic association — attach to any entity
+  entityType: varchar('entity_type', { length: 50 }).notNull(), // invoice, payment, supplier_bill, customer, product, expense
+  entityId: uuid('entity_id').notNull(),
+
+  // Metadata
+  description: text('description'),
+  uploadedBy: uuid('uploaded_by')
+    .notNull()
+    .references(() => users.id),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  teamIdx: index('file_attachments_team_idx').on(table.teamId),
+  entityIdx: index('file_attachments_entity_idx').on(table.entityType, table.entityId),
+  folderIdx: index('file_attachments_folder_idx').on(table.teamId, table.folder),
+}));
+
+export const fileAttachmentsRelations = relations(fileAttachments, ({ one }) => ({
+  team: one(teams, {
+    fields: [fileAttachments.teamId],
+    references: [teams.id],
+  }),
+  uploader: one(users, {
+    fields: [fileAttachments.uploadedBy],
+    references: [users.id],
+  }),
+}));
+
+export type FileAttachment = typeof fileAttachments.$inferSelect;
+export type NewFileAttachment = typeof fileAttachments.$inferInsert;
+
 // Contracts
 export type Contract = typeof contracts.$inferSelect;
 export type NewContract = typeof contracts.$inferInsert;

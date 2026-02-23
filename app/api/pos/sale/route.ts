@@ -9,15 +9,16 @@ import {
   customers,
   activityLogs,
   ActivityType,
+  paymentMethods,
 } from '@/lib/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, asc } from 'drizzle-orm';
 import { generateInvoiceNumber } from '@/lib/invoices/numbering';
 import { calculateLineItem, calculateInvoiceTotals } from '@/lib/invoices/calculations';
 import { getGSTClassification } from '@/lib/invoices/gst-classification';
 import Decimal from 'decimal.js';
 
 const saleItemSchema = z.object({
-  productId: z.string().uuid().optional(),
+  productId: z.string().uuid().nullish(),
   description: z.string().min(1),
   quantity: z.number().positive(),
   unitPrice: z.number().min(0),
@@ -29,13 +30,14 @@ const saleItemSchema = z.object({
 
 const saleSchema = z.object({
   items: z.array(saleItemSchema).min(1),
-  customerId: z.string().uuid().optional(),
-  paymentMethod: z.enum(['cash', 'card', 'bank_transfer', 'qr']).default('cash'),
+  customerId: z.string().uuid().nullish(),
+  paymentMethod: z.string().min(1).default('cash'),
   isCredit: z.boolean().default(false),
-  amountTendered: z.number().optional(),
-  transactionId: z.string().optional(),
-  notes: z.string().optional(),
-  createdAt: z.string().datetime().optional(),
+  paymentReference: z.string().nullish(),
+  amountTendered: z.number().nullish(),
+  transactionId: z.string().nullish(),
+  notes: z.string().nullish(),
+  createdAt: z.string().datetime().nullish(),
 });
 
 export type SaleInput = z.infer<typeof saleSchema>;
@@ -125,6 +127,17 @@ export async function processSale(
   const isPaid = !data.isCredit;
   const invoiceDate = data.createdAt ? new Date(data.createdAt) : new Date();
 
+  // Resolve payment method display name
+  let paymentMethodName = data.paymentMethod;
+  if (data.paymentMethod && data.paymentMethod !== 'credit') {
+    const [method] = await db
+      .select({ name: paymentMethods.name })
+      .from(paymentMethods)
+      .where(and(eq(paymentMethods.teamId, teamId), eq(paymentMethods.code, data.paymentMethod)))
+      .limit(1);
+    if (method) paymentMethodName = method.name;
+  }
+
   // Create invoice (+ payment if not credit) in transaction
   const [invoice] = await db.transaction(async (tx) => {
     const [newInvoice] = await tx
@@ -147,7 +160,7 @@ export async function processSale(
         isLocked: isPaid,
         lockedAt: isPaid ? new Date() : null,
         lockedBy: isPaid ? userId : null,
-        paymentTerms: isPaid ? 'POS Cash Sale' : 'POS Credit Sale - Net 30',
+        paymentTerms: isPaid ? `Cash Sale — POS — ${paymentMethodName}` : 'POS Credit Sale - Net 30',
         notes: data.notes || null,
         createdBy: userId,
       })
@@ -168,9 +181,9 @@ export async function processSale(
         currency,
         paymentDate: invoiceDate,
         paymentMethod: data.paymentMethod,
-        transactionId: data.transactionId || null,
+        transactionId: data.transactionId || data.paymentReference || null,
         receiptNumber: invoiceNumber,
-        notes: 'POS Sale',
+        notes: data.paymentReference ? `Cash Sale — POS — Ref: ${data.paymentReference}` : 'Cash Sale — POS',
         createdBy: userId,
       });
     }
@@ -230,7 +243,15 @@ export const POST = withMobileAuth(async (request: NextRequest, context: MobileA
     }
 
     const result = await processSale(parsed.data, context);
-    return NextResponse.json(result, { status: 201 });
+    // Return flat response for POS app compatibility
+    const receipt = result.receipt;
+    return NextResponse.json({
+      id: receipt.id,
+      invoiceNumber: receipt.invoiceNumber,
+      totalAmount: parseFloat(receipt.totalAmount),
+      createdAt: receipt.date?.toISOString?.() || new Date().toISOString(),
+      receipt, // Also include full receipt for web clients
+    }, { status: 201 });
   } catch (error) {
     console.error('[pos/sale] Error:', error);
     return NextResponse.json({ error: 'Failed to create sale' }, { status: 500 });

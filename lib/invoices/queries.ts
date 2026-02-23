@@ -4,6 +4,7 @@ import {
   invoiceItems,
   customers,
   payments,
+  paymentMethods,
   products,
 } from '@/lib/db/schema';
 import { eq, and, ilike, desc, or, gte, lte, sql } from 'drizzle-orm';
@@ -112,10 +113,36 @@ export async function getInvoiceWithDetails(id: string) {
     .where(eq(invoiceItems.invoiceId, id))
     .orderBy(invoiceItems.sortOrder);
 
-  // Get all payments
+  // Get all payments (with payment method display name)
   const invoicePayments = await db
-    .select()
+    .select({
+      id: payments.id,
+      teamId: payments.teamId,
+      invoiceId: payments.invoiceId,
+      amount: payments.amount,
+      currency: payments.currency,
+      paymentDate: payments.paymentDate,
+      paymentMethod: payments.paymentMethod,
+      paymentMethodName: paymentMethods.name,
+      paymentGateway: payments.paymentGateway,
+      transactionId: payments.transactionId,
+      bankName: payments.bankName,
+      chequeNumber: payments.chequeNumber,
+      adjustmentAmount: payments.adjustmentAmount,
+      adjustmentReason: payments.adjustmentReason,
+      notes: payments.notes,
+      receiptNumber: payments.receiptNumber,
+      createdBy: payments.createdBy,
+      createdAt: payments.createdAt,
+    })
     .from(payments)
+    .leftJoin(
+      paymentMethods,
+      and(
+        eq(paymentMethods.code, payments.paymentMethod),
+        eq(paymentMethods.teamId, payments.teamId)
+      )
+    )
     .where(eq(payments.invoiceId, id))
     .orderBy(desc(payments.paymentDate));
 

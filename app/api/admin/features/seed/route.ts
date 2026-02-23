@@ -36,6 +36,10 @@ const DEFAULT_FEATURES = [
   { code: 'sms_notifications', name: 'SMS Notifications', module: 'communication', description: 'Send invoices and reminders via SMS', sortOrder: 3 },
   { code: 'whatsapp_notifications', name: 'WhatsApp Notifications', module: 'communication', description: 'Send invoices and receipts via WhatsApp', sortOrder: 4 },
 
+  // Storage
+  { code: 'file_attachments', name: 'File Attachments', module: 'storage', description: 'Upload and attach files to invoices, bills, and payments', sortOrder: 1 },
+  { code: 'receipt_ocr', name: 'Receipt OCR', module: 'storage', description: 'Auto-extract reference numbers from payment receipts using OCR', sortOrder: 2 },
+
   // Advanced
   { code: 'multi_currency', name: 'Multi-Currency', module: 'advanced', description: 'Invoice in BTN, INR, USD', sortOrder: 1 },
   { code: 'custom_fields', name: 'Custom Fields', module: 'advanced', description: 'Add custom fields to invoices and products', sortOrder: 2 },
@@ -66,7 +70,7 @@ const DEFAULT_PLANS = [
     maxCustomers: 200,
     monthlyPrice: '499',
     yearlyPrice: '4990',
-    features: ['invoices', 'cash_sales', 'quotations', 'credit_notes', 'payments', 'advances', 'supplier_bills', 'debit_notes', 'inventory', 'gst_returns', 'gst_reports', 'email_invoices', 'data_export'],
+    features: ['invoices', 'cash_sales', 'quotations', 'credit_notes', 'payments', 'advances', 'supplier_bills', 'debit_notes', 'inventory', 'gst_returns', 'gst_reports', 'email_invoices', 'data_export', 'file_attachments'],
   },
   {
     name: 'Professional',
@@ -78,7 +82,7 @@ const DEFAULT_PLANS = [
     maxCustomers: null,
     monthlyPrice: '999',
     yearlyPrice: '9990',
-    features: ['invoices', 'cash_sales', 'quotations', 'credit_notes', 'contracts', 'payments', 'advances', 'supplier_bills', 'debit_notes', 'inventory', 'product_variants', 'gst_returns', 'period_lock', 'gst_reports', 'email_invoices', 'payment_reminders', 'multi_currency', 'data_export', 'custom_templates'],
+    features: ['invoices', 'cash_sales', 'quotations', 'credit_notes', 'contracts', 'payments', 'advances', 'supplier_bills', 'debit_notes', 'inventory', 'product_variants', 'gst_returns', 'period_lock', 'gst_reports', 'email_invoices', 'payment_reminders', 'multi_currency', 'data_export', 'custom_templates', 'file_attachments', 'receipt_ocr'],
   },
   {
     name: 'Enterprise',
