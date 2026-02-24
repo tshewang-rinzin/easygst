@@ -47,7 +47,7 @@ export const GET = withMobileAuth(async (request: NextRequest, context: MobileAu
 
   return NextResponse.json({
     defaultGstRate: parseFloat(team?.defaultGstRate || '0'),
-    currency: team?.defaultCurrency || 'BTN',
+    currency: team?.currency || 'BTN',
     invoicePrefix: team?.invoicePrefix || 'INV',
     businessName: team?.businessName || '',
     tpn: team?.tpn || '',
