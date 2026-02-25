@@ -116,7 +116,7 @@ export async function GET(request: Request) {
         sent++;
       } catch (error) {
         failed++;
-        errors.push(`${invoice.invoiceNumber}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        errors.push(`${invoice.invoiceNumber}: Failed to send reminder`);
       }
     }
 

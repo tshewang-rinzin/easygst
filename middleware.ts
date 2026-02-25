@@ -32,19 +32,26 @@ export async function middleware(request: NextRequest) {
   if (sessionCookie && request.method === 'GET') {
     try {
       const parsed = await verifyToken(sessionCookie.value);
-      const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-      res.cookies.set({
-        name: 'session',
-        value: await signToken({
-          ...parsed,
-          expires: expiresInOneDay.toISOString()
-        }),
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: 'strict',
-        expires: expiresInOneDay
-      });
+      // Only refresh token if it expires within the next 12 hours
+      const expiresAt = parsed.expires ? new Date(parsed.expires as string).getTime() : 0;
+      const twelveHours = 12 * 60 * 60 * 1000;
+
+      if (expiresAt - Date.now() < twelveHours) {
+        const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+        res.cookies.set({
+          name: 'session',
+          value: await signToken({
+            ...parsed,
+            expires: expiresInOneDay.toISOString()
+          }),
+          httpOnly: true,
+          secure: isProduction,
+          sameSite: 'strict',
+          expires: expiresInOneDay
+        });
+      }
     } catch (error) {
       console.error('Error updating session:', error);
       res.cookies.delete('session');

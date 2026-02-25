@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { withMobileAuth, MobileAuthContext } from '@/lib/auth/mobile-auth';
 import { processSale, SaleInput } from '@/app/api/pos/sale/route';
+import { checkBodySize } from '@/lib/api/body-limit';
 
 const syncSaleSchema = z.object({
   localId: z.string(),
@@ -32,11 +33,14 @@ const syncSchema = z.object({
 });
 
 export const POST = withMobileAuth(async (request: NextRequest, context: MobileAuthContext) => {
+  const sizeError = checkBodySize(request, 2 * 1024 * 1024); // 2MB for bulk sync
+  if (sizeError) return sizeError;
+
   try {
     const body = await request.json();
     const parsed = syncSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
     }
 
     const results = [];
@@ -58,7 +62,7 @@ export const POST = withMobileAuth(async (request: NextRequest, context: MobileA
           serverId: null,
           invoiceNumber: null,
           success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: 'Failed to sync item',
         });
       }
     }

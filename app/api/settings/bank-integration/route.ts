@@ -100,7 +100,7 @@ export const POST = withAuth(async (request: NextRequest, { team }) => {
     }
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Validation error', details: error.errors }, { status: 400 });
+      return NextResponse.json({ error: 'Validation error' }, { status: 400 });
     }
     console.error('Error saving bank integration:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

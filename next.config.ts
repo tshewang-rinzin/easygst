@@ -1,5 +1,11 @@
 import type { NextConfig } from 'next';
 
+const allowedOrigins = [
+  'https://www.easygst.bt',
+  'https://easygst.bt',
+  process.env.NEXT_PUBLIC_APP_URL,
+].filter(Boolean).join(', ');
+
 const nextConfig: NextConfig = {
   allowedDevOrigins: ['192.168.0.105'],
   experimental: {
@@ -8,6 +14,28 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      {
+        // CORS for API routes (POS app + external consumers)
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: allowedOrigins,
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization, X-Requested-With',
+          },
+          {
+            key: 'Access-Control-Max-Age',
+            value: '86400',
+          },
+        ],
+      },
       {
         source: '/(.*)',
         headers: [
