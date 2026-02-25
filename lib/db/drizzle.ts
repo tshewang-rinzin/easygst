@@ -1,13 +1,7 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from './schema';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-if (!process.env.POSTGRES_URL) {
-  throw new Error('POSTGRES_URL environment variable is not set');
-}
+import { env } from '@/lib/env';
 
 // Prevent multiple connections during hot reload in development
 declare global {
@@ -18,9 +12,9 @@ declare global {
 let client: ReturnType<typeof postgres>;
 let db: ReturnType<typeof drizzle<typeof schema>>;
 
-if (process.env.NODE_ENV === 'production') {
+if (env.NODE_ENV === 'production') {
   // Production: Create connection with pooling limits
-  client = postgres(process.env.POSTGRES_URL, {
+  client = postgres(env.POSTGRES_URL, {
     max: 10, // Maximum 10 connections
     idle_timeout: 20, // Close idle connections after 20 seconds
     connect_timeout: 10, // Connection timeout 10 seconds
@@ -29,7 +23,7 @@ if (process.env.NODE_ENV === 'production') {
 } else {
   // Development: Reuse existing connection to prevent "too many clients"
   if (!global.__client) {
-    global.__client = postgres(process.env.POSTGRES_URL, {
+    global.__client = postgres(env.POSTGRES_URL, {
       max: 1, // Only 1 connection in development
       idle_timeout: 20,
       connect_timeout: 10,

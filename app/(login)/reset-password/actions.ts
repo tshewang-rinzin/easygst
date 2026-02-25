@@ -28,7 +28,7 @@ export const resetPassword = validatedAction(resetPasswordSchema, async (data) =
   const { token, password } = data;
 
   // Rate limit by token prefix to prevent brute force
-  const rl = checkRateLimit(
+  const rl = await checkRateLimit(
     getRateLimitKey('reset-password', token.substring(0, 8)),
     RATE_LIMITS.resetPassword
   );

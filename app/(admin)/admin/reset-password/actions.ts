@@ -28,7 +28,7 @@ export const resetAdminPassword = validatedAction(resetPasswordSchema, async (da
   const { token, password } = data;
 
   // Rate limit
-  const rl = checkRateLimit(
+  const rl = await checkRateLimit(
     getRateLimitKey('admin-reset-password', token.substring(0, 8)),
     RATE_LIMITS.resetPassword
   );

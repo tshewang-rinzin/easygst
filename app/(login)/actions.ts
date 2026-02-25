@@ -59,7 +59,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const { email, password } = data;
 
   // Rate limit by email
-  const rl = checkRateLimit(
+  const rl = await checkRateLimit(
     getRateLimitKey('sign-in', email.toLowerCase()),
     RATE_LIMITS.signIn
   );
@@ -139,7 +139,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const { name, email, password, inviteToken } = data;
 
   // Rate limit by email
-  const rl = checkRateLimit(
+  const rl = await checkRateLimit(
     getRateLimitKey('sign-up', email.toLowerCase()),
     RATE_LIMITS.signUp
   );
@@ -371,7 +371,7 @@ export const resendVerificationEmail = validatedAction(resendVerificationSchema,
   const { email } = data;
 
   // Rate limit by email
-  const rl = checkRateLimit(
+  const rl = await checkRateLimit(
     getRateLimitKey('resend-verification', email.toLowerCase()),
     RATE_LIMITS.resendVerification
   );

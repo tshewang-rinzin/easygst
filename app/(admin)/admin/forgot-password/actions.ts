@@ -19,7 +19,7 @@ export const requestAdminPasswordReset = validatedAction(forgotPasswordSchema, a
   const { email } = data;
 
   // Rate limit by email
-  const rl = checkRateLimit(
+  const rl = await checkRateLimit(
     getRateLimitKey('admin-forgot-password', email.toLowerCase()),
     RATE_LIMITS.forgotPassword
   );

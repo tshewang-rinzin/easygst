@@ -1,24 +1,12 @@
 /**
- * In-memory rate limiter for auth endpoints.
- * For multi-instance deployments, replace with Redis-backed implementation.
+ * Rate limiter using Upstash Redis (works across Vercel instances).
+ * Falls back to in-memory if Redis is not configured (dev convenience).
  */
 
-interface RateLimitEntry {
-  count: number;
-  resetAt: number;
-}
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
 
-const store = new Map<string, RateLimitEntry>();
-
-// Clean up expired entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of store) {
-    if (entry.resetAt < now) {
-      store.delete(key);
-    }
-  }
-}, 5 * 60 * 1000);
+// ─── Types (unchanged API) ───────────────────────────────────────
 
 interface RateLimitConfig {
   /** Maximum number of requests allowed in the window */
@@ -33,45 +21,113 @@ interface RateLimitResult {
   retryAfterSeconds: number;
 }
 
-/**
- * Check if a request is rate limited.
- * @param key - Unique identifier (e.g., IP address, email)
- * @param config - Rate limit configuration
- */
-export function checkRateLimit(
+// ─── Redis client (lazy, singleton) ──────────────────────────────
+
+let redis: Redis | null = null;
+
+function getRedis(): Redis | null {
+  if (redis) return redis;
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+  redis = new Redis({ url, token });
+  return redis;
+}
+
+// ─── Upstash rate limiters cache ─────────────────────────────────
+
+const limiters = new Map<string, Ratelimit>();
+
+function getLimiter(config: RateLimitConfig): Ratelimit | null {
+  const r = getRedis();
+  if (!r) return null;
+
+  const cacheKey = `${config.maxAttempts}:${config.windowSeconds}`;
+  let limiter = limiters.get(cacheKey);
+  if (!limiter) {
+    limiter = new Ratelimit({
+      redis: r,
+      limiter: Ratelimit.slidingWindow(
+        config.maxAttempts,
+        `${config.windowSeconds} s`
+      ),
+      prefix: 'rl',
+    });
+    limiters.set(cacheKey, limiter);
+  }
+  return limiter;
+}
+
+// ─── In-memory fallback (dev only) ──────────────────────────────
+
+interface MemoryEntry {
+  count: number;
+  resetAt: number;
+}
+
+const memoryStore = new Map<string, MemoryEntry>();
+
+if (typeof globalThis !== 'undefined') {
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, entry] of memoryStore) {
+      if (entry.resetAt < now) memoryStore.delete(key);
+    }
+  }, 5 * 60 * 1000);
+}
+
+function checkMemoryRateLimit(
   key: string,
   config: RateLimitConfig
 ): RateLimitResult {
   const now = Date.now();
-  const entry = store.get(key);
+  const entry = memoryStore.get(key);
 
   if (!entry || entry.resetAt < now) {
-    // First request or window expired
-    store.set(key, {
+    memoryStore.set(key, {
       count: 1,
       resetAt: now + config.windowSeconds * 1000,
     });
-    return {
-      allowed: true,
-      remaining: config.maxAttempts - 1,
-      retryAfterSeconds: 0,
-    };
+    return { allowed: true, remaining: config.maxAttempts - 1, retryAfterSeconds: 0 };
   }
 
   if (entry.count >= config.maxAttempts) {
-    const retryAfterSeconds = Math.ceil((entry.resetAt - now) / 1000);
     return {
       allowed: false,
       remaining: 0,
-      retryAfterSeconds,
+      retryAfterSeconds: Math.ceil((entry.resetAt - now) / 1000),
     };
   }
 
   entry.count++;
+  return { allowed: true, remaining: config.maxAttempts - entry.count, retryAfterSeconds: 0 };
+}
+
+// ─── Public API (same signature as before) ───────────────────────
+
+/**
+ * Check if a request is rate limited.
+ * Uses Upstash Redis if configured, falls back to in-memory.
+ */
+export async function checkRateLimit(
+  key: string,
+  config: RateLimitConfig
+): Promise<RateLimitResult> {
+  const limiter = getLimiter(config);
+
+  if (!limiter) {
+    // No Redis — fall back to in-memory (logs once)
+    if (process.env.NODE_ENV === 'production') {
+      console.warn('[rate-limit] UPSTASH_REDIS_REST_URL not set — using in-memory fallback (not safe for multi-instance)');
+    }
+    return checkMemoryRateLimit(key, config);
+  }
+
+  const result = await limiter.limit(key);
   return {
-    allowed: true,
-    remaining: config.maxAttempts - entry.count,
-    retryAfterSeconds: 0,
+    allowed: result.success,
+    remaining: result.remaining,
+    retryAfterSeconds: result.success ? 0 : Math.ceil((result.reset - Date.now()) / 1000),
   };
 }
 
@@ -87,7 +143,6 @@ export const RATE_LIMITS = {
 
 /**
  * Get a rate limit key from request headers (IP-based).
- * Falls back to 'unknown' if no IP can be determined.
  */
 export function getRateLimitKey(prefix: string, identifier: string): string {
   return `${prefix}:${identifier}`;

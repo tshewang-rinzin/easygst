@@ -19,7 +19,7 @@ export const requestPasswordReset = validatedAction(forgotPasswordSchema, async 
   const { email } = data;
 
   // Rate limit by email
-  const rl = checkRateLimit(
+  const rl = await checkRateLimit(
     getRateLimitKey('forgot-password', email.toLowerCase()),
     RATE_LIMITS.forgotPassword
   );

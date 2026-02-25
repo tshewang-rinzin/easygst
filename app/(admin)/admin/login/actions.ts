@@ -18,7 +18,7 @@ export const adminSignIn = validatedAction(adminSignInSchema, async (data) => {
   const { email, password } = data;
 
   // Rate limit by email
-  const rl = checkRateLimit(
+  const rl = await checkRateLimit(
     getRateLimitKey('admin-sign-in', email.toLowerCase()),
     RATE_LIMITS.signIn
   );
