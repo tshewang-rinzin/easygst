@@ -6,7 +6,7 @@ import {
   businessTypes 
 } from '@/lib/db/schema';
 import { eq, and, like, desc, asc } from 'drizzle-orm';
-import { withAuth } from '@/lib/auth/middleware';
+import { withAuth } from '@/lib/auth/with-auth';
 
 export const GET = withAuth(async (request: NextRequest, { user }) => {
   try {
