@@ -87,6 +87,9 @@ export const teams = pgTable('teams', {
   defaultGstRate: numeric('default_gst_rate', { precision: 5, scale: 2 }).notNull().default('0'), // Default GST rate for all products
   gstRegistered: boolean('gst_registered').notNull().default(false), // Whether business is GST registered
 
+  // Master Product Catalog
+  businessTypeId: uuid('business_type_id'), // FK to businessTypes table
+
   // Subscription — references plans table (no FK constraint to avoid circular dep)
   planId: uuid('plan_id'),
 });
@@ -374,6 +377,9 @@ export const products = pgTable('products', {
   categoryId: uuid('category_id').references(() => productCategories.id),
   category: varchar('category', { length: 100 }), // Kept for backward compatibility and manual entry
 
+  // Master Product Linkage
+  masterProductId: uuid('master_product_id'), // FK to masterProducts table - tracks which master product it was cloned from
+
   // Inventory (for non-variant products)
   trackInventory: boolean('track_inventory').notNull().default(false),
   stockQuantity: integer('stock_quantity').notNull().default(0),
@@ -392,6 +398,7 @@ export const products = pgTable('products', {
   productSkuIdx: index('product_sku_idx').on(table.sku),
   productTypeIdx: index('product_type_idx').on(table.productType),
   productBarcodeIdx: index('product_barcode_idx').on(table.barcode),
+  masterProductIdx: index('master_product_idx').on(table.masterProductId),
 }));
 
 // Product Attribute Definitions (for variants)
@@ -473,6 +480,80 @@ export const inventoryMovements = pgTable('inventory_movements', {
   productMovementIdx: index('product_movement_idx').on(table.productId),
   variantMovementIdx: index('variant_movement_idx').on(table.variantId),
   movementTypeIdx: index('movement_type_idx').on(table.type),
+}));
+
+// ============================================================
+// MASTER PRODUCT CATALOG
+// ============================================================
+
+// Business Types (Grocery, Restaurant, Hardware, etc.)
+export const businessTypes = pgTable('business_types', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: varchar('name', { length: 100 }).notNull().unique(), // "Grocery Store", "Restaurant", "Hardware Shop"
+  slug: varchar('slug', { length: 100 }).notNull().unique(), // "grocery", "restaurant", "hardware"
+  description: text('description'),
+  icon: varchar('icon', { length: 50 }), // Icon name (optional)
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  businessTypeSlugIdx: uniqueIndex('business_type_slug_idx').on(table.slug),
+  businessTypeActiveIdx: index('business_type_active_idx').on(table.isActive),
+}));
+
+// Master Product Categories (per business type)
+export const masterProductCategories = pgTable('master_product_categories', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  businessTypeId: uuid('business_type_id')
+    .notNull()
+    .references(() => businessTypes.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 100 }).notNull(),
+  slug: varchar('slug', { length: 100 }).notNull(),
+  parentId: uuid('parent_id'), // Self-referencing for subcategories
+  sortOrder: integer('sort_order').notNull().default(0),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  businessTypeCategoryIdx: index('master_category_business_type_idx').on(table.businessTypeId),
+  categoryCategoryNameIdx: uniqueIndex('master_category_name_idx').on(table.businessTypeId, table.slug),
+  categoryParentIdx: index('master_category_parent_idx').on(table.parentId),
+}));
+
+// Master Products (templates for teams to clone from)
+export const masterProducts = pgTable('master_products', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  businessTypeId: uuid('business_type_id')
+    .notNull()
+    .references(() => businessTypes.id),
+  categoryId: uuid('category_id')
+    .notNull()
+    .references(() => masterProductCategories.id),
+  
+  // Product Details
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  defaultSku: varchar('default_sku', { length: 100 }), // Default SKU template
+  defaultBarcode: varchar('default_barcode', { length: 100 }), // Default barcode
+  defaultUnit: varchar('default_unit', { length: 50 }).notNull().default('piece'),
+  
+  // Tax & Pricing Defaults
+  defaultGstRate: numeric('default_gst_rate', { precision: 5, scale: 2 }).notNull().default('0'),
+  defaultTaxClassification: varchar('default_tax_classification', { length: 20 }).notNull().default('STANDARD'),
+  
+  // Visual
+  imageUrl: text('image_url'), // Product image URL
+  
+  // Metadata
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  masterProductBusinessTypeIdx: index('master_product_business_type_idx').on(table.businessTypeId),
+  masterProductCategoryIdx: index('master_product_category_idx').on(table.categoryId),
+  masterProductActiveIdx: index('master_product_active_idx').on(table.isActive),
+  masterProductNameIdx: index('master_product_name_idx').on(table.name),
+  masterProductSkuIdx: index('master_product_sku_idx').on(table.defaultSku),
+  masterProductBarcodeIdx: index('master_product_barcode_idx').on(table.defaultBarcode),
 }));
 
 // Invoices
@@ -1817,6 +1898,7 @@ export const teamFeatureOverrides = pgTable('team_feature_overrides', {
 
 export const teamsRelations = relations(teams, ({ one, many }) => ({
   plan: one(plans, { fields: [teams.planId], references: [plans.id] }),
+  businessType: one(businessTypes, { fields: [teams.businessTypeId], references: [businessTypes.id] }),
   teamMembers: many(teamMembers),
   activityLogs: many(activityLogs),
   invitations: many(invitations),
@@ -1902,6 +1984,10 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   categoryRef: one(productCategories, {
     fields: [products.categoryId],
     references: [productCategories.id],
+  }),
+  masterProduct: one(masterProducts, {
+    fields: [products.masterProductId],
+    references: [masterProducts.id],
   }),
   invoiceItems: many(invoiceItems),
   attributeDefinitions: many(productAttributeDefinitions),
@@ -2220,6 +2306,39 @@ export const featuresRelations = relations(features, ({ many }) => ({
 export const planFeaturesRelations = relations(planFeatures, ({ one }) => ({
   plan: one(plans, { fields: [planFeatures.planId], references: [plans.id] }),
   feature: one(features, { fields: [planFeatures.featureId], references: [features.id] }),
+}));
+
+// Master Product Catalog Relations
+export const businessTypesRelations = relations(businessTypes, ({ many }) => ({
+  categories: many(masterProductCategories),
+  masterProducts: many(masterProducts),
+  teams: many(teams),
+}));
+
+export const masterProductCategoriesRelations = relations(masterProductCategories, ({ one, many }) => ({
+  businessType: one(businessTypes, {
+    fields: [masterProductCategories.businessTypeId],
+    references: [businessTypes.id],
+  }),
+  parent: one(masterProductCategories, {
+    fields: [masterProductCategories.parentId],
+    references: [masterProductCategories.id],
+    relationName: 'masterCategoryParent',
+  }),
+  children: many(masterProductCategories, { relationName: 'masterCategoryParent' }),
+  masterProducts: many(masterProducts),
+}));
+
+export const masterProductsRelations = relations(masterProducts, ({ one, many }) => ({
+  businessType: one(businessTypes, {
+    fields: [masterProducts.businessTypeId],
+    references: [businessTypes.id],
+  }),
+  category: one(masterProductCategories, {
+    fields: [masterProducts.categoryId],
+    references: [masterProductCategories.id],
+  }),
+  products: many(products), // Products cloned from this master product
 }));
 
 // ============================================================
@@ -2559,6 +2678,14 @@ export type Subscription = typeof subscriptions.$inferSelect;
 export type NewSubscription = typeof subscriptions.$inferInsert;
 export type SubscriptionPayment = typeof subscriptionPayments.$inferSelect;
 export type NewSubscriptionPayment = typeof subscriptionPayments.$inferInsert;
+
+// Master Product Catalog types
+export type BusinessType = typeof businessTypes.$inferSelect;
+export type NewBusinessType = typeof businessTypes.$inferInsert;
+export type MasterProductCategory = typeof masterProductCategories.$inferSelect;
+export type NewMasterProductCategory = typeof masterProductCategories.$inferInsert;
+export type MasterProduct = typeof masterProducts.$inferSelect;
+export type NewMasterProduct = typeof masterProducts.$inferInsert;
 
 // ============================================================
 // ENUMS

@@ -27,6 +27,94 @@ interface BankAccount {
   isActive: boolean;
 }
 
+interface BusinessType {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  icon?: string;
+}
+
+function BusinessTypeSelector({ teamBusinessTypeId }: { teamBusinessTypeId?: string | null }) {
+  const { data: businessTypes } = useSWR<{ businessTypes: BusinessType[] }>(
+    '/api/master-products/business-types',
+    fetcher
+  );
+  const [showCatalogPrompt, setShowCatalogPrompt] = useState(false);
+  const [selectedType, setSelectedType] = useState(teamBusinessTypeId || '');
+
+  const handleBusinessTypeChange = (value: string) => {
+    setSelectedType(value);
+    if (value && value !== teamBusinessTypeId) {
+      setShowCatalogPrompt(true);
+    }
+  };
+
+  return (
+    <>
+      <div>
+        <Label htmlFor="businessTypeId" className="mb-2">
+          Business Type
+        </Label>
+        <select
+          id="businessTypeId"
+          name="businessTypeId"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+          value={selectedType}
+          onChange={(e) => handleBusinessTypeChange(e.target.value)}
+        >
+          <option value="">Select business type</option>
+          {businessTypes?.businessTypes.map((bt) => (
+            <option key={bt.id} value={bt.id}>
+              {bt.icon ? `${bt.icon} ` : ''}{bt.name}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-gray-500 mt-1">
+          Choose your business category to access relevant product catalogs
+        </p>
+      </div>
+
+      {/* Catalog Prompt */}
+      {showCatalogPrompt && (
+        <Card className="bg-orange-50 border-orange-200">
+          <CardContent className="pt-4">
+            <div className="flex items-start gap-3">
+              <div className="bg-orange-100 p-2 rounded-full">
+                🛍️
+              </div>
+              <div className="flex-1">
+                <h4 className="font-medium text-orange-900 mb-1">
+                  Browse products for your business type?
+                </h4>
+                <p className="text-sm text-orange-700 mb-3">
+                  We have a catalog of products specifically curated for your business type. 
+                  You can browse and add them to your inventory.
+                </p>
+                <div className="flex gap-2">
+                  <Link href="/products/catalog">
+                    <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+                      Browse Catalog
+                    </Button>
+                  </Link>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => setShowCatalogPrompt(false)}
+                    className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                  >
+                    Maybe Later
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </>
+  );
+}
+
 function DefaultBankAccountCard() {
   const { data: bankAccounts, mutate } = useSWR<BankAccount[]>('/api/bank-accounts', fetcher);
   const [saving, setSaving] = useState(false);
@@ -185,6 +273,8 @@ function BusinessForm({ state, team }: BusinessFormProps) {
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
+          <BusinessTypeSelector teamBusinessTypeId={team?.businessTypeId} />
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="businessName" className="mb-2">

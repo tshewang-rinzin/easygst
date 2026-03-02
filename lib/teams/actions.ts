@@ -11,6 +11,7 @@ import { revalidatePath } from 'next/cache';
 // Business Settings Validation Schema
 const businessSettingsSchema = z.object({
   businessName: z.string().min(1, 'Business name is required').max(255),
+  businessTypeId: z.string().uuid().optional().or(z.literal('')),
   tpn: z
     .string()
     .max(20, 'TPN is too long')
@@ -169,6 +170,7 @@ export const updateBusinessSettings = validatedActionWithRole(
         .update(teams)
         .set({
           businessName: data.businessName,
+          businessTypeId: data.businessTypeId || null,
           tpn: data.tpn || null,
           gstNumber: data.gstNumber || null,
           licenseNumber: data.licenseNumber || null,
