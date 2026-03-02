@@ -1,10 +1,9 @@
 import type { NextConfig } from 'next';
 
-const allowedOrigins = [
-  'https://www.easygst.bt',
-  'https://easygst.bt',
-  process.env.NEXT_PUBLIC_APP_URL,
-].filter(Boolean).join(', ');
+// Access-Control-Allow-Origin only accepts a single origin or '*'.
+// Dynamic origin handling must be done in middleware.
+// For static Next.js headers, use '*' or a single origin.
+const allowedOrigin = process.env.NEXT_PUBLIC_APP_URL || 'https://www.easygst.bt';
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ['192.168.0.105'],
@@ -20,7 +19,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Access-Control-Allow-Origin',
-            value: allowedOrigins,
+            value: allowedOrigin,
           },
           {
             key: 'Access-Control-Allow-Methods',
