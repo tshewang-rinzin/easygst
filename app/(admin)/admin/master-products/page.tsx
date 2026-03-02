@@ -97,7 +97,7 @@ export default function MasterProductsPage() {
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`Delete master product "${name}"? This action cannot be undone.`)) return;
     
-    const result = await deleteMasterProduct({ id });
+    const result = await deleteMasterProduct({ id }) as { success?: string; error?: string };
     if (result.success) {
       toast.success(result.success);
       mutate(`/api/master-products?${queryParams}`);

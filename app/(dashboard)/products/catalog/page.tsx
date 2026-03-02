@@ -157,7 +157,7 @@ export default function ProductCatalogPage() {
     const result = await addMasterProductsToTeam({
       masterProductIds: selectedProducts,
       products,
-    });
+    }) as { success?: string; error?: string };
 
     if (result.success) {
       toast.success(result.success);

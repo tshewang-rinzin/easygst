@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db/drizzle';
 import { 
   masterProducts, 
@@ -70,7 +70,7 @@ export const GET = withAuth(async (request: NextRequest, { user }) => {
       .innerJoin(masterProductCategories, eq(masterProducts.categoryId, masterProductCategories.id))
       .where(and(...whereConditions));
 
-    return Response.json({
+    return NextResponse.json({
       products,
       pagination: {
         page,
@@ -81,7 +81,7 @@ export const GET = withAuth(async (request: NextRequest, { user }) => {
     });
   } catch (error) {
     console.error('Error fetching master products:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: 'Failed to fetch master products' },
       { status: 500 }
     );

@@ -1,8 +1,8 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db/drizzle';
 import { businessTypes } from '@/lib/db/schema';
 import { eq, asc } from 'drizzle-orm';
-import { withAuth } from '@/lib/auth/middleware';
+import { withAuth } from '@/lib/auth/with-auth';
 
 export const GET = withAuth(async (request: NextRequest, { user }) => {
   try {
@@ -19,10 +19,10 @@ export const GET = withAuth(async (request: NextRequest, { user }) => {
       .where(eq(businessTypes.isActive, true))
       .orderBy(asc(businessTypes.name));
 
-    return Response.json({ businessTypes: businessTypesList });
+    return NextResponse.json({ businessTypes: businessTypesList });
   } catch (error) {
     console.error('Error fetching business types:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: 'Failed to fetch business types' },
       { status: 500 }
     );

@@ -1,6 +1,6 @@
 'use server';
 
-import { validatedActionWithUser, validatedActionWithRole } from '@/lib/auth/middleware';
+import { validatedActionWithUser, validatedActionWithPlatformAdmin } from '@/lib/auth/middleware';
 import {
   businessTypeSchema,
   updateBusinessTypeSchema,
@@ -34,9 +34,8 @@ import { revalidatePath } from 'next/cache';
 /**
  * Create a new business type (Admin only)
  */
-export const createBusinessType = validatedActionWithRole(
+export const createBusinessType = validatedActionWithPlatformAdmin(
   businessTypeSchema,
-  'platform_admin',
   async (data, _, user) => {
     try {
       const admin = await getPlatformAdmin();
@@ -69,9 +68,8 @@ export const createBusinessType = validatedActionWithRole(
 /**
  * Update an existing business type (Admin only)
  */
-export const updateBusinessType = validatedActionWithRole(
+export const updateBusinessType = validatedActionWithPlatformAdmin(
   updateBusinessTypeSchema,
-  'platform_admin',
   async (data, _, user) => {
     try {
       const admin = await getPlatformAdmin();
@@ -104,9 +102,8 @@ export const updateBusinessType = validatedActionWithRole(
 /**
  * Delete a business type (Admin only)
  */
-export const deleteBusinessType = validatedActionWithRole(
+export const deleteBusinessType = validatedActionWithPlatformAdmin(
   deleteBusinessTypeSchema,
-  'platform_admin',
   async (data, _, user) => {
     try {
       const admin = await getPlatformAdmin();
@@ -131,9 +128,8 @@ export const deleteBusinessType = validatedActionWithRole(
 /**
  * Create a new master product category (Admin only)
  */
-export const createMasterProductCategory = validatedActionWithRole(
+export const createMasterProductCategory = validatedActionWithPlatformAdmin(
   masterProductCategorySchema,
-  'platform_admin',
   async (data, _, user) => {
     try {
       const admin = await getPlatformAdmin();
@@ -167,9 +163,8 @@ export const createMasterProductCategory = validatedActionWithRole(
 /**
  * Update an existing master product category (Admin only)
  */
-export const updateMasterProductCategory = validatedActionWithRole(
+export const updateMasterProductCategory = validatedActionWithPlatformAdmin(
   updateMasterProductCategorySchema,
-  'platform_admin',
   async (data, _, user) => {
     try {
       const admin = await getPlatformAdmin();
@@ -202,9 +197,8 @@ export const updateMasterProductCategory = validatedActionWithRole(
 /**
  * Delete a master product category (Admin only)
  */
-export const deleteMasterProductCategory = validatedActionWithRole(
+export const deleteMasterProductCategory = validatedActionWithPlatformAdmin(
   deleteMasterProductCategorySchema,
-  'platform_admin',
   async (data, _, user) => {
     try {
       const admin = await getPlatformAdmin();
@@ -229,9 +223,8 @@ export const deleteMasterProductCategory = validatedActionWithRole(
 /**
  * Create a new master product (Admin only)
  */
-export const createMasterProduct = validatedActionWithRole(
+export const createMasterProduct = validatedActionWithPlatformAdmin(
   masterProductSchema,
-  'platform_admin',
   async (data, _, user) => {
     try {
       const admin = await getPlatformAdmin();
@@ -269,9 +262,8 @@ export const createMasterProduct = validatedActionWithRole(
 /**
  * Update an existing master product (Admin only)
  */
-export const updateMasterProduct = validatedActionWithRole(
+export const updateMasterProduct = validatedActionWithPlatformAdmin(
   updateMasterProductSchema,
-  'platform_admin',
   async (data, _, user) => {
     try {
       const admin = await getPlatformAdmin();
@@ -310,9 +302,8 @@ export const updateMasterProduct = validatedActionWithRole(
 /**
  * Delete a master product (Admin only)
  */
-export const deleteMasterProduct = validatedActionWithRole(
+export const deleteMasterProduct = validatedActionWithPlatformAdmin(
   deleteMasterProductSchema,
-  'platform_admin',
   async (data, _, user) => {
     try {
       const admin = await getPlatformAdmin();
@@ -336,9 +327,8 @@ export const deleteMasterProduct = validatedActionWithRole(
 /**
  * Import master products from CSV (Admin only)
  */
-export const importMasterProducts = validatedActionWithRole(
+export const importMasterProducts = validatedActionWithPlatformAdmin(
   importMasterProductsSchema,
-  'platform_admin',
   async (data, _, user) => {
     try {
       const admin = await getPlatformAdmin();

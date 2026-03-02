@@ -74,7 +74,7 @@ export default function BusinessTypesPage() {
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`Delete business type "${name}"? This will affect all related products and categories.`)) return;
     
-    const result = await deleteBusinessType({ id });
+    const result = await deleteBusinessType({ id }) as { success?: string; error?: string };
     if (result.success) {
       toast.success(result.success);
       mutate('/api/admin/business-types');
@@ -254,9 +254,9 @@ function BusinessTypeDialog({
 
     const data = { name, slug, description, icon, isActive };
 
-    const result = businessType
+    const result = (businessType
       ? await updateBusinessType({ id: businessType.id, ...data })
-      : await createBusinessType(data);
+      : await createBusinessType(data)) as { success?: string; error?: string };
 
     if (result.success) {
       toast.success(result.success);

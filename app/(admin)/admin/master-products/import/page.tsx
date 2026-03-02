@@ -97,7 +97,7 @@ export default function ImportMasterProductsPage() {
     const result = await importMasterProducts({
       csvData: csvData.trim(),
       businessTypeId: selectedBusinessType,
-    });
+    }) as { success?: string; error?: string };
 
     if (result.success) {
       toast.success(result.success);
