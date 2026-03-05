@@ -1,4 +1,7 @@
 import { z } from 'zod';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('env');
 
 const requiredString = (name: string) =>
   z.preprocess(
@@ -107,6 +110,10 @@ const serverSchema = z.object({
 
 export type ServerEnv = z.infer<typeof serverSchema>;
 
+declare global {
+  var __envDiagnosticsLogged: boolean | undefined;
+}
+
 function validateEnv(): ServerEnv {
   const result = serverSchema.safeParse(process.env);
 
@@ -124,4 +131,44 @@ function validateEnv(): ServerEnv {
   return result.data;
 }
 
+function toHost(value: string | undefined): string | null {
+  if (!value) return null;
+  try {
+    return new URL(value).host;
+  } catch {
+    return 'invalid-url';
+  }
+}
+
+function logStartupEnvDiagnostics(validatedEnv: ServerEnv) {
+  if (global.__envDiagnosticsLogged) return;
+  global.__envDiagnosticsLogged = true;
+
+  const normalizedKeys = ['POSTGRES_URL', 'AUTH_SECRET', 'BASE_URL'].filter((key) => {
+    const rawValue = process.env[key];
+    return typeof rawValue === 'string' && rawValue !== rawValue.trim();
+  });
+
+  logger.info('Environment validated', {
+    nodeEnv: validatedEnv.NODE_ENV,
+    postgresHost: toHost(validatedEnv.POSTGRES_URL),
+    baseUrlHost: toHost(validatedEnv.BASE_URL),
+    publicAppUrlHost: toHost(validatedEnv.NEXT_PUBLIC_APP_URL),
+    emailEnabled: validatedEnv.EMAIL_ENABLED === 'true',
+  });
+
+  if (normalizedKeys.length > 0) {
+    logger.warn('Trimmed whitespace/newlines from environment variables', {
+      keys: normalizedKeys,
+    });
+  }
+
+  if (validatedEnv.NODE_ENV === 'production' && validatedEnv.AUTH_SECRET.length < 32) {
+    logger.warn('AUTH_SECRET is shorter than recommended minimum length', {
+      minRecommended: 32,
+    });
+  }
+}
+
 export const env = validateEnv();
+logStartupEnvDiagnostics(env);
