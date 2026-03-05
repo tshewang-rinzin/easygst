@@ -2,10 +2,11 @@ import { compare, hash } from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { NewUser, PlatformAdmin } from '@/lib/db/schema';
+import { env } from '@/lib/env';
 
-const key = new TextEncoder().encode(process.env.AUTH_SECRET);
+const key = new TextEncoder().encode(env.AUTH_SECRET);
 const SALT_ROUNDS = 10;
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const IS_PRODUCTION = env.NODE_ENV === 'production';
 
 export async function hashPassword(password: string) {
   return hash(password, SALT_ROUNDS);
