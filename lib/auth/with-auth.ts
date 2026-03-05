@@ -18,7 +18,7 @@ type AuthenticatedHandler = (
  * Returns 401 if not authenticated, 403 if no team found.
  */
 export function withAuth(handler: AuthenticatedHandler) {
-  return async (request: NextRequest, routeContext?: { params?: Promise<any> }) => {
+  return async (request: NextRequest, routeContext: { params: Promise<any> }) => {
     try {
       const user = await getUser();
       if (!user) {

@@ -7,10 +7,7 @@ const allowedOrigin = process.env.NEXT_PUBLIC_APP_URL || 'https://www.easygst.bt
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ['192.168.0.105'],
-  experimental: {
-    ppr: true,
-    clientSegmentCache: true
-  },
+  experimental: {},
   async headers() {
     return [
       {

@@ -82,14 +82,15 @@ function VerifyEmailSentContent({
   );
 }
 
-export default function VerifyEmailSentPage({
+export default async function VerifyEmailSentPage({
   searchParams
 }: {
-  searchParams: { email?: string };
+  searchParams: Promise<{ email?: string }>;
 }) {
+  const params = await searchParams;
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <VerifyEmailSentContent searchParams={searchParams} />
+      <VerifyEmailSentContent searchParams={params} />
     </Suspense>
   );
 }

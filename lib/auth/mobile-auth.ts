@@ -99,7 +99,7 @@ type MobileAuthHandler = (
  * Wraps an API route handler to enforce mobile JWT authentication.
  */
 export function withMobileAuth(handler: MobileAuthHandler) {
-  return async (request: NextRequest, routeContext?: { params?: Promise<any> }) => {
+  return async (request: NextRequest, routeContext: { params: Promise<any> }) => {
     try {
       const token = extractBearerToken(request);
       if (!token) {
