@@ -48,7 +48,7 @@ const createStyles = (accent: string) =>
       alignItems: 'center',
     },
     businessName: {
-      fontSize: 18,
+      fontSize: 11,
       fontWeight: 'bold',
       color: '#111827',
     },
@@ -115,7 +115,7 @@ const createStyles = (accent: string) =>
       marginBottom: 8,
     },
     companyName: {
-      fontSize: 12,
+      fontSize: 11,
       fontWeight: 'bold',
       color: '#111827',
       marginBottom: 4,
@@ -523,10 +523,6 @@ export const InvoiceTemplateModern: React.FC<InvoiceTemplateProps> = ({
             <View>
               {data.termsAndConditions && <Text style={styles.footerText}>{data.termsAndConditions}</Text>}
               <Text style={styles.footerText}>This is a computer-generated invoice.</Text>
-            </View>
-            <View style={styles.signatureSection}>
-              <View style={styles.signatureLine} />
-              <Text style={styles.signatureLabel}>Authorized Signature</Text>
             </View>
             {data.qrCodeDataUrl && (
               <View style={styles.qrSection}>

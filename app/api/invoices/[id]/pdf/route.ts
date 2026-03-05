@@ -26,7 +26,7 @@ export const GET = withAuth(async (request: NextRequest, { team, params }) => {
     // Prepare invoice data for PDF
     const pdfData = {
       // Business Info
-      businessName: team.name || 'Your Business',
+      businessName: team.businessName || team.name || 'Your Business',
       logoUrl: team.logoUrl,
       tpn: team.tpn,
       gstNumber: team.gstNumber,

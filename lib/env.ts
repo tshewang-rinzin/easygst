@@ -60,10 +60,12 @@ const serverSchema = z.object({
   UPSTASH_REDIS_REST_URL: optionalUrl(),
   UPSTASH_REDIS_REST_TOKEN: optionalString(),
 
-  // Email / SMTP
+  // Email (Mailtrap API v2)
   EMAIL_ENABLED: optionalString(),
   EMAIL_FROM: optionalString(),
   EMAIL_FROM_NAME: optionalString(),
+  MAILTRAP_API_TOKEN: optionalString(),
+  // Legacy SMTP (kept for database settings fallback)
   SMTP_HOST: optionalString(),
   SMTP_PORT: optionalString(),
   SMTP_USER: optionalString(),

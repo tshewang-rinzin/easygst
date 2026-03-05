@@ -88,10 +88,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   companyName: {
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: 'bold',
     color: '#1f2937',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   detailText: {
     fontSize: 9,
@@ -616,11 +616,6 @@ export const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ data, accentCo
             <Text style={styles.footerText}>
               This is a computer-generated invoice.
             </Text>
-          </View>
-
-          <View style={styles.signatureSection}>
-            <View style={styles.signatureLine} />
-            <Text style={styles.signatureLabel}>Authorized Signature</Text>
           </View>
 
           {data.qrCodeDataUrl && (
