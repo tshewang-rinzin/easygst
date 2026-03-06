@@ -13,6 +13,8 @@ import {
   ArrowLeft,
   ScrollText,
   Crown,
+  Package,
+  Store,
 } from 'lucide-react';
 
 const adminNavigation = [
@@ -35,6 +37,16 @@ const adminNavigation = [
     name: 'Plans & Features',
     href: '/admin/plans',
     icon: Crown,
+  },
+  {
+    name: 'Business Types',
+    href: '/admin/master-products/business-types',
+    icon: Store,
+  },
+  {
+    name: 'Product Catalog',
+    href: '/admin/master-products',
+    icon: Package,
   },
   {
     name: 'Email Settings',
