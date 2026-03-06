@@ -86,7 +86,7 @@ export async function sendEmail({
 /**
  * Send a test email to verify email configuration
  */
-export async function sendTestEmail(to: string): Promise<{ success: boolean; error?: string }> {
+export async function sendTestEmail(to: string): Promise<{ success: boolean; error?: string; messageId?: string }> {
   try {
     const { default: TestEmail } = await import('./templates/test-email');
 

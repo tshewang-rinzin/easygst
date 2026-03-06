@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Mail, Server, Shield, CheckCircle, XCircle } from 'lucide-react';
 import { getPlatformAdmin } from '@/lib/db/queries';
 import { redirect } from 'next/navigation';
+import { TestEmailForm } from './test-email-form';
 
 async function getEmailSettings() {
   const [settings] = await db.select().from(emailSettings).limit(1);
@@ -96,6 +97,13 @@ export default async function AdminEmailSettingsPage() {
                 </div>
               </div>
 
+              <div className="p-4 border rounded-lg">
+                <div className="text-sm text-gray-500 mb-1">Provider</div>
+                <div className="font-medium capitalize">
+                  {(settings as any).provider === 'smtp' ? 'SMTP' : 'Mailtrap API v2'}
+                </div>
+              </div>
+
               {settings.updatedAt && (
                 <div className="text-sm text-gray-500 text-right">
                   Last updated: {new Date(settings.updatedAt).toLocaleString()}
@@ -105,6 +113,8 @@ export default async function AdminEmailSettingsPage() {
           )}
         </CardContent>
       </Card>
+
+      <TestEmailForm />
     </div>
   );
 }
