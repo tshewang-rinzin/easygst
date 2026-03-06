@@ -2551,6 +2551,10 @@ export type NewPlatformAdmin = typeof platformAdmins.$inferInsert;
 export const emailSettings = pgTable('email_settings', {
   id: uuid('id').defaultRandom().primaryKey(),
 
+  // Provider Selection
+  provider: varchar('provider', { length: 20 }).notNull().default('mailtrap_api'), // 'mailtrap_api' | 'smtp'
+  apiToken: text('api_token'), // For API-based providers like Mailtrap
+
   // SMTP Configuration
   smtpHost: varchar('smtp_host', { length: 255 }),
   smtpPort: integer('smtp_port'),
