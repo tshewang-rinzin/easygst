@@ -92,6 +92,10 @@ export const teams = pgTable('teams', {
 
   // Subscription — references plans table (no FK constraint to avoid circular dep)
   planId: uuid('plan_id'),
+
+  // Tour Invoice Settings
+  enableTourInvoices: boolean('enable_tour_invoices').notNull().default(false),
+  tourInvoicePrefix: varchar('tour_invoice_prefix', { length: 20 }).default('TI'),
 });
 
 export const teamMembers = pgTable('team_members', {
@@ -1896,6 +1900,169 @@ export const teamFeatureOverrides = pgTable('team_feature_overrides', {
 // RELATIONS
 // ============================================================
 
+// ============================================================
+// TOUR INVOICES
+// ============================================================
+
+export const tourInvoices = pgTable('tour_invoices', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  customerId: uuid('customer_id').notNull().references(() => customers.id),
+
+  publicId: uuid('public_id').defaultRandom().notNull().unique(),
+
+  invoiceNumber: varchar('invoice_number', { length: 50 }).notNull(),
+  invoiceDate: timestamp('invoice_date').notNull().defaultNow(),
+  dueDate: timestamp('due_date'),
+
+  tourName: varchar('tour_name', { length: 255 }).notNull(),
+  tourType: varchar('tour_type', { length: 50 }).notNull().default('cultural'),
+  arrivalDate: timestamp('arrival_date'),
+  departureDate: timestamp('departure_date'),
+  numberOfNights: integer('number_of_nights'),
+  numberOfGuests: integer('number_of_guests').notNull().default(1),
+  guestNationality: varchar('guest_nationality', { length: 100 }).notNull(),
+  tourGuide: varchar('tour_guide', { length: 255 }),
+
+  currency: varchar('currency', { length: 3 }).notNull().default('USD'),
+  sdfPerPersonPerNight: numeric('sdf_per_person_per_night', { precision: 10, scale: 2 }).notNull().default('0'),
+  sdfTotal: numeric('sdf_total', { precision: 15, scale: 2 }).notNull().default('0'),
+
+  subtotal: numeric('subtotal', { precision: 15, scale: 2 }).notNull(),
+  totalTax: numeric('total_tax', { precision: 15, scale: 2 }).notNull().default('0'),
+  totalDiscount: numeric('total_discount', { precision: 15, scale: 2 }).notNull().default('0'),
+  grandTotal: numeric('grand_total', { precision: 15, scale: 2 }).notNull(),
+
+  amountPaid: numeric('amount_paid', { precision: 15, scale: 2 }).notNull().default('0'),
+  amountDue: numeric('amount_due', { precision: 15, scale: 2 }).notNull(),
+
+  status: varchar('status', { length: 20 }).notNull().default('draft'),
+  paymentStatus: varchar('payment_status', { length: 20 }).notNull().default('unpaid'),
+
+  inclusions: jsonb('inclusions').default('[]'),
+  exclusions: jsonb('exclusions').default('[]'),
+
+  paymentTerms: text('payment_terms'),
+  notes: text('notes'),
+  customerNotes: text('customer_notes'),
+  termsAndConditions: text('terms_and_conditions'),
+
+  sentAt: timestamp('sent_at'),
+  viewedAt: timestamp('viewed_at'),
+  lastReminderSentAt: timestamp('last_reminder_sent_at'),
+
+  isLocked: boolean('is_locked').notNull().default(false),
+  lockedAt: timestamp('locked_at'),
+  lockedBy: uuid('locked_by').references(() => users.id),
+
+  cancelledAt: timestamp('cancelled_at'),
+  cancelledReason: text('cancelled_reason'),
+  cancelledById: uuid('cancelled_by_id').references(() => users.id),
+
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdBy: uuid('created_by').notNull().references(() => users.id),
+}, (table) => ({
+  teamTourInvoiceIdx: index('team_tour_invoice_idx').on(table.teamId),
+  tourInvoiceNumberIdx: uniqueIndex('tour_invoice_number_idx').on(table.teamId, table.invoiceNumber),
+  tourInvoicePublicIdIdx: uniqueIndex('tour_invoice_public_id_idx').on(table.publicId),
+  customerTourInvoiceIdx: index('customer_tour_invoice_idx').on(table.customerId),
+  tourInvoiceStatusIdx: index('tour_invoice_status_idx').on(table.status),
+  tourInvoiceDateIdx: index('tour_invoice_date_idx').on(table.invoiceDate),
+  tourInvoiceArrivalIdx: index('tour_invoice_arrival_idx').on(table.arrivalDate),
+}));
+
+export const tourInvoiceItems = pgTable('tour_invoice_items', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  tourInvoiceId: uuid('tour_invoice_id').notNull()
+    .references(() => tourInvoices.id, { onDelete: 'cascade' }),
+
+  category: varchar('category', { length: 50 }).notNull(),
+
+  description: text('description').notNull(),
+  quantity: numeric('quantity', { precision: 15, scale: 4 }).notNull().default('1'),
+  unit: varchar('unit', { length: 50 }),
+  unitPrice: numeric('unit_price', { precision: 15, scale: 2 }).notNull(),
+
+  pricingBasis: varchar('pricing_basis', { length: 20 }).notNull().default('per_unit'),
+
+  numberOfDays: integer('number_of_days'),
+  numberOfPersons: integer('number_of_persons'),
+
+  lineTotal: numeric('line_total', { precision: 15, scale: 2 }).notNull(),
+  discountPercent: numeric('discount_percent', { precision: 5, scale: 2 }).default('0'),
+  discountAmount: numeric('discount_amount', { precision: 15, scale: 2 }).default('0'),
+
+  taxRate: numeric('tax_rate', { precision: 5, scale: 2 }).notNull().default('0'),
+  taxAmount: numeric('tax_amount', { precision: 15, scale: 2 }).notNull().default('0'),
+  isTaxExempt: boolean('is_tax_exempt').notNull().default(false),
+
+  itemTotal: numeric('item_total', { precision: 15, scale: 2 }).notNull(),
+
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  tourInvoiceItemIdx: index('tour_invoice_item_idx').on(table.tourInvoiceId),
+  tourInvoiceItemCategoryIdx: index('tour_invoice_item_category_idx').on(table.tourInvoiceId, table.category),
+}));
+
+export const tourInvoiceGuests = pgTable('tour_invoice_guests', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  tourInvoiceId: uuid('tour_invoice_id').notNull()
+    .references(() => tourInvoices.id, { onDelete: 'cascade' }),
+
+  guestName: varchar('guest_name', { length: 255 }).notNull(),
+  nationality: varchar('nationality', { length: 100 }).notNull(),
+  passportNumber: varchar('passport_number', { length: 50 }),
+  visaNumber: varchar('visa_number', { length: 50 }),
+  dateOfBirth: timestamp('date_of_birth'),
+  gender: varchar('gender', { length: 20 }),
+
+  email: varchar('email', { length: 255 }),
+  phone: varchar('phone', { length: 20 }),
+
+  specialRequirements: text('special_requirements'),
+
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  tourInvoiceGuestIdx: index('tour_invoice_guest_idx').on(table.tourInvoiceId),
+}));
+
+export const tourInvoiceSequences = pgTable('tour_invoice_sequences', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id').notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }).unique(),
+  year: integer('year').notNull(),
+  lastNumber: integer('last_number').notNull().default(0),
+  lockedAt: timestamp('locked_at'),
+  lockedBy: varchar('locked_by', { length: 100 }),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamTourInvoiceYearIdx: uniqueIndex('team_tour_invoice_year_idx').on(table.teamId, table.year),
+}));
+
+export const tourInvoicePayments = pgTable('tour_invoice_payments', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  tourInvoiceId: uuid('tour_invoice_id').notNull().references(() => tourInvoices.id),
+
+  amount: numeric('amount', { precision: 15, scale: 2 }).notNull(),
+  currency: varchar('currency', { length: 3 }).notNull(),
+  paymentDate: timestamp('payment_date').notNull().defaultNow(),
+  paymentMethod: varchar('payment_method', { length: 50 }).notNull(),
+  transactionId: varchar('transaction_id', { length: 255 }),
+  bankName: varchar('bank_name', { length: 100 }),
+  notes: text('notes'),
+  receiptNumber: varchar('receipt_number', { length: 50 }),
+
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdBy: uuid('created_by').notNull().references(() => users.id),
+}, (table) => ({
+  teamTourPaymentIdx: index('team_tour_payment_idx').on(table.teamId),
+  tourInvoicePaymentIdx: index('tour_invoice_payment_idx').on(table.tourInvoiceId),
+}));
+
 export const teamsRelations = relations(teams, ({ one, many }) => ({
   plan: one(plans, { fields: [teams.planId], references: [plans.id] }),
   businessType: one(businessTypes, { fields: [teams.businessTypeId], references: [businessTypes.id] }),
@@ -1914,6 +2081,8 @@ export const teamsRelations = relations(teams, ({ one, many }) => ({
   taxSettings: many(taxSettings),
   subscriptions: many(subscriptions),
   subscriptionPayments: many(subscriptionPayments),
+  tourInvoices: many(tourInvoices),
+  tourInvoicePayments: many(tourInvoicePayments),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -2341,6 +2510,34 @@ export const masterProductsRelations = relations(masterProducts, ({ one, many })
   products: many(products), // Products cloned from this master product
 }));
 
+// Tour Invoice Relations
+export const tourInvoicesRelations = relations(tourInvoices, ({ one, many }) => ({
+  team: one(teams, { fields: [tourInvoices.teamId], references: [teams.id] }),
+  customer: one(customers, { fields: [tourInvoices.customerId], references: [customers.id] }),
+  createdByUser: one(users, { fields: [tourInvoices.createdBy], references: [users.id] }),
+  items: many(tourInvoiceItems),
+  guests: many(tourInvoiceGuests),
+  payments: many(tourInvoicePayments),
+}));
+
+export const tourInvoiceItemsRelations = relations(tourInvoiceItems, ({ one }) => ({
+  tourInvoice: one(tourInvoices, { fields: [tourInvoiceItems.tourInvoiceId], references: [tourInvoices.id] }),
+}));
+
+export const tourInvoiceGuestsRelations = relations(tourInvoiceGuests, ({ one }) => ({
+  tourInvoice: one(tourInvoices, { fields: [tourInvoiceGuests.tourInvoiceId], references: [tourInvoices.id] }),
+}));
+
+export const tourInvoiceSequencesRelations = relations(tourInvoiceSequences, ({ one }) => ({
+  team: one(teams, { fields: [tourInvoiceSequences.teamId], references: [teams.id] }),
+}));
+
+export const tourInvoicePaymentsRelations = relations(tourInvoicePayments, ({ one }) => ({
+  team: one(teams, { fields: [tourInvoicePayments.teamId], references: [teams.id] }),
+  tourInvoice: one(tourInvoices, { fields: [tourInvoicePayments.tourInvoiceId], references: [tourInvoices.id] }),
+  createdByUser: one(users, { fields: [tourInvoicePayments.createdBy], references: [users.id] }),
+}));
+
 // ============================================================
 // TYPE EXPORTS
 // ============================================================
@@ -2690,6 +2887,25 @@ export type MasterProductCategory = typeof masterProductCategories.$inferSelect;
 export type NewMasterProductCategory = typeof masterProductCategories.$inferInsert;
 export type MasterProduct = typeof masterProducts.$inferSelect;
 export type NewMasterProduct = typeof masterProducts.$inferInsert;
+
+// Tour Invoice types
+export type TourInvoice = typeof tourInvoices.$inferSelect;
+export type NewTourInvoice = typeof tourInvoices.$inferInsert;
+export type TourInvoiceItem = typeof tourInvoiceItems.$inferSelect;
+export type NewTourInvoiceItem = typeof tourInvoiceItems.$inferInsert;
+export type TourInvoiceGuest = typeof tourInvoiceGuests.$inferSelect;
+export type NewTourInvoiceGuest = typeof tourInvoiceGuests.$inferInsert;
+export type TourInvoiceSequence = typeof tourInvoiceSequences.$inferSelect;
+export type NewTourInvoiceSequence = typeof tourInvoiceSequences.$inferInsert;
+export type TourInvoicePayment = typeof tourInvoicePayments.$inferSelect;
+export type NewTourInvoicePayment = typeof tourInvoicePayments.$inferInsert;
+
+export type TourInvoiceWithDetails = TourInvoice & {
+  customer: Customer;
+  items: TourInvoiceItem[];
+  guests: TourInvoiceGuest[];
+  payments: TourInvoicePayment[];
+};
 
 // ============================================================
 // ENUMS

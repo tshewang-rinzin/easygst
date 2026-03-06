@@ -21,6 +21,7 @@ import {
   FileEdit,
   FolderKanban,
   Warehouse,
+  Plane,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -120,6 +121,15 @@ const navigation = [
     children: [
       { name: 'All Contracts', href: '/contracts' },
       { name: 'New Contract', href: '/contracts/new' },
+    ]
+  },
+  {
+    name: 'Tour Invoices',
+    icon: Plane,
+    children: [
+      { name: 'All Tour Invoices', href: '/tour-invoices' },
+      { name: 'New Tour Invoice', href: '/tour-invoices/new' },
+      { name: 'Tour Reports', href: '/tour-invoices/reports' },
     ]
   },
   {

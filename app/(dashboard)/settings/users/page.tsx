@@ -44,6 +44,7 @@ export default function UsersRolesPage() {
   const { data, mutate, isLoading } = useSWR<{
     members: TeamMemberWithUser[];
     invitations: PendingInvitation[];
+    currentUserId: string;
   }>('/api/users/team-members', fetcher);
 
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
@@ -203,24 +204,33 @@ export default function UsersRolesPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <select
-                      value={member.role}
-                      onChange={(e) =>
-                        handleChangeRole(member.id, e.target.value as 'owner' | 'admin' | 'member')
-                      }
-                      className="px-3 py-1 border rounded-md text-sm"
-                    >
-                      <option value="member">Member</option>
-                      <option value="admin">Admin</option>
-                      <option value="owner">Owner</option>
-                    </select>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleRemoveMember(member.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {member.userId === data?.currentUserId ? (
+                      <>
+                        {getRoleBadge(member.role)}
+                        <span className="text-xs text-muted-foreground">(You)</span>
+                      </>
+                    ) : (
+                      <>
+                        <select
+                          value={member.role}
+                          onChange={(e) =>
+                            handleChangeRole(member.id, e.target.value as 'owner' | 'admin' | 'member')
+                          }
+                          className="px-3 py-1 border rounded-md text-sm"
+                        >
+                          <option value="member">Member</option>
+                          <option value="admin">Admin</option>
+                          <option value="owner">Owner</option>
+                        </select>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleRemoveMember(member.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}

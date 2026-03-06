@@ -2,6 +2,7 @@ import { renderToStream } from '@react-pdf/renderer';
 import { InvoiceTemplate } from './templates/invoice-template';
 import { InvoiceTemplateModern } from './templates/invoice-template-modern';
 import { InvoiceTemplateMinimal } from './templates/invoice-template-minimal';
+import { TourInvoiceTemplate, TourInvoiceTemplateData } from './templates/tour-invoice-template';
 import React from 'react';
 import QRCode from 'qrcode';
 
@@ -132,4 +133,42 @@ export async function generateInvoicePDF(
  */
 export function getInvoicePDFFilename(invoiceNumber: string): string {
   return `Invoice-${invoiceNumber}.pdf`;
+}
+
+/**
+ * Tour Invoice PDF Data type (re-exported from template)
+ */
+export type { TourInvoiceTemplateData as TourInvoiceData };
+
+/**
+ * Generate a PDF tour invoice as a readable stream
+ */
+export async function generateTourInvoicePDF(
+  data: TourInvoiceTemplateData,
+  accentColor: string = '#1f2937'
+): Promise<NodeJS.ReadableStream> {
+  let qrCodeDataUrl: string | null = null;
+  if (data.qrCodeDataUrl) {
+    qrCodeDataUrl = data.qrCodeDataUrl;
+  }
+
+  const templateData = {
+    ...data,
+    qrCodeDataUrl,
+  };
+
+  const document = React.createElement(TourInvoiceTemplate, {
+    data: templateData,
+    accentColor,
+  }) as any;
+
+  const stream = await renderToStream(document);
+  return stream;
+}
+
+/**
+ * Get the filename for a tour invoice PDF
+ */
+export function getTourInvoicePDFFilename(invoiceNumber: string): string {
+  return `Tour-Invoice-${invoiceNumber}.pdf`;
 }

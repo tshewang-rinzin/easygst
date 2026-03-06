@@ -9,7 +9,7 @@ export const GET = withAuth(async (request, { user, team }) => {
       getPendingInvitations(),
     ]);
 
-    return NextResponse.json({ members, invitations });
+    return NextResponse.json({ members, invitations, currentUserId: user.id });
   } catch (error) {
     console.error('Error fetching team members:', error);
     return NextResponse.json(
