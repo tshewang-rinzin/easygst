@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, ArrowLeft, Upload, X } from 'lucide-react';
+import { Loader2, ArrowLeft, Upload, X, Check, ChevronsUpDown, ShoppingCart, Utensils, Bed, Store, Wrench, Pill, Shirt, Monitor, HardHat, Truck, Leaf, GraduationCap, HeartPulse, Briefcase, Factory, Code, Car, Palette, BookOpen, Sofa, Scissors, Building, Video, CircleDot, Plane, LucideIcon } from 'lucide-react';
 import { updateBusinessSettings } from '@/lib/teams/actions';
 import { Team } from '@/lib/db/schema';
 import useSWR from 'swr';
@@ -35,6 +35,39 @@ interface BusinessType {
   icon?: string;
 }
 
+const ICON_MAP: Record<string, LucideIcon> = {
+  'shopping-cart': ShoppingCart,
+  'utensils': Utensils,
+  'bed': Bed,
+  'store': Store,
+  'wrench': Wrench,
+  'pill': Pill,
+  'shirt': Shirt,
+  'monitor': Monitor,
+  'hard-hat': HardHat,
+  'truck': Truck,
+  'leaf': Leaf,
+  'graduation-cap': GraduationCap,
+  'heart-pulse': HeartPulse,
+  'briefcase': Briefcase,
+  'factory': Factory,
+  'code': Code,
+  'car': Car,
+  'palette': Palette,
+  'book-open': BookOpen,
+  'sofa': Sofa,
+  'scissors': Scissors,
+  'building': Building,
+  'video': Video,
+  'circle-dot': CircleDot,
+  'plane': Plane,
+};
+
+function getIcon(iconName?: string) {
+  if (!iconName) return CircleDot;
+  return ICON_MAP[iconName] || CircleDot;
+}
+
 function BusinessTypeSelector({ teamBusinessTypeId }: { teamBusinessTypeId?: string | null }) {
   const { data: businessTypes } = useSWR<{ businessTypes: BusinessType[] }>(
     '/api/master-products/business-types',
@@ -42,13 +75,22 @@ function BusinessTypeSelector({ teamBusinessTypeId }: { teamBusinessTypeId?: str
   );
   const [showCatalogPrompt, setShowCatalogPrompt] = useState(false);
   const [selectedType, setSelectedType] = useState(teamBusinessTypeId || '');
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
 
   const handleBusinessTypeChange = (value: string) => {
     setSelectedType(value);
+    setOpen(false);
+    setSearch('');
     if (value && value !== teamBusinessTypeId) {
       setShowCatalogPrompt(true);
     }
   };
+
+  const selectedBt = businessTypes?.businessTypes.find((bt) => bt.id === selectedType);
+  const filteredTypes = businessTypes?.businessTypes.filter((bt) =>
+    bt.name.toLowerCase().includes(search.toLowerCase())
+  ) || [];
 
   return (
     <>
@@ -56,20 +98,65 @@ function BusinessTypeSelector({ teamBusinessTypeId }: { teamBusinessTypeId?: str
         <Label htmlFor="businessTypeId" className="mb-2">
           Business Type
         </Label>
-        <select
-          id="businessTypeId"
-          name="businessTypeId"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-          value={selectedType}
-          onChange={(e) => handleBusinessTypeChange(e.target.value)}
-        >
-          <option value="">Select business type</option>
-          {businessTypes?.businessTypes.map((bt) => (
-            <option key={bt.id} value={bt.id}>
-              {bt.icon ? `${bt.icon} ` : ''}{bt.name}
-            </option>
-          ))}
-        </select>
+        <input type="hidden" name="businessTypeId" value={selectedType} />
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setOpen(!open)}
+            className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-2 focus:ring-orange-500"
+          >
+            {selectedBt ? (
+              <span className="flex items-center gap-2">
+                {(() => { const Icon = getIcon(selectedBt.icon); return <Icon className="h-4 w-4 text-gray-500" />; })()}
+                {selectedBt.name}
+              </span>
+            ) : (
+              <span className="text-gray-500">Select business type</span>
+            )}
+            <ChevronsUpDown className="h-4 w-4 text-gray-400" />
+          </button>
+
+          {open && (
+            <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-72 overflow-hidden">
+              <div className="p-2 border-b">
+                <input
+                  type="text"
+                  placeholder="Search business type..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  autoFocus
+                />
+              </div>
+              <div className="max-h-56 overflow-auto">
+                {filteredTypes.length === 0 ? (
+                  <div className="px-4 py-3 text-sm text-gray-500">No business type found.</div>
+                ) : (
+                  filteredTypes.map((bt) => {
+                    const Icon = getIcon(bt.icon);
+                    return (
+                      <button
+                        key={bt.id}
+                        type="button"
+                        onClick={() => handleBusinessTypeChange(bt.id)}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-orange-50 transition-colors"
+                      >
+                        <Icon className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-gray-900">{bt.name}</div>
+                          {bt.description && (
+                            <div className="text-xs text-gray-500 truncate">{bt.description}</div>
+                          )}
+                        </div>
+                        {bt.id === selectedType && <Check className="h-4 w-4 text-orange-500 flex-shrink-0" />}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          )}
+        </div>
         <p className="text-xs text-gray-500 mt-1">
           Choose your business category to access relevant product catalogs
         </p>
