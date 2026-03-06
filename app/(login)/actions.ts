@@ -9,6 +9,7 @@ import {
   teams,
   teamMembers,
   activityLogs,
+  plans,
   type NewUser,
   type NewTeam,
   type NewTeamMember,
@@ -248,8 +249,16 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
       .limit(1);
   } else {
     // Create a new team if there's no invitation
+    // Assign the default free plan
+    const [defaultPlan] = await db
+      .select({ id: plans.id })
+      .from(plans)
+      .where(eq(plans.isDefault, true))
+      .limit(1);
+
     const newTeam: NewTeam = {
-      name: `${name}'s Team`
+      name: `${name}'s Team`,
+      ...(defaultPlan ? { planId: defaultPlan.id } : {}),
     };
 
     [createdTeam] = await db.insert(teams).values(newTeam).returning();

@@ -10,8 +10,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Users, Mail, Calendar, Building2, MoreVertical, KeyRound, Loader2, CheckCircle } from 'lucide-react';
-import { sendPasswordResetEmail } from './actions';
+import { Users, Mail, Calendar, Building2, MoreVertical, KeyRound, MailCheck, Loader2, CheckCircle } from 'lucide-react';
+import { sendPasswordResetEmail, adminResendVerificationEmail } from './actions';
 import { User } from '@/lib/db/schema';
 
 interface UserRow {
@@ -30,7 +30,7 @@ export function UsersTable({ users }: UsersTableProps) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSendResetEmail = async (userId: string) => {
+  const handleAction = async (userId: string, action: 'reset' | 'verify') => {
     setSendingUserId(userId);
     setSuccessMessage(null);
     setErrorMessage(null);
@@ -39,7 +39,9 @@ export function UsersTable({ users }: UsersTableProps) {
       const formData = new FormData();
       formData.append('userId', userId);
 
-      const result = await sendPasswordResetEmail({}, formData);
+      const result = action === 'reset'
+        ? await sendPasswordResetEmail({}, formData)
+        : await adminResendVerificationEmail({}, formData);
 
       if ('error' in result && result.error) {
         setErrorMessage(result.error);
@@ -162,8 +164,18 @@ export function UsersTable({ users }: UsersTableProps) {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            {!row.user.emailVerified && (
+                              <DropdownMenuItem
+                                onClick={() => handleAction(row.user.id, 'verify')}
+                                disabled={isPending}
+                                className="cursor-pointer"
+                              >
+                                <MailCheck className="h-4 w-4 mr-2" />
+                                Resend Verification Email
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem
-                              onClick={() => handleSendResetEmail(row.user.id)}
+                              onClick={() => handleAction(row.user.id, 'reset')}
                               disabled={isPending}
                               className="cursor-pointer"
                             >
