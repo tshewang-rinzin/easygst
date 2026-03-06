@@ -29,6 +29,8 @@ import {
   TrendingUp,
   Wallet,
   ArrowRight,
+  CheckCircle2,
+  Circle,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -48,6 +50,102 @@ interface DashboardMetrics {
 }
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+interface SetupStep {
+  id: string;
+  label: string;
+  description: string;
+  completed: boolean;
+  required: boolean;
+  href: string;
+}
+
+interface SetupProgressData {
+  steps: SetupStep[];
+  completedCount: number;
+  totalCount: number;
+  requiredCompletedCount: number;
+  requiredTotalCount: number;
+  percentage: number;
+  allRequiredComplete: boolean;
+}
+
+function SetupProgressCard() {
+  const { data: progress } = useSWR<SetupProgressData>('/api/setup-progress', fetcher);
+
+  if (!progress || progress.percentage === 100) return null;
+
+  const incompleteSteps = progress.steps.filter((s) => !s.completed);
+
+  if (progress.allRequiredComplete && incompleteSteps.every((s) => !s.required)) {
+    // All required done, only optional remain - show celebratory dismissable card
+    return (
+      <Card className="mb-8 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50">
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <CheckCircle2 className="w-6 h-6 text-green-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-green-900">All required setup complete! 🎉</h3>
+              <p className="text-sm text-green-700 mt-1">
+                {incompleteSteps.length > 0
+                  ? `${incompleteSteps.length} optional step${incompleteSteps.length > 1 ? 's' : ''} remaining for a perfect setup.`
+                  : 'Your business is fully configured.'}
+              </p>
+            </div>
+            {incompleteSteps.length > 0 && (
+              <Link href="/onboarding">
+                <Button variant="outline" size="sm" className="border-green-300 text-green-700 hover:bg-green-100">
+                  Complete Setup
+                </Button>
+              </Link>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="mb-8 border-orange-200">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-base">Complete Your Setup</CardTitle>
+            <p className="text-sm text-gray-500 mt-1">
+              {progress.completedCount} of {progress.totalCount} steps completed
+            </p>
+          </div>
+          <Link href="/onboarding">
+            <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
+              Complete Setup
+            </Button>
+          </Link>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+          <div
+            className="bg-orange-500 h-2 rounded-full transition-all"
+            style={{ width: `${progress.percentage}%` }}
+          />
+        </div>
+        <div className="space-y-2">
+          {incompleteSteps.map((step) => (
+            <div key={step.id} className="flex items-center gap-2 text-sm">
+              <Circle className="w-3 h-3 text-gray-300 flex-shrink-0" />
+              <span className="text-gray-600">{step.label}</span>
+              {step.required && (
+                <span className="text-xs text-red-500">(required)</span>
+              )}
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 function DashboardSkeleton() {
   return (
@@ -545,6 +643,11 @@ export default function DashboardPage() {
           Overview of your sales, purchases, and GST obligations
         </p>
       </div>
+
+      {/* Setup Progress */}
+      <Suspense fallback={null}>
+        <SetupProgressCard />
+      </Suspense>
 
       {/* Main Dashboard Overview */}
       <Suspense fallback={<DashboardSkeleton />}>

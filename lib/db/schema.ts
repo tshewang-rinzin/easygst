@@ -96,6 +96,9 @@ export const teams = pgTable('teams', {
   // Tour Invoice Settings
   enableTourInvoices: boolean('enable_tour_invoices').notNull().default(false),
   tourInvoicePrefix: varchar('tour_invoice_prefix', { length: 20 }).default('TI'),
+
+  // Onboarding
+  onboardingCompleted: boolean('onboarding_completed').notNull().default(false),
 });
 
 export const teamMembers = pgTable('team_members', {

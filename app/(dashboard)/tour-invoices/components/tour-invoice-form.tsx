@@ -9,6 +9,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
   PlusCircle,
   Trash2,
   ChevronDown,
@@ -22,6 +29,9 @@ import {
   AlertTriangle,
   ClipboardPaste,
   Zap,
+  Search,
+  UserPlus,
+  Loader2,
 } from 'lucide-react';
 import { createTourInvoice, updateTourInvoice } from '../actions';
 import { TOUR_CATEGORIES, CATEGORY_MAP, DEFAULT_INCLUSIONS, DEFAULT_EXCLUSIONS } from '@/lib/tour-invoice/category-presets';
@@ -33,22 +43,101 @@ import type { TourInvoiceItemFormData, TourInvoiceGuestFormData, TourInvoiceForm
 interface Customer {
   id: string;
   name: string;
+  email?: string | null;
+  phone?: string | null;
 }
 
 interface TourInvoiceFormProps {
-  customers: Customer[];
   existingInvoice?: any;
   existingItems?: any[];
   existingGuests?: any[];
+  initialCustomer?: Customer | null;
 }
 
-export function TourInvoiceForm({ customers, existingInvoice, existingItems, existingGuests }: TourInvoiceFormProps) {
+export function TourInvoiceForm({ existingInvoice, existingItems, existingGuests, initialCustomer }: TourInvoiceFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  // Basic fields
-  const [customerId, setCustomerId] = useState(existingInvoice?.customerId || '');
+  // Customer search state
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(initialCustomer || null);
+  const [customerQuery, setCustomerQuery] = useState('');
+  const [customerResults, setCustomerResults] = useState<Customer[]>([]);
+  const [customerSearchOpen, setCustomerSearchOpen] = useState(false);
+  const [customerSearchLoading, setCustomerSearchLoading] = useState(false);
+
+  // Add new customer dialog
+  const [showNewCustomerDialog, setShowNewCustomerDialog] = useState(false);
+  const [newCustomerName, setNewCustomerName] = useState('');
+  const [newCustomerEmail, setNewCustomerEmail] = useState('');
+  const [newCustomerPhone, setNewCustomerPhone] = useState('');
+  const [newCustomerSaving, setNewCustomerSaving] = useState(false);
+
+  // Customer search effect
+  useEffect(() => {
+    if (customerQuery.length < 2) {
+      setCustomerResults([]);
+      setCustomerSearchOpen(false);
+      return;
+    }
+    const timeout = setTimeout(async () => {
+      setCustomerSearchLoading(true);
+      try {
+        const res = await fetch(`/api/customers/search?q=${encodeURIComponent(customerQuery)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setCustomerResults(data);
+          setCustomerSearchOpen(true);
+        }
+      } catch (e) {
+        console.error('Customer search error:', e);
+      } finally {
+        setCustomerSearchLoading(false);
+      }
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [customerQuery]);
+
+  const handleSelectCustomer = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setCustomerQuery('');
+    setCustomerSearchOpen(false);
+  };
+
+  const handleCreateCustomer = async () => {
+    if (!newCustomerName.trim()) return;
+    setNewCustomerSaving(true);
+    try {
+      const res = await fetch('/api/customers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newCustomerName.trim(),
+          email: newCustomerEmail.trim() || undefined,
+          phone: newCustomerPhone.trim() || undefined,
+          customerType: 'business',
+        }),
+      });
+      if (res.ok) {
+        const customer = await res.json();
+        setSelectedCustomer({ id: customer.id, name: customer.name, email: customer.email, phone: customer.phone });
+        setShowNewCustomerDialog(false);
+        setNewCustomerName('');
+        setNewCustomerEmail('');
+        setNewCustomerPhone('');
+      } else {
+        const data = await res.json();
+        setError(data.error || 'Failed to create customer');
+      }
+    } catch (e) {
+      setError('Failed to create customer');
+    } finally {
+      setNewCustomerSaving(false);
+    }
+  };
+
+  // Sync customerId with selectedCustomer
+  const customerId = selectedCustomer?.id || '';
   const [tourName, setTourName] = useState(existingInvoice?.tourName || '');
   const [tourType, setTourType] = useState(existingInvoice?.tourType || 'cultural');
   const [arrivalDate, setArrivalDate] = useState(existingInvoice?.arrivalDate ? new Date(existingInvoice.arrivalDate).toISOString().split('T')[0] : '');
@@ -406,18 +495,67 @@ export function TourInvoiceForm({ customers, existingInvoice, existingItems, exi
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <div className="relative">
               <Label>Customer *</Label>
-              <select
-                value={customerId}
-                onChange={(e) => setCustomerId(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-              >
-                <option value="">Select customer...</option>
-                {customers.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
+              {selectedCustomer ? (
+                <div className="mt-1 flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
+                  <div>
+                    <div className="font-medium text-gray-900">{selectedCustomer.name}</div>
+                    {(selectedCustomer.email || selectedCustomer.phone) && (
+                      <div className="text-sm text-gray-500">
+                        {selectedCustomer.email}{selectedCustomer.email && selectedCustomer.phone ? ' • ' : ''}{selectedCustomer.phone}
+                      </div>
+                    )}
+                  </div>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setSelectedCustomer(null)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <div className="relative mt-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      type="text"
+                      placeholder="Search by name, email, or phone..."
+                      value={customerQuery}
+                      onChange={(e) => setCustomerQuery(e.target.value)}
+                      className="pl-10"
+                      autoComplete="off"
+                    />
+                  </div>
+                  {customerSearchOpen && customerResults.length > 0 && (
+                    <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+                      {customerResults.map((c) => (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => handleSelectCustomer(c)}
+                          className="w-full px-4 py-3 text-left hover:bg-orange-50 border-b last:border-b-0"
+                        >
+                          <div className="font-medium text-gray-900">{c.name}</div>
+                          <div className="text-sm text-gray-500">
+                            {c.email}{c.email && c.phone ? ' • ' : ''}{c.phone}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {customerSearchOpen && customerQuery.length >= 2 && customerResults.length === 0 && !customerSearchLoading && (
+                    <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-4">
+                      <p className="text-sm text-gray-500 mb-2">No customers found.</p>
+                      <Button type="button" variant="outline" size="sm" onClick={() => { setShowNewCustomerDialog(true); setNewCustomerName(customerQuery); setCustomerSearchOpen(false); }}>
+                        <UserPlus className="h-4 w-4 mr-2" /> Add &quot;{customerQuery}&quot; as new customer
+                      </Button>
+                    </div>
+                  )}
+                  <div className="mt-2">
+                    <Button type="button" variant="ghost" size="sm" onClick={() => setShowNewCustomerDialog(true)} className="text-sm text-gray-500">
+                      <UserPlus className="h-4 w-4 mr-1" /> Add new customer
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
             <div>
               <Label>Tour Name *</Label>
@@ -1010,6 +1148,35 @@ export function TourInvoiceForm({ customers, existingInvoice, existingItems, exi
           {isSubmitting ? 'Saving...' : existingInvoice ? 'Update' : 'Save as Draft'}
         </Button>
       </div>
+
+      {/* New Customer Dialog */}
+      <Dialog open={showNewCustomerDialog} onOpenChange={setShowNewCustomerDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Customer</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Name *</Label>
+              <Input value={newCustomerName} onChange={(e) => setNewCustomerName(e.target.value)} placeholder="Customer name" />
+            </div>
+            <div>
+              <Label>Email</Label>
+              <Input type="email" value={newCustomerEmail} onChange={(e) => setNewCustomerEmail(e.target.value)} placeholder="customer@example.com" />
+            </div>
+            <div>
+              <Label>Phone</Label>
+              <Input value={newCustomerPhone} onChange={(e) => setNewCustomerPhone(e.target.value)} placeholder="+975 ..." />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewCustomerDialog(false)}>Cancel</Button>
+            <Button onClick={handleCreateCustomer} disabled={newCustomerSaving || !newCustomerName.trim()}>
+              {newCustomerSaving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Creating...</> : 'Create & Select'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
