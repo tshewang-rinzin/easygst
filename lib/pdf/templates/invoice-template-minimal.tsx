@@ -440,7 +440,7 @@ export const InvoiceTemplateMinimal: React.FC<InvoiceTemplateProps> = ({
                 <View key={account.id} style={{ marginTop: index > 0 ? 6 : 4 }}>
                   <Text style={[styles.paymentText, { fontWeight: 'bold' }]}>
                     {account.paymentMethod === 'mbob' ? 'mBoB' : account.paymentMethod === 'mpay' ? 'mPay' : account.paymentMethod === 'bank_transfer' ? 'Bank Transfer' : account.paymentMethod.charAt(0).toUpperCase() + account.paymentMethod.slice(1)}
-                    {account.isDefault ? ' (Default)' : ''}
+                    
                   </Text>
                   <Text style={styles.paymentText}>{account.bankName} - {account.accountNumber}</Text>
                 </View>

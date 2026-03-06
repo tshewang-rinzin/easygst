@@ -574,7 +574,7 @@ export const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ data, accentCo
                           ? 'Bank Transfer'
                           : account.paymentMethod.charAt(0).toUpperCase() +
                             account.paymentMethod.slice(1)}
-                    {account.isDefault ? ' (Default)' : ''}
+                    
                   </Text>
                   <Text style={styles.paymentText}>
                     {account.bankName} - {account.accountNumber}
