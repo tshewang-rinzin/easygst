@@ -486,9 +486,8 @@ export const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ data, accentCo
           {/* Table Header */}
           {allServiceItems ? (
             <View style={styles.tableHeader}>
-              <Text style={[styles.tableHeaderText, { width: '60%' }]}>Description</Text>
-              <Text style={[styles.tableHeaderText, { width: '15%', textAlign: 'right' }]}>Tax</Text>
-              <Text style={[styles.tableHeaderText, { width: '25%', textAlign: 'right' }]}>Amount</Text>
+              <Text style={[styles.tableHeaderText, { width: '70%' }]}>Description</Text>
+              <Text style={[styles.tableHeaderText, { width: '30%', textAlign: 'right' }]}>Amount</Text>
             </View>
           ) : (
             <View style={styles.tableHeader}>
@@ -513,16 +512,13 @@ export const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ data, accentCo
                   key={index}
                   style={[styles.tableRow, index % 2 === 1 ? styles.tableRowAlt : {}]}
                 >
-                  <View style={{ width: '60%' }}>
+                  <View style={{ width: '70%' }}>
                     <Text style={styles.tableCell}>{getDisplayDescription(item)}</Text>
                     <View style={[styles.gstTag, gstStyle]}>
                       <Text style={{ fontSize: 6, color: gstStyle.color }}>{getGstLabel(classification)}</Text>
                     </View>
                   </View>
-                  <Text style={[styles.tableCell, { width: '15%', textAlign: 'right' }]}>
-                    {item.isTaxExempt ? '-' : `${parseFloat(item.taxRate).toFixed(0)}%`}
-                  </Text>
-                  <Text style={[styles.tableCell, { width: '25%', textAlign: 'right', fontWeight: 'bold' }]}>
+                  <Text style={[styles.tableCell, { width: '30%', textAlign: 'right', fontWeight: 'bold' }]}>
                     {formatCurrency((parseFloat(item.itemTotal) - parseFloat(item.taxAmount || '0')).toFixed(2), data.currency)}
                   </Text>
                 </View>
@@ -580,7 +576,12 @@ export const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ data, accentCo
             )}
 
             <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>GST</Text>
+              <Text style={styles.totalLabel}>
+                {(() => {
+                  const rates = [...new Set(data.items.filter(i => !i.isTaxExempt).map(i => parseFloat(i.taxRate)))];
+                  return rates.length === 1 ? `GST (${rates[0]}%)` : 'GST';
+                })()}
+              </Text>
               <Text style={styles.totalValue}>
                 {formatCurrency(data.totalTax, data.currency)}
               </Text>

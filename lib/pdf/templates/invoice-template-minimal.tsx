@@ -398,8 +398,7 @@ export const InvoiceTemplateMinimal: React.FC<InvoiceTemplateProps> = ({
         <View style={styles.table}>
           {allServiceItems ? (
             <View style={styles.tableHeader}>
-              <Text style={[styles.tableHeaderText, { flex: 4 }]}>Description</Text>
-              <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>Tax</Text>
+              <Text style={[styles.tableHeaderText, { flex: 5 }]}>Description</Text>
               <Text style={[styles.tableHeaderText, { flex: 2, textAlign: 'right' }]}>Amount</Text>
             </View>
           ) : (
@@ -420,15 +419,12 @@ export const InvoiceTemplateMinimal: React.FC<InvoiceTemplateProps> = ({
             if (allServiceItems) {
               return (
                 <View key={index} style={styles.tableRow}>
-                  <View style={{ flex: 4 }}>
+                  <View style={{ flex: 5 }}>
                     <Text style={styles.tableCell}>{getDisplayDescription(item)}</Text>
                     <View style={[styles.gstTag, gstStyle]}>
                       <Text style={{ fontSize: 6, color: gstStyle.color }}>{getGstLabel(classification)}</Text>
                     </View>
                   </View>
-                  <Text style={[styles.tableCell, { flex: 1, textAlign: 'center' }]}>
-                    {item.isTaxExempt ? '-' : `${parseFloat(item.taxRate).toFixed(0)}%`}
-                  </Text>
                   <Text style={[styles.tableCell, { flex: 2, textAlign: 'right', fontWeight: 'bold' }]}>
                     {formatCurrency((parseFloat(item.itemTotal) - parseFloat(item.taxAmount || '0')).toFixed(2), data.currency)}
                   </Text>
@@ -472,7 +468,12 @@ export const InvoiceTemplateMinimal: React.FC<InvoiceTemplateProps> = ({
               </View>
             )}
             <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>GST</Text>
+              <Text style={styles.totalLabel}>
+                {(() => {
+                  const rates = [...new Set(data.items.filter(i => !i.isTaxExempt).map(i => parseFloat(i.taxRate)))];
+                  return rates.length === 1 ? `GST (${rates[0]}%)` : 'GST';
+                })()}
+              </Text>
               <Text style={styles.totalValue}>{formatCurrency(data.totalTax, data.currency)}</Text>
             </View>
             <View style={styles.grandTotalRow}>
