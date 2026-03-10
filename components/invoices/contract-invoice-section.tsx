@@ -40,6 +40,7 @@ interface ContractInvoiceSectionProps {
   onApply: (data: {
     contractId: string;
     contractName: string;
+    contractTotalValue: number;
     description: string;
     unitPrice: number;
     invoiceAmount: number; // GST-inclusive
@@ -121,6 +122,7 @@ export function ContractInvoiceSection({ customerId, onApply }: ContractInvoiceS
     onApply({
       contractId: selectedContract.id,
       contractName: selectedContract.name,
+      contractTotalValue: parseFloat(selectedContract.totalValue),
       description: desc,
       unitPrice: invoiceAmount, // GST-inclusive, will be reverse-calculated at invoice level
       invoiceAmount,

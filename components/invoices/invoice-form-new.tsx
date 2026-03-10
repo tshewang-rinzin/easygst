@@ -413,6 +413,10 @@ export function InvoiceFormNew({ defaultGstRate }: { defaultGstRate: string }) {
           <ContractInvoiceSection
             customerId={selectedCustomer.id}
             onApply={(data) => {
+              // Auto-fill contract amount from the contract
+              if (data.contractTotalValue) {
+                setContractAmount(data.contractTotalValue.toFixed(2));
+              }
               // Contract amounts are GST-inclusive — reverse-calculate base price
               const gstRate = parseFloat(defaultGstRate) || 0;
               const basePrice = gstRate > 0
