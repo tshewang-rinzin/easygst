@@ -8,6 +8,7 @@ import {
   Image,
 } from '@react-pdf/renderer';
 import { InvoiceTemplateProps } from './types';
+import { amountInWords } from '@/lib/utils/amount-in-words';
 
 const createStyles = (accent: string) =>
   StyleSheet.create({
@@ -477,6 +478,11 @@ export const InvoiceTemplateMinimal: React.FC<InvoiceTemplateProps> = ({
             <View style={styles.grandTotalRow}>
               <Text style={styles.grandTotalLabel}>Total</Text>
               <Text style={styles.grandTotalValue}>{formatCurrency(data.totalAmount, data.currency)}</Text>
+            </View>
+            <View style={{ marginTop: 4, paddingTop: 4 }}>
+              <Text style={{ fontSize: 7, color: '#6b7280', fontStyle: 'italic' }}>
+                {amountInWords(data.totalAmount, data.currency)}
+              </Text>
             </View>
             {parseFloat(data.amountPaid) > 0 && (
               <>

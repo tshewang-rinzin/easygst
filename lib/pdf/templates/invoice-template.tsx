@@ -316,6 +316,7 @@ const styles = StyleSheet.create({
 });
 
 import { InvoiceData, InvoiceTemplateProps } from './types';
+import { amountInWords } from '@/lib/utils/amount-in-words';
 
 export const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ data, accentColor }) => {
   const formatDate = (date: Date | null | undefined) => {
@@ -589,6 +590,12 @@ export const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ data, accentCo
               <Text style={styles.grandTotalLabel}>Total Amount</Text>
               <Text style={styles.grandTotalValue}>
                 {formatCurrency(data.totalAmount, data.currency)}
+              </Text>
+            </View>
+
+            <View style={{ marginTop: 4, paddingTop: 4 }}>
+              <Text style={{ fontSize: 7, color: '#6b7280', fontStyle: 'italic' }}>
+                {amountInWords(data.totalAmount, data.currency)}
               </Text>
             </View>
 
