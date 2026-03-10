@@ -22,6 +22,7 @@ import {
   FolderKanban,
   Warehouse,
   Plane,
+  RefreshCw,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -113,6 +114,14 @@ const navigation = [
       { name: 'Cash Sales', href: '/sales/cash-sales' },
       { name: 'Customers', href: '/customers' },
       { name: 'Sales Register', href: '/sales/register' },
+    ]
+  },
+  {
+    name: 'Subscriptions',
+    icon: RefreshCw,
+    children: [
+      { name: 'All Subscriptions', href: '/subscriptions' },
+      { name: 'New Subscription', href: '/subscriptions/new' },
     ]
   },
   {

@@ -395,6 +395,9 @@ export const products = pgTable('products', {
   // Barcode (for POS scanning)
   barcode: varchar('barcode', { length: 100 }),
 
+  // Recurring Billing (for service packages/subscriptions)
+  billingCycle: varchar('billing_cycle', { length: 20 }), // monthly, quarterly, half_yearly, yearly, one_time — null = not a package
+
   // Metadata
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -2066,6 +2069,89 @@ export const tourInvoicePayments = pgTable('tour_invoice_payments', {
   tourInvoicePaymentIdx: index('tour_invoice_payment_idx').on(table.tourInvoiceId),
 }));
 
+// ============================================================
+// CUSTOMER SUBSCRIPTIONS (Package/Recurring Billing)
+// ============================================================
+
+export const customerSubscriptions = pgTable('customer_subscriptions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  customerId: uuid('customer_id')
+    .notNull()
+    .references(() => customers.id),
+  productId: uuid('product_id')
+    .notNull()
+    .references(() => products.id),
+
+  // Identification
+  subscriptionNumber: varchar('subscription_number', { length: 50 }).notNull(), // SUB-YYYY-NNNN
+
+  // Status
+  status: varchar('status', { length: 20 }).notNull().default('active'), // active, paused, cancelled, expired
+
+  // Billing
+  billingCycle: varchar('billing_cycle', { length: 20 }).notNull(), // monthly, quarterly, half_yearly, yearly
+  price: numeric('price', { precision: 10, scale: 2 }).notNull(), // override price per cycle
+  currency: varchar('currency', { length: 3 }).notNull().default('BTN'),
+
+  // Dates
+  startDate: timestamp('start_date').notNull(),
+  nextBillingDate: timestamp('next_billing_date').notNull(),
+  expiryDate: timestamp('expiry_date'), // nullable — null = no expiry
+
+  // Settings
+  autoInvoice: boolean('auto_invoice').notNull().default(true),
+
+  // Notes
+  notes: text('notes'),
+
+  // Metadata
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdBy: uuid('created_by')
+    .notNull()
+    .references(() => users.id),
+}, (table) => ({
+  teamSubIdx: index('customer_sub_team_idx').on(table.teamId),
+  customerSubIdx: index('customer_sub_customer_idx').on(table.customerId),
+  statusSubIdx: index('customer_sub_status_idx').on(table.status),
+  nextBillingIdx: index('customer_sub_next_billing_idx').on(table.nextBillingDate),
+  subNumberIdx: uniqueIndex('customer_sub_number_idx').on(table.teamId, table.subscriptionNumber),
+}));
+
+export const customerSubscriptionInvoices = pgTable('customer_subscription_invoices', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  subscriptionId: uuid('subscription_id')
+    .notNull()
+    .references(() => customerSubscriptions.id, { onDelete: 'cascade' }),
+  invoiceId: uuid('invoice_id')
+    .notNull()
+    .references(() => invoices.id),
+  billingPeriodStart: timestamp('billing_period_start').notNull(),
+  billingPeriodEnd: timestamp('billing_period_end').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  subInvoiceSubIdx: index('sub_invoice_sub_idx').on(table.subscriptionId),
+  subInvoiceInvIdx: index('sub_invoice_inv_idx').on(table.invoiceId),
+}));
+
+export const customerSubscriptionSequences = pgTable('customer_subscription_sequences', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' })
+    .unique(),
+  year: integer('year').notNull(),
+  lastNumber: integer('last_number').notNull().default(0),
+  lockedAt: timestamp('locked_at'),
+  lockedBy: varchar('locked_by', { length: 100 }),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamSubSeqYearIdx: uniqueIndex('team_sub_seq_year_idx').on(table.teamId, table.year),
+}));
+
 export const teamsRelations = relations(teams, ({ one, many }) => ({
   plan: one(plans, { fields: [teams.planId], references: [plans.id] }),
   businessType: one(businessTypes, { fields: [teams.businessTypeId], references: [businessTypes.id] }),
@@ -2086,6 +2172,7 @@ export const teamsRelations = relations(teams, ({ one, many }) => ({
   subscriptionPayments: many(subscriptionPayments),
   tourInvoices: many(tourInvoices),
   tourInvoicePayments: many(tourInvoicePayments),
+  customerSubscriptions: many(customerSubscriptions),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -2541,6 +2628,24 @@ export const tourInvoicePaymentsRelations = relations(tourInvoicePayments, ({ on
   createdByUser: one(users, { fields: [tourInvoicePayments.createdBy], references: [users.id] }),
 }));
 
+// Customer Subscription Relations
+export const customerSubscriptionsRelations = relations(customerSubscriptions, ({ one, many }) => ({
+  team: one(teams, { fields: [customerSubscriptions.teamId], references: [teams.id] }),
+  customer: one(customers, { fields: [customerSubscriptions.customerId], references: [customers.id] }),
+  product: one(products, { fields: [customerSubscriptions.productId], references: [products.id] }),
+  createdByUser: one(users, { fields: [customerSubscriptions.createdBy], references: [users.id] }),
+  subscriptionInvoices: many(customerSubscriptionInvoices),
+}));
+
+export const customerSubscriptionInvoicesRelations = relations(customerSubscriptionInvoices, ({ one }) => ({
+  subscription: one(customerSubscriptions, { fields: [customerSubscriptionInvoices.subscriptionId], references: [customerSubscriptions.id] }),
+  invoice: one(invoices, { fields: [customerSubscriptionInvoices.invoiceId], references: [invoices.id] }),
+}));
+
+export const customerSubscriptionSequencesRelations = relations(customerSubscriptionSequences, ({ one }) => ({
+  team: one(teams, { fields: [customerSubscriptionSequences.teamId], references: [teams.id] }),
+}));
+
 // ============================================================
 // TYPE EXPORTS
 // ============================================================
@@ -2902,6 +3007,13 @@ export type TourInvoiceSequence = typeof tourInvoiceSequences.$inferSelect;
 export type NewTourInvoiceSequence = typeof tourInvoiceSequences.$inferInsert;
 export type TourInvoicePayment = typeof tourInvoicePayments.$inferSelect;
 export type NewTourInvoicePayment = typeof tourInvoicePayments.$inferInsert;
+
+// Customer Subscription types
+export type CustomerSubscription = typeof customerSubscriptions.$inferSelect;
+export type NewCustomerSubscription = typeof customerSubscriptions.$inferInsert;
+export type CustomerSubscriptionInvoice = typeof customerSubscriptionInvoices.$inferSelect;
+export type NewCustomerSubscriptionInvoice = typeof customerSubscriptionInvoices.$inferInsert;
+export type CustomerSubscriptionSequence = typeof customerSubscriptionSequences.$inferSelect;
 
 export type TourInvoiceWithDetails = TourInvoice & {
   customer: Customer;

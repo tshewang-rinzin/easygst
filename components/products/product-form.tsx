@@ -105,6 +105,8 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
   );
   const [trackInventory, setTrackInventory] = useState(product?.trackInventory ?? false);
   const [hasVariants, setHasVariants] = useState(false);
+  const [enableRecurring, setEnableRecurring] = useState(!!product?.billingCycle);
+  const [billingCycle, setBillingCycle] = useState(product?.billingCycle || 'monthly');
 
   // Inline variant builder state
   const [attributes, setAttributes] = useState<InlineAttribute[]>([]);
@@ -593,6 +595,53 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
           <input type="hidden" name="trackInventory" value="false" />
           <input type="hidden" name="stockQuantity" value="0" />
           <input type="hidden" name="lowStockThreshold" value="0" />
+
+          {/* Recurring Billing */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="recurringToggle" className="text-base font-medium cursor-pointer">
+                    Recurring Billing
+                  </Label>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Enable to make this a subscription package with automatic billing
+                  </p>
+                </div>
+                <Switch
+                  id="recurringToggle"
+                  checked={enableRecurring}
+                  onCheckedChange={(checked: boolean) => {
+                    setEnableRecurring(checked);
+                    if (!checked) setBillingCycle('');
+                    else setBillingCycle('monthly');
+                  }}
+                />
+              </div>
+
+              {enableRecurring && (
+                <div className="mt-4">
+                  <Label htmlFor="billingCycleSelect" className="mb-2">
+                    Billing Cycle
+                  </Label>
+                  <select
+                    id="billingCycleSelect"
+                    value={billingCycle}
+                    onChange={(e) => setBillingCycle(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="half_yearly">Half Yearly</option>
+                    <option value="yearly">Yearly</option>
+                    <option value="one_time">One-time</option>
+                  </select>
+                </div>
+              )}
+
+              <input type="hidden" name="billingCycle" value={enableRecurring ? billingCycle : ''} />
+            </CardContent>
+          </Card>
         </>
       )}
 

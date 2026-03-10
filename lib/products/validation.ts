@@ -28,6 +28,11 @@ export const productSchema = z.object({
   stockQuantity: z.coerce.number().int().min(0).default(0),
   lowStockThreshold: z.coerce.number().int().min(0).default(5),
   isActive: booleanCoerce(true),
+  // Recurring billing (for services)
+  billingCycle: z.preprocess(
+    (val) => (val === '' || val === null || val === undefined ? undefined : val),
+    z.enum(['monthly', 'quarterly', 'half_yearly', 'yearly', 'one_time']).optional()
+  ),
   // Variant pass-through fields (used during creation)
   hasVariants: booleanCoerce(false),
   variantAttributes: z.string().optional(),
