@@ -413,13 +413,17 @@ export function InvoiceFormNew({ defaultGstRate }: { defaultGstRate: string }) {
           <ContractInvoiceSection
             customerId={selectedCustomer.id}
             onApply={(data) => {
-              // Add a line item from the contract
+              // Contract amounts are GST-inclusive — reverse-calculate base price
+              const gstRate = parseFloat(defaultGstRate) || 0;
+              const basePrice = gstRate > 0
+                ? data.invoiceAmount / (1 + gstRate / 100)
+                : data.invoiceAmount;
               const newItem: LineItem = {
                 id: crypto.randomUUID(),
                 description: data.description,
                 quantity: '1',
                 unit: 'service',
-                unitPrice: data.unitPrice.toFixed(2),
+                unitPrice: basePrice.toFixed(2),
                 discountPercent: '0',
                 taxRate: defaultGstRate,
                 isTaxExempt: false,
