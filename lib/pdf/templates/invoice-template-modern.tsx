@@ -484,7 +484,7 @@ export const InvoiceTemplateModern: React.FC<InvoiceTemplateProps> = ({
                       {item.isTaxExempt ? '-' : `${parseFloat(item.taxRate).toFixed(0)}%`}
                     </Text>
                     <Text style={[styles.tableCell, { flex: 2, textAlign: 'right', fontWeight: 'bold' }]}>
-                      {formatCurrency(item.itemTotal, data.currency)}
+                      {formatCurrency((parseFloat(item.itemTotal) - parseFloat(item.taxAmount || '0')).toFixed(2), data.currency)}
                     </Text>
                   </View>
                 );

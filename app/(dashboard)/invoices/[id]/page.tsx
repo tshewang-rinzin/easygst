@@ -300,7 +300,9 @@ async function InvoiceDetails({ id }: { id: string }) {
                       )}
                     </td>
                     <td className="text-right py-3 font-medium">
-                      {invoice.currency} {parseFloat(item.itemTotal || '0').toFixed(2)}
+                      {invoice.currency} {allServiceItems
+                        ? (parseFloat(item.itemTotal || '0') - parseFloat(item.taxAmount || '0')).toFixed(2)
+                        : parseFloat(item.itemTotal || '0').toFixed(2)}
                     </td>
                   </tr>
                   );

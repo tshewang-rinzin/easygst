@@ -219,7 +219,9 @@ export default async function VerifyInvoicePage({ params }: Props) {
                                 {item.isTaxExempt ? 'Exempt' : `${parseFloat(item.taxRate)}%`}
                               </td>
                               <td className="text-right px-3 py-2 text-gray-900 font-medium">
-                                {formatCurrency(item.itemTotal, invoice.currency)}
+                                {allService
+                                  ? formatCurrency((parseFloat(item.itemTotal) - parseFloat(item.taxAmount || '0')).toFixed(2), invoice.currency)
+                                  : formatCurrency(item.itemTotal, invoice.currency)}
                               </td>
                             </tr>
                           );
