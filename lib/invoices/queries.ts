@@ -332,6 +332,9 @@ export async function getInvoiceByPublicId(publicId: string) {
       },
       customer: {
         name: customers.name,
+        customerType: customers.customerType,
+        contactPerson: customers.contactPerson,
+        department: customers.department,
       },
       team: {
         name: teams.name,

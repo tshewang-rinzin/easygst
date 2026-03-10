@@ -343,7 +343,19 @@ export const InvoiceTemplateMinimal: React.FC<InvoiceTemplateProps> = ({
           </View>
           <View style={styles.col}>
             <Text style={styles.sectionLabel}>Bill To</Text>
-            <Text style={styles.name}>{data.customer.name}</Text>
+            {data.customer.customerType === 'government' ? (
+              <>
+                {data.customer.contactPerson && (
+                  <Text style={styles.name}>{data.customer.contactPerson}</Text>
+                )}
+                {data.customer.department && (
+                  <Text style={styles.detailText}>{data.customer.department}</Text>
+                )}
+                <Text style={data.customer.contactPerson ? styles.detailText : styles.name}>{data.customer.name}</Text>
+              </>
+            ) : (
+              <Text style={styles.name}>{data.customer.name}</Text>
+            )}
             {data.customer.tpn && <Text style={styles.detailText}>TPN: {data.customer.tpn}</Text>}
             {data.customer.email && <Text style={styles.detailText}>{data.customer.email}</Text>}
             {data.customer.phone && <Text style={styles.detailText}>{data.customer.phone}</Text>}

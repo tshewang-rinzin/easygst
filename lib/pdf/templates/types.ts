@@ -33,6 +33,9 @@ export interface InvoiceData {
     phone?: string | null;
     address?: string | null;
     tpn?: string | null;
+    customerType?: string | null;
+    contactPerson?: string | null;
+    department?: string | null;
   };
 
   // Line Items

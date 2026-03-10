@@ -55,6 +55,9 @@ export const GET = withAuth(async (request: NextRequest, { team, params }) => {
         phone: invoice.customer?.phone,
         address: invoice.customer?.address,
         tpn: invoice.customer?.tpn,
+        customerType: invoice.customer?.customerType,
+        contactPerson: invoice.customer?.contactPerson,
+        department: invoice.customer?.department,
       },
 
       // Line Items

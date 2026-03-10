@@ -132,9 +132,23 @@ export default async function VerifyInvoicePage({ params }: Props) {
             {/* Billed To */}
             <div>
               <p className="text-sm font-medium text-gray-500 mb-1">Billed To</p>
-              <p className="text-lg font-semibold text-gray-900">
-                {invoice.customer?.name}
-              </p>
+              {invoice.customer?.customerType === 'government' ? (
+                <>
+                  {invoice.customer?.contactPerson && (
+                    <p className="text-lg font-semibold text-gray-900">{invoice.customer.contactPerson}</p>
+                  )}
+                  {invoice.customer?.department && (
+                    <p className="text-sm text-gray-700">{invoice.customer.department}</p>
+                  )}
+                  <p className={invoice.customer?.contactPerson ? "text-sm text-gray-700" : "text-lg font-semibold text-gray-900"}>
+                    {invoice.customer?.name}
+                  </p>
+                </>
+              ) : (
+                <p className="text-lg font-semibold text-gray-900">
+                  {invoice.customer?.name}
+                </p>
+              )}
             </div>
 
             {/* Details Grid */}
