@@ -163,14 +163,98 @@ export default async function VerifyInvoicePage({ params }: Props) {
               </div>
             </div>
 
-            {/* Amount */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-sm font-medium text-gray-500 mb-1">
-                Total Amount
-              </p>
-              <p className="text-3xl font-bold text-gray-900">
-                {formatCurrency(invoice.totalAmount, invoice.currency)}
-              </p>
+            {/* Contract Amount */}
+            {invoice.contractAmount && parseFloat(invoice.contractAmount) > 0 && (
+              <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                <p className="text-xs font-medium text-blue-600">Total Contract Value</p>
+                <p className="text-lg font-semibold text-blue-900">
+                  {formatCurrency(invoice.contractAmount, invoice.currency)}
+                </p>
+              </div>
+            )}
+
+            {/* Line Items */}
+            {invoice.items && invoice.items.length > 0 && (() => {
+              const allService = invoice.items.every(
+                (item) => item.lineItemType === 'service' || item.lineItemType === 'milestone'
+              );
+              return (
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-2">Items</p>
+                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="text-left px-3 py-2 text-gray-600 font-medium">Description</th>
+                          {!allService && (
+                            <>
+                              <th className="text-right px-3 py-2 text-gray-600 font-medium">Qty</th>
+                              <th className="text-right px-3 py-2 text-gray-600 font-medium">Unit Price</th>
+                            </>
+                          )}
+                          <th className="text-right px-3 py-2 text-gray-600 font-medium">Tax</th>
+                          <th className="text-right px-3 py-2 text-gray-600 font-medium">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {invoice.items.map((item, idx) => {
+                          const isService = item.lineItemType === 'service' || item.lineItemType === 'milestone';
+                          const desc = item.percentage && parseFloat(item.percentage) > 0
+                            ? `${item.description} (${parseFloat(item.percentage)}%)`
+                            : item.description;
+                          return (
+                            <tr key={idx}>
+                              <td className="px-3 py-2 text-gray-900">{desc}</td>
+                              {!allService && (
+                                <>
+                                  <td className="text-right px-3 py-2 text-gray-700">
+                                    {isService ? '-' : parseFloat(item.quantity).toLocaleString()}
+                                  </td>
+                                  <td className="text-right px-3 py-2 text-gray-700">
+                                    {isService ? '-' : formatCurrency(item.unitPrice, invoice.currency)}
+                                  </td>
+                                </>
+                              )}
+                              <td className="text-right px-3 py-2 text-gray-700">
+                                {item.isTaxExempt ? 'Exempt' : `${parseFloat(item.taxRate)}%`}
+                              </td>
+                              <td className="text-right px-3 py-2 text-gray-900 font-medium">
+                                {formatCurrency(item.itemTotal, invoice.currency)}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Totals */}
+            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+              <div className="flex justify-between text-sm text-gray-600">
+                <span>Subtotal</span>
+                <span>{formatCurrency(invoice.subtotal, invoice.currency)}</span>
+              </div>
+              {parseFloat(invoice.totalDiscount) > 0 && (
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Discount</span>
+                  <span>-{formatCurrency(invoice.totalDiscount, invoice.currency)}</span>
+                </div>
+              )}
+              {parseFloat(invoice.totalTax) > 0 && (
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Tax</span>
+                  <span>{formatCurrency(invoice.totalTax, invoice.currency)}</span>
+                </div>
+              )}
+              <div className="flex justify-between pt-2 border-t border-gray-200">
+                <span className="font-semibold text-gray-900">Total Amount</span>
+                <span className="text-xl font-bold text-gray-900">
+                  {formatCurrency(invoice.totalAmount, invoice.currency)}
+                </span>
+              </div>
             </div>
           </div>
 

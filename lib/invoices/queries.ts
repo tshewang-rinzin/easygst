@@ -321,11 +321,16 @@ export async function getInvoiceByPublicId(publicId: string) {
   const [result] = await db
     .select({
       invoice: {
+        id: invoices.id,
         invoiceNumber: invoices.invoiceNumber,
         publicId: invoices.publicId,
         invoiceDate: invoices.invoiceDate,
         dueDate: invoices.dueDate,
+        subtotal: invoices.subtotal,
+        totalTax: invoices.totalTax,
+        totalDiscount: invoices.totalDiscount,
         totalAmount: invoices.totalAmount,
+        contractAmount: invoices.contractAmount,
         currency: invoices.currency,
         status: invoices.status,
         paymentStatus: invoices.paymentStatus,
@@ -354,9 +359,29 @@ export async function getInvoiceByPublicId(publicId: string) {
 
   if (!result) return null;
 
+  // Fetch line items
+  const items = await db
+    .select({
+      description: invoiceItems.description,
+      quantity: invoiceItems.quantity,
+      unit: invoiceItems.unit,
+      unitPrice: invoiceItems.unitPrice,
+      taxRate: invoiceItems.taxRate,
+      taxAmount: invoiceItems.taxAmount,
+      isTaxExempt: invoiceItems.isTaxExempt,
+      itemTotal: invoiceItems.itemTotal,
+      percentage: invoiceItems.percentage,
+      lineItemType: invoiceItems.lineItemType,
+      sortOrder: invoiceItems.sortOrder,
+    })
+    .from(invoiceItems)
+    .where(eq(invoiceItems.invoiceId, result.invoice.id))
+    .orderBy(invoiceItems.sortOrder);
+
   return {
     ...result.invoice,
     customer: result.customer,
     team: result.team,
+    items,
   };
 }
