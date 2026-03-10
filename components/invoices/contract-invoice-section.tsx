@@ -21,6 +21,20 @@ interface Contract {
   status: string;
 }
 
+interface Milestone {
+  id: string;
+  name: string;
+  description: string | null;
+  percentage: string | null;
+  amount: string;
+  status: string;
+  sortOrder: number;
+}
+
+interface ContractDetails {
+  milestones: Milestone[];
+}
+
 interface ContractInvoiceSectionProps {
   customerId: string | null;
   onApply: (data: {
@@ -29,21 +43,34 @@ interface ContractInvoiceSectionProps {
     description: string;
     unitPrice: number;
     invoiceAmount: number; // GST-inclusive
+    milestoneId?: string;
   }) => void;
 }
 
 export function ContractInvoiceSection({ customerId, onApply }: ContractInvoiceSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedContractId, setSelectedContractId] = useState('');
-  const [mode, setMode] = useState<'percentage' | 'amount'>('percentage');
+  const [mode, setMode] = useState<'percentage' | 'amount' | 'milestone'>('percentage');
   const [percentage, setPercentage] = useState('');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
+  const [selectedMilestoneId, setSelectedMilestoneId] = useState('');
 
   const { data: contracts } = useSWR<Contract[]>(
     customerId ? `/api/contracts?customerId=${customerId}&status=active` : null,
     fetcher
   );
+
+  const { data: contractDetails } = useSWR<ContractDetails>(
+    selectedContractId ? `/api/contracts/${selectedContractId}` : null,
+    fetcher
+  );
+
+  const pendingMilestones = contractDetails?.milestones?.filter(
+    (m) => m.status === 'pending'
+  ) || [];
+
+  const selectedMilestone = pendingMilestones.find((m) => m.id === selectedMilestoneId);
 
   if (!customerId || !contracts || contracts.length === 0) return null;
 
@@ -57,6 +84,9 @@ export function ContractInvoiceSection({ customerId, onApply }: ContractInvoiceS
 
   const getInvoiceAmount = (): number => {
     if (!selectedContract) return 0;
+    if (mode === 'milestone' && selectedMilestone) {
+      return parseFloat(selectedMilestone.amount);
+    }
     if (mode === 'percentage' && percentage) {
       return (parseFloat(selectedContract.totalValue) * parseFloat(percentage)) / 100;
     }
@@ -76,8 +106,17 @@ export function ContractInvoiceSection({ customerId, onApply }: ContractInvoiceS
       return;
     }
 
-    const desc = description ||
-      `${selectedContract.name}${mode === 'percentage' ? ` - ${percentage}% billing` : ' - Progress billing'}`;
+    let desc = description;
+    if (!desc) {
+      if (mode === 'milestone' && selectedMilestone) {
+        const pct = selectedMilestone.percentage ? ` (${parseFloat(selectedMilestone.percentage)}%)` : '';
+        desc = `${selectedContract.name} - ${selectedMilestone.name}${pct}`;
+      } else if (mode === 'percentage') {
+        desc = `${selectedContract.name} - ${percentage}% billing`;
+      } else {
+        desc = `${selectedContract.name} - Progress billing`;
+      }
+    }
 
     onApply({
       contractId: selectedContract.id,
@@ -85,6 +124,7 @@ export function ContractInvoiceSection({ customerId, onApply }: ContractInvoiceS
       description: desc,
       unitPrice: invoiceAmount, // GST-inclusive, will be reverse-calculated at invoice level
       invoiceAmount,
+      milestoneId: mode === 'milestone' ? selectedMilestoneId : undefined,
     });
 
     // Reset
@@ -92,6 +132,7 @@ export function ContractInvoiceSection({ customerId, onApply }: ContractInvoiceS
     setPercentage('');
     setAmount('');
     setDescription('');
+    setSelectedMilestoneId('');
     setIsExpanded(false);
   };
 
@@ -129,6 +170,8 @@ export function ContractInvoiceSection({ customerId, onApply }: ContractInvoiceS
                 setSelectedContractId(e.target.value);
                 setPercentage('');
                 setAmount('');
+                setSelectedMilestoneId('');
+                setMode('percentage');
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
             >
@@ -170,9 +213,22 @@ export function ContractInvoiceSection({ customerId, onApply }: ContractInvoiceS
 
               {/* Mode Toggle */}
               <div className="flex gap-2">
+                {pendingMilestones.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => { setMode('milestone'); setPercentage(''); setAmount(''); }}
+                    className={`flex-1 text-xs py-2 px-3 rounded-md font-medium border transition-all ${
+                      mode === 'milestone'
+                        ? 'bg-purple-100 border-purple-300 text-purple-800'
+                        : 'bg-white border-gray-200 text-gray-500'
+                    }`}
+                  >
+                    By Milestone
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={() => setMode('percentage')}
+                  onClick={() => { setMode('percentage'); setSelectedMilestoneId(''); }}
                   className={`flex-1 text-xs py-2 px-3 rounded-md font-medium border transition-all ${
                     mode === 'percentage'
                       ? 'bg-purple-100 border-purple-300 text-purple-800'
@@ -183,7 +239,7 @@ export function ContractInvoiceSection({ customerId, onApply }: ContractInvoiceS
                 </button>
                 <button
                   type="button"
-                  onClick={() => setMode('amount')}
+                  onClick={() => { setMode('amount'); setSelectedMilestoneId(''); }}
                   className={`flex-1 text-xs py-2 px-3 rounded-md font-medium border transition-all ${
                     mode === 'amount'
                       ? 'bg-purple-100 border-purple-300 text-purple-800'
@@ -194,7 +250,38 @@ export function ContractInvoiceSection({ customerId, onApply }: ContractInvoiceS
                 </button>
               </div>
 
-              {mode === 'percentage' ? (
+              {mode === 'milestone' ? (
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 mb-1 block">Select Milestone</Label>
+                  <select
+                    value={selectedMilestoneId}
+                    onChange={(e) => setSelectedMilestoneId(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
+                  >
+                    <option value="">Choose a milestone...</option>
+                    {pendingMilestones.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name} — {fmt(parseFloat(m.amount), selectedContract.currency)}
+                        {m.percentage ? ` (${parseFloat(m.percentage)}%)` : ''}
+                      </option>
+                    ))}
+                  </select>
+                  {selectedMilestone && (
+                    <div className="mt-2 bg-white rounded-lg p-3 text-xs text-gray-600 space-y-1 border border-gray-200">
+                      <div className="flex justify-between">
+                        <span className="font-medium text-gray-900">{selectedMilestone.name}</span>
+                      </div>
+                      {selectedMilestone.description && (
+                        <p className="text-gray-500">{selectedMilestone.description}</p>
+                      )}
+                      <div className="flex justify-between font-semibold text-purple-600">
+                        <span>Amount:</span>
+                        <span>{fmt(parseFloat(selectedMilestone.amount), selectedContract.currency)}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : mode === 'percentage' ? (
                 <div>
                   <Label className="text-sm font-medium text-gray-700 mb-1 block">Percentage of Contract</Label>
                   <div className="flex items-center gap-2">
