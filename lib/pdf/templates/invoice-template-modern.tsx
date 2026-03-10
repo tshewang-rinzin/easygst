@@ -220,12 +220,12 @@ const createStyles = (accent: string) =>
       borderTopColor: accent,
     },
     grandTotalLabel: {
-      fontSize: 11,
+      fontSize: 9,
       fontWeight: 'bold',
       color: '#111827',
     },
     grandTotalValue: {
-      fontSize: 11,
+      fontSize: 9,
       fontWeight: 'bold',
       color: accent,
     },

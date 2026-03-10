@@ -195,19 +195,19 @@ const styles = StyleSheet.create({
   grandTotalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 12,
+    paddingVertical: 8,
     paddingHorizontal: 10,
     backgroundColor: '#1f2937',
     borderRadius: 4,
     marginTop: 4,
   },
   grandTotalLabel: {
-    fontSize: 12,
+    fontSize: 9,
     fontWeight: 'bold',
     color: '#ffffff',
   },
   grandTotalValue: {
-    fontSize: 14,
+    fontSize: 9,
     fontWeight: 'bold',
     color: '#ffffff',
   },
