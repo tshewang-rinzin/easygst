@@ -398,6 +398,9 @@ export const products = pgTable('products', {
   // Recurring Billing (for service packages/subscriptions)
   billingCycle: varchar('billing_cycle', { length: 20 }), // monthly, quarterly, half_yearly, yearly, one_time — null = not a package
 
+  // Package features (e.g., ["10GB Storage", "5 Email Accounts", "Free SSL"])
+  features: jsonb('features').$type<string[]>(),
+
   // Metadata
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at').notNull().defaultNow(),

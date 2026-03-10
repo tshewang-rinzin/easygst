@@ -33,6 +33,14 @@ export const productSchema = z.object({
     (val) => (val === '' || val === null || val === undefined ? undefined : val),
     z.enum(['monthly', 'quarterly', 'half_yearly', 'yearly', 'one_time']).optional()
   ),
+  features: z.preprocess(
+    (val) => {
+      if (!val || val === '' || val === '[]') return undefined;
+      if (typeof val === 'string') { try { return JSON.parse(val); } catch { return undefined; } }
+      return val;
+    },
+    z.array(z.string()).optional()
+  ),
   // Variant pass-through fields (used during creation)
   hasVariants: booleanCoerce(false),
   variantAttributes: z.string().optional(),

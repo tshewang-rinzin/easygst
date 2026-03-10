@@ -107,6 +107,8 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
   const [hasVariants, setHasVariants] = useState(false);
   const [enableRecurring, setEnableRecurring] = useState(!!product?.billingCycle);
   const [billingCycle, setBillingCycle] = useState(product?.billingCycle || 'monthly');
+  const [features, setFeatures] = useState<string[]>(product?.features || []);
+  const [newFeature, setNewFeature] = useState('');
 
   // Inline variant builder state
   const [attributes, setAttributes] = useState<InlineAttribute[]>([]);
@@ -640,6 +642,61 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
               )}
 
               <input type="hidden" name="billingCycle" value={enableRecurring ? billingCycle : ''} />
+            </CardContent>
+          </Card>
+
+          {/* Package Features */}
+          <Card>
+            <CardContent className="pt-6">
+              <Label className="text-base font-medium">Package Features</Label>
+              <p className="text-sm text-gray-500 mt-1 mb-4">
+                List what&apos;s included in this package
+              </p>
+
+              <div className="space-y-2">
+                {features.map((feature, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <span className="text-green-600">✓</span>
+                    <span className="flex-1 text-sm">{feature}</span>
+                    <button
+                      type="button"
+                      onClick={() => setFeatures(features.filter((_, i) => i !== index))}
+                      className="text-gray-400 hover:text-red-500 text-sm"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-2 mt-3">
+                <Input
+                  placeholder="e.g., 10GB Storage"
+                  value={newFeature}
+                  onChange={(e) => setNewFeature(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newFeature.trim()) {
+                      e.preventDefault();
+                      setFeatures([...features, newFeature.trim()]);
+                      setNewFeature('');
+                    }
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    if (newFeature.trim()) {
+                      setFeatures([...features, newFeature.trim()]);
+                      setNewFeature('');
+                    }
+                  }}
+                >
+                  Add
+                </Button>
+              </div>
+
+              <input type="hidden" name="features" value={JSON.stringify(features)} />
             </CardContent>
           </Card>
         </>
