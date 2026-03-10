@@ -210,6 +210,21 @@ async function InvoiceDetails({ id }: { id: string }) {
           <CardTitle className="text-lg">Line Items</CardTitle>
         </CardHeader>
         <CardContent>
+          {/* Contract Amount */}
+          {invoice.contractAmount && parseFloat(invoice.contractAmount) > 0 && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm font-semibold text-blue-900">
+                Total Contract Value: {invoice.currency} {parseFloat(invoice.contractAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+            </div>
+          )}
+
+          {(() => {
+            const allServiceItems = invoice.items.every(
+              (item: any) => item.lineItemType === 'service' || item.lineItemType === 'milestone'
+            );
+
+            return (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -217,12 +232,16 @@ async function InvoiceDetails({ id }: { id: string }) {
                   <th className="text-left py-2 text-sm font-medium text-gray-600">
                     Description
                   </th>
-                  <th className="text-right py-2 text-sm font-medium text-gray-600">
-                    Qty
-                  </th>
-                  <th className="text-right py-2 text-sm font-medium text-gray-600">
-                    Unit Price
-                  </th>
+                  {!allServiceItems && (
+                    <>
+                      <th className="text-right py-2 text-sm font-medium text-gray-600">
+                        Qty
+                      </th>
+                      <th className="text-right py-2 text-sm font-medium text-gray-600">
+                        Unit Price
+                      </th>
+                    </>
+                  )}
                   <th className="text-right py-2 text-sm font-medium text-gray-600">
                     Tax
                   </th>
@@ -232,25 +251,41 @@ async function InvoiceDetails({ id }: { id: string }) {
                 </tr>
               </thead>
               <tbody>
-                {invoice.items.map((item) => {
+                {invoice.items.map((item: any) => {
                   const classification = item.gstClassification || getGSTClassification(parseFloat(item.taxRate), item.isTaxExempt);
                   const classificationLabel = getGSTClassificationLabel(classification as any);
                   const classificationColor = getGSTClassificationColor(classification as any);
+                  const isServiceItem = item.lineItemType === 'service' || item.lineItemType === 'milestone';
+                  const displayDescription = item.percentage && parseFloat(item.percentage) > 0
+                    ? `${item.description} (${parseFloat(item.percentage)}%)`
+                    : item.description;
 
                   return (
                   <tr key={item.id} className="border-b">
                     <td className="py-3">
-                      <p className="font-medium">{item.description}</p>
+                      <p className="font-medium">{displayDescription}</p>
                       <span className={`inline-block mt-1 px-2 py-0.5 text-xs font-medium rounded ${classificationColor}`}>
                         {classificationLabel}
                       </span>
                     </td>
-                    <td className="text-right py-3">
-                      {parseFloat(item.quantity)} {item.unit}
-                    </td>
-                    <td className="text-right py-3">
-                      {invoice.currency} {parseFloat(item.unitPrice).toFixed(2)}
-                    </td>
+                    {!allServiceItems && (
+                      <>
+                        <td className="text-right py-3">
+                          {isServiceItem ? (
+                            <span className="text-gray-400">-</span>
+                          ) : (
+                            <>{parseFloat(item.quantity)} {item.unit}</>
+                          )}
+                        </td>
+                        <td className="text-right py-3">
+                          {isServiceItem ? (
+                            <span className="text-gray-400">-</span>
+                          ) : (
+                            <>{invoice.currency} {parseFloat(item.unitPrice).toFixed(2)}</>
+                          )}
+                        </td>
+                      </>
+                    )}
                     <td className="text-right py-3">
                       {item.isTaxExempt ? (
                         <span className="text-gray-500">-</span>
@@ -273,6 +308,8 @@ async function InvoiceDetails({ id }: { id: string }) {
               </tbody>
             </table>
           </div>
+            );
+          })()}
 
           {/* Totals */}
           <div className="mt-6 flex justify-end">

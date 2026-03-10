@@ -349,6 +349,17 @@ export const InvoiceTemplateModern: React.FC<InvoiceTemplateProps> = ({
   const isDraft = data.status === 'draft';
   const isPaid = parseFloat(data.amountDue) <= 0;
 
+  const allServiceItems = data.items.every(
+    (item) => item.lineItemType === 'service' || item.lineItemType === 'milestone'
+  );
+
+  const getDisplayDescription = (item: typeof data.items[0]) => {
+    if (item.percentage && parseFloat(item.percentage) > 0) {
+      return `${item.description} (${parseFloat(item.percentage)}%)`;
+    }
+    return item.description;
+  };
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -428,31 +439,71 @@ export const InvoiceTemplateModern: React.FC<InvoiceTemplateProps> = ({
             )}
           </View>
 
+          {/* Contract Amount */}
+          {data.contractAmount && parseFloat(data.contractAmount) > 0 && (
+            <View style={{ marginBottom: 10, padding: 8, backgroundColor: accentColor + '10', borderRadius: 6 }}>
+              <Text style={{ fontSize: 10, fontWeight: 'bold', color: accentColor }}>
+                Total Contract Value: {formatCurrency(data.contractAmount, data.currency)}
+              </Text>
+            </View>
+          )}
+
           {/* Table */}
           <View style={styles.table}>
-            <View style={styles.tableHeader}>
-              <Text style={[styles.tableHeaderText, styles.col1]}>Description</Text>
-              <Text style={[styles.tableHeaderText, styles.col2]}>Qty</Text>
-              <Text style={[styles.tableHeaderText, styles.col3]}>Unit Price</Text>
-              <Text style={[styles.tableHeaderText, styles.col4]}>Tax</Text>
-              <Text style={[styles.tableHeaderText, styles.col5]}>Tax Amt</Text>
-              <Text style={[styles.tableHeaderText, styles.col6]}>Total</Text>
-            </View>
+            {allServiceItems ? (
+              <View style={styles.tableHeader}>
+                <Text style={[styles.tableHeaderText, { flex: 4 }]}>Description</Text>
+                <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>Tax</Text>
+                <Text style={[styles.tableHeaderText, { flex: 2, textAlign: 'right' }]}>Amount</Text>
+              </View>
+            ) : (
+              <View style={styles.tableHeader}>
+                <Text style={[styles.tableHeaderText, styles.col1]}>Description</Text>
+                <Text style={[styles.tableHeaderText, styles.col2]}>Qty</Text>
+                <Text style={[styles.tableHeaderText, styles.col3]}>Unit Price</Text>
+                <Text style={[styles.tableHeaderText, styles.col4]}>Tax</Text>
+                <Text style={[styles.tableHeaderText, styles.col5]}>Tax Amt</Text>
+                <Text style={[styles.tableHeaderText, styles.col6]}>Total</Text>
+              </View>
+            )}
             {data.items.map((item, index) => {
               const classification = item.gstClassification || 'STANDARD';
               const gstStyle = getGstTagStyle(classification);
+              const isServiceItem = item.lineItemType === 'service' || item.lineItemType === 'milestone';
+
+              if (allServiceItems) {
+                return (
+                  <View key={index} style={styles.tableRow}>
+                    <View style={{ flex: 4 }}>
+                      <Text style={styles.tableCell}>{getDisplayDescription(item)}</Text>
+                      <View style={[styles.gstTag, gstStyle]}>
+                        <Text style={{ fontSize: 6, color: gstStyle.color }}>{getGstLabel(classification)}</Text>
+                      </View>
+                    </View>
+                    <Text style={[styles.tableCell, { flex: 1, textAlign: 'center' }]}>
+                      {item.isTaxExempt ? '-' : `${parseFloat(item.taxRate).toFixed(0)}%`}
+                    </Text>
+                    <Text style={[styles.tableCell, { flex: 2, textAlign: 'right', fontWeight: 'bold' }]}>
+                      {formatCurrency(item.itemTotal, data.currency)}
+                    </Text>
+                  </View>
+                );
+              }
+
               return (
                 <View key={index} style={styles.tableRow}>
                   <View style={styles.col1}>
-                    <Text style={styles.tableCell}>{item.description}</Text>
+                    <Text style={styles.tableCell}>{getDisplayDescription(item)}</Text>
                     <View style={[styles.gstTag, gstStyle]}>
                       <Text style={{ fontSize: 6, color: gstStyle.color }}>{getGstLabel(classification)}</Text>
                     </View>
                   </View>
                   <Text style={[styles.tableCell, styles.col2]}>
-                    {parseFloat(item.quantity).toFixed(2)}{item.unit ? ` ${item.unit}` : ''}
+                    {isServiceItem ? '-' : `${parseFloat(item.quantity).toFixed(2)}${item.unit ? ` ${item.unit}` : ''}`}
                   </Text>
-                  <Text style={[styles.tableCell, styles.col3]}>{formatCurrency(item.unitPrice, data.currency)}</Text>
+                  <Text style={[styles.tableCell, styles.col3]}>
+                    {isServiceItem ? '-' : formatCurrency(item.unitPrice, data.currency)}
+                  </Text>
                   <Text style={[styles.tableCell, styles.col4]}>{item.isTaxExempt ? '-' : `${parseFloat(item.taxRate).toFixed(0)}%`}</Text>
                   <Text style={[styles.tableCell, styles.col5]}>{formatCurrency(item.taxAmount || '0', data.currency)}</Text>
                   <Text style={[styles.tableCell, styles.col6, { fontWeight: 'bold' }]}>{formatCurrency(item.itemTotal, data.currency)}</Text>

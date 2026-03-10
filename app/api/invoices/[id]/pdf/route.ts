@@ -40,6 +40,9 @@ export const GET = withAuth(async (request: NextRequest, { team, params }) => {
       // Bank Accounts (new)
       bankAccounts: bankAccounts,
 
+      // Contract
+      contractAmount: invoice.contractAmount,
+
       // Invoice Info
       invoiceNumber: invoice.invoiceNumber,
       invoiceDate: invoice.invoiceDate,
@@ -70,6 +73,8 @@ export const GET = withAuth(async (request: NextRequest, { team, params }) => {
         taxAmount: item.taxAmount || '0',
         isTaxExempt: item.isTaxExempt,
         gstClassification: item.gstClassification,
+        percentage: item.percentage,
+        lineItemType: item.lineItemType,
         itemTotal: item.itemTotal || '0',
       })),
 

@@ -24,6 +24,7 @@ export const GET = withAuth(async (request: NextRequest, { team }) => {
         unit: products.unit,
         defaultTaxRate: products.defaultTaxRate,
         isTaxExempt: products.isTaxExempt,
+        productType: products.productType,
       })
       .from(products)
       .where(
@@ -76,6 +77,7 @@ export const GET = withAuth(async (request: NextRequest, { team }) => {
           unit: products.unit,
           defaultTaxRate: products.defaultTaxRate,
           isTaxExempt: products.isTaxExempt,
+          productType: products.productType,
         })
         .from(products)
         .where(

@@ -33,6 +33,7 @@ interface Product {
   unit: string;
   defaultTaxRate: string;
   isTaxExempt: boolean;
+  productType?: string;
   variantId?: string;
   variantName?: string;
 }
@@ -48,6 +49,8 @@ interface LineItem {
   isTaxExempt: boolean;
   productId?: string;
   variantId?: string;
+  lineItemType: string;
+  percentage: string;
 }
 
 interface InvoiceData {
@@ -58,6 +61,7 @@ interface InvoiceData {
   invoiceDate: Date;
   dueDate: Date | null;
   currency: string;
+  contractAmount?: string | null;
   items: Array<{
     description: string;
     quantity: string;
@@ -66,6 +70,8 @@ interface InvoiceData {
     discountPercent: string;
     taxRate: string;
     isTaxExempt: boolean;
+    lineItemType?: string | null;
+    percentage?: string | null;
   }>;
   paymentTerms: string | null;
   notes: string | null;
@@ -85,6 +91,7 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
   );
   const { data: units } = useSWR<Unit[]>('/api/units', fetcher);
   const { data: taxClassifications } = useSWR<TaxClassification[]>('/api/tax-classifications', fetcher);
+  const [contractAmount, setContractAmount] = useState<string>(invoice.contractAmount || '');
   const [lineItems, setLineItems] = useState<LineItem[]>(
     invoice.items.map((item) => ({
       id: crypto.randomUUID(),
@@ -95,6 +102,8 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
       discountPercent: item.discountPercent || '0',
       taxRate: item.taxRate || defaultGstRate,
       isTaxExempt: item.isTaxExempt,
+      lineItemType: item.lineItemType || 'product',
+      percentage: item.percentage || '',
     }))
   );
 
@@ -145,6 +154,8 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
       isTaxExempt: item.isTaxExempt,
       productId: item.productId || undefined,
       variantId: item.variantId || undefined,
+      lineItemType: item.lineItemType || 'product',
+      percentage: item.percentage ? parseFloat(item.percentage) : undefined,
     }));
 
     // Create clean FormData with proper structure
@@ -155,6 +166,7 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
     const dueDate = formData.get('dueDate');
     if (dueDate) cleanFormData.append('dueDate', dueDate as string);
     cleanFormData.append('currency', formData.get('currency') as string);
+    if (contractAmount) cleanFormData.append('contractAmount', contractAmount);
 
     // Append items as JSON string
     cleanFormData.append('items', JSON.stringify(itemsData));
@@ -189,6 +201,8 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
         discountPercent: '0',
         taxRate: defaultGstRate,
         isTaxExempt: false,
+        lineItemType: 'product',
+        percentage: '',
       },
     ]);
   };
@@ -206,6 +220,7 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
   };
 
   const handleProductSelect = (id: string, product: Product) => {
+    const isService = product.productType === 'service';
     setLineItems(
       lineItems.map((item) =>
         item.id === id
@@ -218,6 +233,8 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
               isTaxExempt: product.isTaxExempt,
               productId: product.id,
               variantId: product.variantId,
+              lineItemType: isService ? 'service' : 'product',
+              quantity: isService ? '1' : item.quantity,
             }
           : item
       )
@@ -368,6 +385,31 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
           </div>
         </div>
 
+        {/* Contract Amount */}
+        {lineItems.some((item) => item.lineItemType === 'service' || item.lineItemType === 'milestone') && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <h2 className="text-base font-semibold text-blue-900 mb-4">Contract Information</h2>
+            <div className="max-w-xs">
+              <Label htmlFor="contractAmount" className="text-sm font-medium text-blue-800 mb-2 block">
+                Total Contract Value
+              </Label>
+              <Input
+                id="contractAmount"
+                type="number"
+                step="0.01"
+                min="0"
+                value={contractAmount}
+                onChange={(e) => setContractAmount(e.target.value)}
+                placeholder="0.00"
+                className="bg-white"
+              />
+              <p className="text-xs text-blue-600 mt-1">
+                Used to calculate percentage-based service items
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Line Items */}
         <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
           <div className="flex justify-between items-center mb-6">
@@ -416,10 +458,16 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
                 </tr>
               </thead>
               <tbody>
-                {lineItems.map((item, index) => (
+                {lineItems.map((item, index) => {
+                  const isServiceItem = item.lineItemType === 'service' || item.lineItemType === 'milestone';
+
+                  return (
                   <tr key={item.id} className="border-b border-gray-200 hover:bg-gray-50">
                     <td className="py-3 px-2">
                       <span className="text-sm font-medium text-gray-600">{index + 1}</span>
+                      {isServiceItem && (
+                        <span className="block text-xs text-blue-600 font-medium">SVC</span>
+                      )}
                     </td>
                     <td className="py-3 px-2">
                       <ProductSearchInline
@@ -429,7 +477,38 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
                         index={index}
                         required={false}
                       />
+                      {isServiceItem && contractAmount && (
+                        <div className="mt-1 flex items-center gap-1">
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            value={item.percentage}
+                            onChange={(e) => {
+                              const pct = e.target.value;
+                              const updates: Partial<LineItem> = { percentage: pct };
+                              if (pct && contractAmount) {
+                                updates.unitPrice = (parseFloat(contractAmount) * parseFloat(pct) / 100).toFixed(2);
+                              }
+                              setLineItems(lineItems.map((li) =>
+                                li.id === item.id ? { ...li, ...updates } : li
+                              ));
+                            }}
+                            placeholder="%"
+                            className="h-7 text-xs w-20"
+                          />
+                          <span className="text-xs text-gray-500">% of contract</span>
+                        </div>
+                      )}
                     </td>
+                    {isServiceItem ? (
+                      <>
+                        <td className="py-3 px-2 text-center text-sm text-gray-400">-</td>
+                        <td className="py-3 px-2 text-center text-sm text-gray-400">-</td>
+                      </>
+                    ) : (
+                      <>
                     <td className="py-3 px-2">
                       <Input
                         type="number"
@@ -464,6 +543,8 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
                         )}
                       </select>
                     </td>
+                      </>
+                    )}
                     <td className="py-3 px-2">
                       <Input
                         type="number"
@@ -548,7 +629,8 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
                       )}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

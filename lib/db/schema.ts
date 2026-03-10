@@ -584,6 +584,9 @@ export const invoices = pgTable('invoices', {
   contractMilestoneId: uuid('contract_milestone_id'),
   contractBillingScheduleId: uuid('contract_billing_schedule_id'),
 
+  // Contract reference
+  contractAmount: numeric('contract_amount', { precision: 15, scale: 2 }), // Total contract value for reference
+
   // Invoice Identification
   publicId: uuid('public_id').defaultRandom().notNull().unique(), // UUID for public verification URL
   invoiceNumber: varchar('invoice_number', { length: 50 }).notNull(), // INV-2026-0001
@@ -654,6 +657,10 @@ export const invoiceItems = pgTable('invoice_items', {
   quantity: numeric('quantity', { precision: 15, scale: 4 }).notNull().default('1'),
   unit: varchar('unit', { length: 50 }),
   unitPrice: numeric('unit_price', { precision: 15, scale: 2 }).notNull(),
+
+  // Service/milestone fields
+  percentage: numeric('percentage', { precision: 5, scale: 2 }), // Optional percentage of contract amount
+  lineItemType: varchar('line_item_type', { length: 20 }).default('product'), // 'product' | 'service' | 'milestone'
 
   // Pricing Breakdown
   lineTotal: numeric('line_total', { precision: 15, scale: 2 }).notNull(), // quantity * unitPrice

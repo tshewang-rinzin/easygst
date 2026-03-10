@@ -338,6 +338,7 @@ export async function getInvoiceByPublicId(publicId: string) {
       },
       team: {
         name: teams.name,
+        businessName: teams.businessName,
         tpn: teams.tpn,
         gstNumber: teams.gstNumber,
         address: teams.address,

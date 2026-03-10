@@ -109,7 +109,7 @@ export default async function VerifyInvoicePage({ params }: Props) {
             <div>
               <p className="text-sm font-medium text-gray-500 mb-1">Issued By</p>
               <p className="text-lg font-semibold text-gray-900">
-                {invoice.team?.name}
+                {invoice.team?.businessName || invoice.team?.name}
               </p>
               {invoice.team?.tpn && (
                 <p className="text-sm text-gray-600">TPN: {invoice.team.tpn}</p>

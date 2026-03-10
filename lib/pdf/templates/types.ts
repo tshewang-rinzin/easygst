@@ -19,6 +19,9 @@ export interface InvoiceData {
     isDefault: boolean;
   }>;
 
+  // Contract
+  contractAmount?: string | null;
+
   // Invoice Info
   invoiceNumber: string;
   invoiceDate: Date;
@@ -48,6 +51,8 @@ export interface InvoiceData {
     taxAmount: string;
     isTaxExempt: boolean;
     gstClassification?: string | null;
+    percentage?: string | null;
+    lineItemType?: string | null;
     itemTotal: string;
   }>;
 

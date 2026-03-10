@@ -22,6 +22,8 @@ export const invoiceItemSchema = z.object({
     .max(100, 'Tax rate cannot exceed 100%')
     .default(0),
   isTaxExempt: booleanCoerce(false),
+  percentage: z.coerce.number().min(0).max(100).optional(),
+  lineItemType: z.enum(['product', 'service', 'milestone']).default('product'),
 });
 
 export type InvoiceItemFormData = z.infer<typeof invoiceItemSchema>;
@@ -32,6 +34,7 @@ export const invoiceSchema = z.object({
   invoiceDate: z.coerce.date(),
   dueDate: z.coerce.date().optional(),
   currency: z.enum(['BTN', 'INR', 'USD']).default('BTN'),
+  contractAmount: z.coerce.number().min(0).optional(),
   items: z
     .string()
     .transform((str) => {

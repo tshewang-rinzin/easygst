@@ -38,6 +38,7 @@ async function EditInvoiceForm({ id }: { id: string }) {
         invoiceDate: invoice.invoiceDate,
         dueDate: invoice.dueDate,
         currency: invoice.currency,
+        contractAmount: invoice.contractAmount,
         items: invoice.items.map((item: any) => ({
           description: item.description,
           quantity: item.quantity,
@@ -46,6 +47,8 @@ async function EditInvoiceForm({ id }: { id: string }) {
           discountPercent: item.discountPercent || '0',
           taxRate: item.taxRate,
           isTaxExempt: item.isTaxExempt,
+          lineItemType: item.lineItemType || 'product',
+          percentage: item.percentage || null,
         })),
         paymentTerms: invoice.paymentTerms,
         notes: invoice.notes,
