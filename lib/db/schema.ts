@@ -308,7 +308,7 @@ export const productCategories = pgTable('product_categories', {
   categoryParentIdx: index('category_parent_idx').on(table.parentId),
 }));
 
-// Units of Measurement
+// Units of Measurement (Legacy - kept for backward compatibility)
 export const units = pgTable('units', {
   id: uuid('id').defaultRandom().primaryKey(),
   teamId: uuid('team_id')
@@ -329,6 +329,66 @@ export const units = pgTable('units', {
 }, (table) => ({
   teamUnitIdx: index('team_unit_idx').on(table.teamId),
   teamUnitNameIdx: uniqueIndex('team_unit_name_idx').on(table.teamId, table.name),
+}));
+
+// Units of Measure (Advanced UOM System)
+export const unitsOfMeasure = pgTable('units_of_measure', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+
+  // Basic Information
+  name: varchar('name', { length: 50 }).notNull(),
+  abbreviation: varchar('abbreviation', { length: 10 }).notNull(),
+  type: varchar('type', { length: 20 }).notNull(), // quantity, weight, volume, length, area, time
+  
+  // Conversion System
+  isBaseUnit: boolean('is_base_unit').notNull().default(false),
+  conversionToBase: numeric('conversion_to_base', { precision: 15, scale: 6 }).notNull().default('1'),
+  
+  // Status
+  isActive: boolean('is_active').notNull().default(true),
+  
+  // Metadata
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamUomIdx: index('team_uom_idx').on(table.teamId),
+  teamUomNameIdx: uniqueIndex('team_uom_name_idx').on(table.teamId, table.name),
+  teamUomAbbrevIdx: uniqueIndex('team_uom_abbrev_idx').on(table.teamId, table.abbreviation),
+  uomTypeIdx: index('uom_type_idx').on(table.teamId, table.type),
+}));
+
+// Product Units (Links products to units with pricing and conversion)
+export const productUnits = pgTable('product_units', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  productId: uuid('product_id')
+    .notNull()
+    .references(() => products.id, { onDelete: 'cascade' }),
+  unitId: uuid('unit_id')
+    .notNull()
+    .references(() => unitsOfMeasure.id, { onDelete: 'cascade' }),
+
+  // Settings
+  isDefault: boolean('is_default').notNull().default(false),
+  pricePerUnit: numeric('price_per_unit', { precision: 15, scale: 2 }),
+  conversionFactor: numeric('conversion_factor', { precision: 15, scale: 6 }).notNull().default('1'),
+  barcode: varchar('barcode', { length: 100 }),
+  
+  // Status
+  isActive: boolean('is_active').notNull().default(true),
+  
+  // Metadata
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  teamProductUnitIdx: index('team_product_unit_idx').on(table.teamId),
+  productUnitIdx: uniqueIndex('product_unit_idx').on(table.productId, table.unitId),
+  productDefaultUnitIdx: index('product_default_unit_idx').on(table.productId, table.isDefault),
+  productUnitBarcodeIdx: index('product_unit_barcode_idx').on(table.teamId, table.barcode),
 }));
 
 // Tax Classifications (GST Categories)
@@ -2262,6 +2322,7 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   attributeDefinitions: many(productAttributeDefinitions),
   variants: many(productVariants),
   inventoryMovements: many(inventoryMovements),
+  productUnits: many(productUnits),
 }));
 
 export const productAttributeDefinitionsRelations = relations(productAttributeDefinitions, ({ one }) => ({
@@ -2656,6 +2717,30 @@ export const customerSubscriptionSequencesRelations = relations(customerSubscrip
   team: one(teams, { fields: [customerSubscriptionSequences.teamId], references: [teams.id] }),
 }));
 
+// UOM Relations
+export const unitsOfMeasureRelations = relations(unitsOfMeasure, ({ one, many }) => ({
+  team: one(teams, {
+    fields: [unitsOfMeasure.teamId],
+    references: [teams.id],
+  }),
+  productUnits: many(productUnits),
+}));
+
+export const productUnitsRelations = relations(productUnits, ({ one }) => ({
+  team: one(teams, {
+    fields: [productUnits.teamId],
+    references: [teams.id],
+  }),
+  product: one(products, {
+    fields: [productUnits.productId],
+    references: [products.id],
+  }),
+  unit: one(unitsOfMeasure, {
+    fields: [productUnits.unitId],
+    references: [unitsOfMeasure.id],
+  }),
+}));
+
 // ============================================================
 // TYPE EXPORTS
 // ============================================================
@@ -2692,9 +2777,15 @@ export type NewCustomer = typeof customers.$inferInsert;
 export type Supplier = typeof suppliers.$inferSelect;
 export type NewSupplier = typeof suppliers.$inferInsert;
 
-// Unit types
+// Unit types (Legacy)
 export type Unit = typeof units.$inferSelect;
 export type NewUnit = typeof units.$inferInsert;
+
+// UOM System types
+export type UnitOfMeasure = typeof unitsOfMeasure.$inferSelect;
+export type NewUnitOfMeasure = typeof unitsOfMeasure.$inferInsert;
+export type ProductUnit = typeof productUnits.$inferSelect;
+export type NewProductUnit = typeof productUnits.$inferInsert;
 
 // Tax Classification types
 export type TaxClassification = typeof taxClassifications.$inferSelect;

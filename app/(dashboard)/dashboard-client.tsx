@@ -198,6 +198,7 @@ const navigation = [
     children: [
       { name: 'All Products', href: '/products' },
       { name: 'Categories', href: '/products/categories' },
+      { name: 'Units of Measure', href: '/products/units' },
     ],
   },
   {
