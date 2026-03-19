@@ -329,7 +329,7 @@ export function BankAccountForm({ account, onSuccess }: BankAccountFormProps) {
           <Button
             type="submit"
             disabled={isPending}
-            className="bg-orange-500 hover:bg-orange-600 text-white"
+            className="bg-amber-500 hover:bg-amber-800 text-white"
           >
             {isPending ? (
               <>

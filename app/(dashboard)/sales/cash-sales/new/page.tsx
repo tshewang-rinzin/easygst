@@ -321,7 +321,7 @@ export default function NewCashSalePage() {
                 <select
                   id="currency"
                   name="currency"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                   defaultValue="BTN"
                   required
                 >
@@ -409,7 +409,7 @@ export default function NewCashSalePage() {
                       <select
                         value={item.unit}
                         onChange={(e) => updateLineItem(item.id, 'unit', e.target.value)}
-                        className="w-full h-9 px-2 py-1 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        className="w-full h-9 px-2 py-1 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
                       >
                         <option value="piece">Piece</option>
                         <option value="hour">Hour</option>
@@ -450,7 +450,7 @@ export default function NewCashSalePage() {
                         value={item.taxRate}
                         onChange={(e) => updateLineItem(item.id, 'taxRate', e.target.value)}
                         disabled={item.isTaxExempt}
-                        className="w-full h-9 px-2 py-1 border border-gray-300 rounded-md text-sm bg-white disabled:bg-gray-100 disabled:text-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        className="w-full h-9 px-2 py-1 border border-gray-300 rounded-md text-sm bg-white disabled:bg-gray-100 disabled:text-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
                       >
                         {taxClassifications && taxClassifications.length > 0 ? (
                           taxClassifications
@@ -483,7 +483,7 @@ export default function NewCashSalePage() {
                         onChange={(e) =>
                           updateLineItem(item.id, 'isTaxExempt', e.target.checked)
                         }
-                        className="h-4 w-4 text-orange-500 focus:ring-orange-500 border-gray-300 rounded cursor-pointer"
+                        className="h-4 w-4 text-amber-500 focus:ring-amber-500 border-gray-300 rounded cursor-pointer"
                       />
                     </td>
                     <td className="py-3 px-2 text-right">

@@ -416,7 +416,7 @@ async function InvoiceDetails({ id }: { id: string }) {
                         <span className={`px-2 py-0.5 text-xs font-medium rounded ${
                           isNegative
                             ? 'bg-green-100 text-green-700'
-                            : 'bg-orange-100 text-orange-700'
+                            : 'bg-amber-100 text-amber-900'
                         }`}>
                           {adjustment.adjustmentType.replace('_', ' ')}
                         </span>
@@ -436,7 +436,7 @@ async function InvoiceDetails({ id }: { id: string }) {
                     </div>
                     <div className="text-right ml-4">
                       <p className={`text-lg font-semibold ${
-                        isNegative ? 'text-green-600' : 'text-orange-600'
+                        isNegative ? 'text-green-600' : 'text-amber-800'
                       }`}>
                         {isNegative ? '' : '+'}{invoice.currency} {Math.abs(amount).toFixed(2)}
                       </p>
@@ -490,7 +490,7 @@ async function InvoiceDetails({ id }: { id: string }) {
                             <span className={`text-xs font-medium px-2 py-0.5 rounded ${
                               adjustmentAmount < 0
                                 ? 'bg-green-100 text-green-700'
-                                : 'bg-orange-100 text-orange-700'
+                                : 'bg-amber-100 text-amber-900'
                             }`}>
                               {payment.adjustmentReason?.replace('_', ' ') || 'adjustment'}
                             </span>

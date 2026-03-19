@@ -87,7 +87,7 @@ async function RevenueByCategorySection({ dateFrom, dateTo }: { dateFrom?: Date;
                   <div key={row.category} className="flex items-center gap-2 text-sm">
                     <span className="w-32 truncate text-gray-600">{CATEGORY_MAP[row.category]?.label || row.category}</span>
                     <div className="flex-1 bg-gray-100 rounded-full h-4 overflow-hidden">
-                      <div className="bg-orange-500 h-4 rounded-full" style={{ width: `${Math.max(pct, 1)}%` }} />
+                      <div className="bg-amber-500 h-4 rounded-full" style={{ width: `${Math.max(pct, 1)}%` }} />
                     </div>
                     <span className="w-14 text-right text-gray-500">{pct.toFixed(1)}%</span>
                   </div>
@@ -255,7 +255,7 @@ export default async function TourInvoiceReportsPage({
                 value={opt.value}
                 variant={range === opt.value ? 'default' : 'outline'}
                 size="sm"
-                className={range === opt.value ? 'bg-orange-500 hover:bg-orange-600' : ''}
+                className={range === opt.value ? 'bg-amber-500 hover:bg-amber-800' : ''}
               >
                 {opt.label}
               </Button>

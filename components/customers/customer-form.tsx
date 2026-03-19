@@ -47,7 +47,7 @@ export function CustomerForm({ customer }: CustomerFormProps) {
                   className={cn(
                     'flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors',
                     isSelected
-                      ? 'border-orange-500 bg-orange-50 text-orange-700'
+                      ? 'border-amber-500 bg-amber-50 text-amber-900'
                       : 'border-gray-200 hover:border-gray-300 text-gray-600'
                   )}
                 >

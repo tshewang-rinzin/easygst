@@ -99,7 +99,7 @@ export function CustomerSearch({ onSelect, selectedCustomer }: CustomerSearchPro
               key={customer.id}
               type="button"
               onClick={() => handleSelect(customer)}
-              className="w-full px-4 py-3 text-left hover:bg-orange-50 border-b last:border-b-0 transition-colors focus:bg-orange-50 focus:outline-none"
+              className="w-full px-4 py-3 text-left hover:bg-amber-50 border-b last:border-b-0 transition-colors focus:bg-amber-50 focus:outline-none"
             >
               <div className="font-semibold text-gray-900 mb-1">{customer.name}</div>
               <div className="text-sm text-gray-600">

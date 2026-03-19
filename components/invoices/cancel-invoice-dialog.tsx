@@ -65,7 +65,7 @@ export function CancelInvoiceDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="text-orange-600 hover:text-orange-700 hover:bg-orange-50">
+        <Button variant="outline" size="sm" className="text-amber-800 hover:text-amber-900 hover:bg-amber-50">
           <Ban className="h-4 w-4 mr-2" />
           Cancel Invoice
         </Button>
@@ -73,7 +73,7 @@ export function CancelInvoiceDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-orange-500" />
+            <AlertTriangle className="h-5 w-5 text-amber-500" />
             Cancel Invoice
           </DialogTitle>
           <DialogDescription>
@@ -91,8 +91,8 @@ export function CancelInvoiceDialog({
             </div>
           )}
 
-          <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-            <p className="text-sm text-orange-800">
+          <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-sm text-amber-950">
               <strong>Important:</strong> Cancelled invoices cannot be edited or restored.
               The invoice number will be preserved for audit purposes.
             </p>
@@ -130,7 +130,7 @@ export function CancelInvoiceDialog({
             type="button"
             onClick={handleCancel}
             disabled={isPending || !reason.trim()}
-            className="bg-orange-600 hover:bg-orange-700"
+            className="bg-amber-800 hover:bg-amber-900"
           >
             {isPending ? 'Cancelling...' : 'Cancel Invoice'}
           </Button>

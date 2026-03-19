@@ -160,7 +160,7 @@ export default function GstReturnDetailPage({
             </div>
             <div className="border-t pt-4">
               <div className="text-sm text-muted-foreground">Net GST Payable</div>
-              <div className="text-2xl font-bold text-orange-600">
+              <div className="text-2xl font-bold text-amber-800">
                 {formatCurrency(gstReturn.netGstPayable, 'BTN')}
               </div>
             </div>

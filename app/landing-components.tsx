@@ -12,7 +12,7 @@ export function FAQItem({ question, answer }: { question: string; answer: string
   return (
     <div className="border border-gray-200 rounded-lg">
       <button
-        className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-inset"
+        className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-inset"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className="font-medium text-gray-900">{question}</span>
@@ -42,13 +42,13 @@ export function SiteHeader() {
           {/* Logo */}
           <Link href="/" className="flex items-center group">
             <div className="relative">
-              <div className="absolute inset-0 bg-orange-500 rounded-lg blur-sm opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <div className="relative bg-gradient-to-br from-orange-500 to-orange-600 p-2 rounded-lg shadow-lg">
+              <div className="absolute inset-0 bg-amber-500 rounded-lg blur-sm opacity-50 group-hover:opacity-75 transition-opacity"></div>
+              <div className="relative bg-gradient-to-br from-amber-500 to-amber-800 p-2 rounded-lg shadow-lg">
                 <FileText className="h-6 w-6 text-white" strokeWidth={2.5} />
               </div>
             </div>
             <div className="ml-3">
-              <span className="text-xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-amber-800 to-amber-500 bg-clip-text text-transparent">
                 EasyGST
               </span>
               <p className="text-xs text-gray-500 -mt-1">Made in Bhutan</p>
@@ -57,18 +57,18 @@ export function SiteHeader() {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
-            <Link href="#features" className="text-gray-700 hover:text-orange-600 font-medium transition-colors">Features</Link>
-            <Link href="#pricing" className="text-gray-700 hover:text-orange-600 font-medium transition-colors">Pricing</Link>
-            <Link href="#faq" className="text-gray-700 hover:text-orange-600 font-medium transition-colors">FAQ</Link>
+            <Link href="#features" className="text-gray-700 hover:text-amber-800 font-medium transition-colors">Features</Link>
+            <Link href="#pricing" className="text-gray-700 hover:text-amber-800 font-medium transition-colors">Pricing</Link>
+            <Link href="#faq" className="text-gray-700 hover:text-amber-800 font-medium transition-colors">FAQ</Link>
           </nav>
 
           {/* Desktop Auth Buttons */}
           <div className="hidden lg:flex items-center space-x-4">
             <Link href="/sign-in">
-              <Button variant="ghost" className="text-gray-700 hover:text-orange-600">Sign In</Button>
+              <Button variant="ghost" className="text-gray-700 hover:text-amber-800">Sign In</Button>
             </Link>
             <Link href="/sign-up">
-              <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg shadow-orange-200">Get Started Free</Button>
+              <Button className="bg-gradient-to-r from-amber-500 to-amber-800 hover:from-amber-800 hover:to-amber-900 shadow-lg shadow-amber-200">Get Started Free</Button>
             </Link>
           </div>
 
@@ -91,15 +91,15 @@ export function SiteHeader() {
               </button>
             </div>
             <div className="p-6 space-y-6">
-              <Link href="#features" className="block text-gray-700 hover:text-orange-600 font-medium" onClick={() => setMobileOpen(false)}>Features</Link>
-              <Link href="#pricing" className="block text-gray-700 hover:text-orange-600 font-medium" onClick={() => setMobileOpen(false)}>Pricing</Link>
-              <Link href="#faq" className="block text-gray-700 hover:text-orange-600 font-medium" onClick={() => setMobileOpen(false)}>FAQ</Link>
+              <Link href="#features" className="block text-gray-700 hover:text-amber-800 font-medium" onClick={() => setMobileOpen(false)}>Features</Link>
+              <Link href="#pricing" className="block text-gray-700 hover:text-amber-800 font-medium" onClick={() => setMobileOpen(false)}>Pricing</Link>
+              <Link href="#faq" className="block text-gray-700 hover:text-amber-800 font-medium" onClick={() => setMobileOpen(false)}>FAQ</Link>
               <hr />
               <Link href="/sign-in" className="block">
                 <Button variant="ghost" className="w-full justify-start" onClick={() => setMobileOpen(false)}>Sign In</Button>
               </Link>
               <Link href="/sign-up" className="block">
-                <Button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700" onClick={() => setMobileOpen(false)}>Get Started Free</Button>
+                <Button className="w-full bg-gradient-to-r from-amber-500 to-amber-800 hover:from-amber-800 hover:to-amber-900" onClick={() => setMobileOpen(false)}>Get Started Free</Button>
               </Link>
             </div>
           </div>

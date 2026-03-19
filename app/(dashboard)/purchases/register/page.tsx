@@ -130,7 +130,7 @@ export default function PurchaseRegisterPage() {
     <section className="flex-1 p-4 lg:p-8">
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-2">
-          <FileSpreadsheet className="h-6 w-6 text-orange-500" />
+          <FileSpreadsheet className="h-6 w-6 text-amber-500" />
           <h1 className="text-lg lg:text-2xl font-medium text-gray-900">
             Purchase Register
           </h1>
@@ -177,7 +177,7 @@ export default function PurchaseRegisterPage() {
             <div className="flex gap-2">
               <Button
                 onClick={fetchPurchaseRegister}
-                className="bg-orange-500 hover:bg-orange-600"
+                className="bg-amber-500 hover:bg-amber-800"
               >
                 Apply Filter
               </Button>
@@ -270,7 +270,7 @@ export default function PurchaseRegisterPage() {
               <p className="text-gray-500 mb-2">No purchases found for this period</p>
               <p className="text-sm text-gray-400">
                 Try adjusting your date range or{' '}
-                <Link href="/purchases/bills/new" className="text-orange-600 hover:text-orange-700">
+                <Link href="/purchases/bills/new" className="text-amber-800 hover:text-amber-900">
                   create a supplier bill
                 </Link>
               </p>
@@ -303,7 +303,7 @@ export default function PurchaseRegisterPage() {
                       <TableCell className="text-sm">
                         <Link
                           href={`/purchases/bills/${entry.id}`}
-                          className="text-orange-600 hover:text-orange-700 font-medium"
+                          className="text-amber-800 hover:text-amber-900 font-medium"
                         >
                           {entry.number}
                         </Link>

@@ -24,8 +24,8 @@ const reportPages = [
     description: 'Track outstanding supplier bills and payables',
     href: '/reports/unpaid-bills',
     icon: Receipt,
-    color: 'text-orange-600',
-    bg: 'bg-orange-50',
+    color: 'text-amber-800',
+    bg: 'bg-amber-50',
   },
   {
     title: 'GST Summary',

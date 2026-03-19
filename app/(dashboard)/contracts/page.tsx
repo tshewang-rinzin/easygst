@@ -28,7 +28,7 @@ function StatusBadge({ status }: { status: string }) {
 function TypeBadge({ type }: { type: string }) {
   return (
     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-      type === 'project' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700'
+      type === 'project' ? 'bg-purple-100 text-purple-700' : 'bg-amber-100 text-amber-900'
     }`}>
       {type === 'project' ? 'Project' : 'AMC'}
     </span>
@@ -73,7 +73,7 @@ export default function ContractsPage() {
           </p>
         </div>
         <Link href="/contracts/new">
-          <Button className="bg-orange-500 hover:bg-orange-600">
+          <Button className="bg-amber-500 hover:bg-amber-800">
             <Plus className="h-4 w-4 mr-2" />
             New Contract
           </Button>
@@ -115,7 +115,7 @@ export default function ContractsPage() {
             Create your first project or AMC contract to start billing.
           </p>
           <Link href="/contracts/new">
-            <Button className="bg-orange-500 hover:bg-orange-600">
+            <Button className="bg-amber-500 hover:bg-amber-800">
               <Plus className="h-4 w-4 mr-2" />
               Create Contract
             </Button>
@@ -131,7 +131,7 @@ export default function ContractsPage() {
               <Link
                 key={c.id}
                 href={`/contracts/${c.id}`}
-                className="block bg-white border border-gray-200 rounded-lg p-5 hover:border-orange-300 hover:shadow-sm transition-all"
+                className="block bg-white border border-gray-200 rounded-lg p-5 hover:border-amber-300 hover:shadow-sm transition-all"
               >
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
@@ -159,7 +159,7 @@ export default function ContractsPage() {
                   </div>
                   <div className="w-full bg-gray-100 rounded-full h-2">
                     <div
-                      className="bg-orange-500 h-2 rounded-full transition-all"
+                      className="bg-amber-500 h-2 rounded-full transition-all"
                       style={{ width: `${progress}%` }}
                     />
                   </div>

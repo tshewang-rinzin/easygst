@@ -198,7 +198,7 @@ export default function ViewReceiptPage() {
                       <div className="flex-1">
                         <Link
                           href={`/sales/invoices/${allocation.invoice?.id}`}
-                          className="text-lg font-medium text-orange-600 hover:text-orange-700"
+                          className="text-lg font-medium text-amber-800 hover:text-amber-900"
                         >
                           {allocation.invoice?.invoiceNumber || 'N/A'}
                         </Link>

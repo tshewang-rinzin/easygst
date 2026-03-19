@@ -53,7 +53,7 @@ async function CreditNotesList() {
             Credit notes are used to refund or adjust invoices for customers.
           </p>
           <Link href="/sales/credit-notes/new">
-            <Button className="bg-orange-500 hover:bg-orange-600">
+            <Button className="bg-amber-500 hover:bg-amber-800">
               <Plus className="h-4 w-4 mr-2" />
               Create Credit Note
             </Button>
@@ -116,7 +116,7 @@ async function CreditNotesList() {
                     </p>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <p className={parseFloat(creditNote.unappliedAmount) > 0 ? 'text-orange-600 font-medium' : 'text-gray-500'}>
+                    <p className={parseFloat(creditNote.unappliedAmount) > 0 ? 'text-amber-800 font-medium' : 'text-gray-500'}>
                       {creditNote.currency} {parseFloat(creditNote.unappliedAmount).toFixed(2)}
                     </p>
                   </td>
@@ -151,7 +151,7 @@ export default function CreditNotesPage() {
           </p>
         </div>
         <Link href="/sales/credit-notes/new">
-          <Button className="bg-orange-500 hover:bg-orange-600">
+          <Button className="bg-amber-500 hover:bg-amber-800">
             <Plus className="h-4 w-4 mr-2" />
             New Credit Note
           </Button>

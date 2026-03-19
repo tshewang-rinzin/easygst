@@ -88,11 +88,11 @@ export default function GstSummaryPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Net GST Payable</p>
-                    <p className="text-2xl font-bold text-orange-600">
+                    <p className="text-2xl font-bold text-amber-800">
                       {formatCurrency(summary?.netGstPayable || '0', 'BTN')}
                     </p>
                   </div>
-                  <FileSpreadsheet className="h-8 w-8 text-orange-500" />
+                  <FileSpreadsheet className="h-8 w-8 text-amber-500" />
                 </div>
               </CardContent>
             </Card>
@@ -221,9 +221,9 @@ export default function GstSummaryPage() {
           </Card>
 
           {/* Net GST Summary */}
-          <Card className="border-2 border-orange-200 bg-orange-50/50">
+          <Card className="border-2 border-amber-200 bg-amber-50/50">
             <CardHeader>
-              <CardTitle className="text-orange-900">Net GST Calculation</CardTitle>
+              <CardTitle className="text-amber-950">Net GST Calculation</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -239,9 +239,9 @@ export default function GstSummaryPage() {
                     - {formatCurrency(summary?.inputGst || '0', 'BTN')}
                   </span>
                 </div>
-                <div className="border-t-2 border-orange-300 pt-4 flex justify-between items-center">
-                  <span className="text-2xl font-bold text-orange-900">Net GST Payable</span>
-                  <span className="text-2xl font-bold text-orange-600">
+                <div className="border-t-2 border-amber-300 pt-4 flex justify-between items-center">
+                  <span className="text-2xl font-bold text-amber-950">Net GST Payable</span>
+                  <span className="text-2xl font-bold text-amber-800">
                     {formatCurrency(summary?.netGstPayable || '0', 'BTN')}
                   </span>
                 </div>

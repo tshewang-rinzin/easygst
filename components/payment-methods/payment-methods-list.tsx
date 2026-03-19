@@ -42,7 +42,7 @@ const CATEGORY_CONFIG: Record<string, { label: string; icon: any; color: string 
   mobile_banking: { label: 'Mobile Banking', icon: Smartphone, color: 'bg-blue-50 border-blue-200' },
   bank_transfer: { label: 'Bank Transfer', icon: Building2, color: 'bg-purple-50 border-purple-200' },
   cheque: { label: 'Cheque', icon: FileCheck, color: 'bg-yellow-50 border-yellow-200' },
-  online: { label: 'Online', icon: Globe, color: 'bg-orange-50 border-orange-200' },
+  online: { label: 'Online', icon: Globe, color: 'bg-amber-50 border-amber-200' },
   other: { label: 'Other', icon: MoreHorizontal, color: 'bg-gray-50 border-gray-200' },
 };
 
@@ -114,7 +114,7 @@ export function PaymentMethodsList({ initialMethods, hasAnyMethods: initialHasAn
     <div className="space-y-6">
       {/* Seed Default Methods Button */}
       {!hasAnyMethods && (
-        <Card className="border-orange-200 bg-orange-50">
+        <Card className="border-amber-200 bg-amber-50">
           <CardHeader>
             <CardTitle className="text-lg">No Payment Methods Found</CardTitle>
             <CardDescription>
@@ -125,7 +125,7 @@ export function PaymentMethodsList({ initialMethods, hasAnyMethods: initialHasAn
             <Button
               onClick={handleSeedDefaults}
               disabled={isSeeding}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
+              className="bg-amber-500 hover:bg-amber-800 text-white"
             >
               {isSeeding ? (
                 <>

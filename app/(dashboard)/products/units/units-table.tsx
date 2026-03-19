@@ -23,7 +23,7 @@ const unitTypeColors = {
   quantity: 'bg-blue-100 text-blue-800',
   weight: 'bg-green-100 text-green-800', 
   volume: 'bg-purple-100 text-purple-800',
-  length: 'bg-orange-100 text-orange-800',
+  length: 'bg-amber-100 text-amber-950',
   area: 'bg-pink-100 text-pink-800',
   time: 'bg-gray-100 text-gray-800',
 } as const;

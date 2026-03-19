@@ -15,7 +15,7 @@ import { CategoryActions } from '@/components/categories/category-actions';
 function CategoryNode({ category, depth = 0 }: { category: CategoryWithChildren; depth?: number }) {
   return (
     <>
-      <Card className={depth > 0 ? 'ml-6 border-l-4 border-l-orange-200' : ''}>
+      <Card className={depth > 0 ? 'ml-6 border-l-4 border-l-amber-200' : ''}>
         <CardHeader className="py-3">
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -80,7 +80,7 @@ export default async function CategoriesPage() {
           </p>
         </div>
         <Link href="/products/categories/new">
-          <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+          <Button className="bg-amber-500 hover:bg-amber-800 text-white">
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Category
           </Button>
@@ -92,7 +92,7 @@ export default async function CategoriesPage() {
           <CardContent className="flex flex-col items-center justify-center py-12">
             <p className="text-muted-foreground mb-4">No categories yet</p>
             <Link href="/products/categories/new">
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+              <Button className="bg-amber-500 hover:bg-amber-800 text-white">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Create your first category
               </Button>

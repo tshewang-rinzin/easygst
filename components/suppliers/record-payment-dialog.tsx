@@ -72,7 +72,7 @@ export function RecordPaymentDialog({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b flex-shrink-0">
           <div className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-orange-600" />
+            <DollarSign className="h-5 w-5 text-amber-800" />
             <h2 className="text-lg font-semibold text-gray-900">
               Record Payment
             </h2>
@@ -146,7 +146,7 @@ export function RecordPaymentDialog({
                   name="paymentMethod"
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                   required
                 >
                   {paymentMethods.map((method: any) => (
@@ -297,7 +297,7 @@ export function RecordPaymentDialog({
             <Button
               type="submit"
               disabled={isPending || !paymentMethods || paymentMethods.length === 0}
-              className="bg-orange-500 hover:bg-orange-600"
+              className="bg-amber-500 hover:bg-amber-800"
             >
               {isPending ? 'Recording...' : 'Record Payment'}
             </Button>

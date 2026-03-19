@@ -268,7 +268,7 @@ export function SubscriptionClient({
             onClick={() => setBillingCycle('yearly')}
           >
             Yearly
-            <Badge className="ml-2 bg-orange-100 text-orange-700 text-xs">Save ~17%</Badge>
+            <Badge className="ml-2 bg-amber-100 text-amber-900 text-xs">Save ~17%</Badge>
           </button>
         </div>
       </div>
@@ -285,12 +285,12 @@ export function SubscriptionClient({
             <Card
               key={plan.id}
               className={`relative ${
-                isRecommended ? 'border-orange-500 border-2 shadow-lg' : ''
-              } ${isCurrentPlan(plan) ? 'bg-orange-50/50' : ''}`}
+                isRecommended ? 'border-amber-500 border-2 shadow-lg' : ''
+              } ${isCurrentPlan(plan) ? 'bg-amber-50/50' : ''}`}
             >
               {isRecommended && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-orange-500 text-white">
+                  <Badge className="bg-amber-500 text-white">
                     <Sparkles className="h-3 w-3 mr-1" />
                     Recommended
                   </Badge>
@@ -305,7 +305,7 @@ export function SubscriptionClient({
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
                   {plan.name}
-                  {plan.name === 'Enterprise' && <Crown className="h-4 w-4 text-orange-500" />}
+                  {plan.name === 'Enterprise' && <Crown className="h-4 w-4 text-amber-500" />}
                 </CardTitle>
                 <CardDescription className="text-xs">{plan.description}</CardDescription>
               </CardHeader>
@@ -336,31 +336,31 @@ export function SubscriptionClient({
                 <div className="space-y-2 mb-4 text-sm">
                   {plan.maxUsers && (
                     <div className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-orange-500 shrink-0" />
+                      <Check className="h-4 w-4 text-amber-500 shrink-0" />
                       <span>{plan.maxUsers} team members</span>
                     </div>
                   )}
                   {plan.maxInvoicesPerMonth && (
                     <div className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-orange-500 shrink-0" />
+                      <Check className="h-4 w-4 text-amber-500 shrink-0" />
                       <span>{plan.maxInvoicesPerMonth} invoices/month</span>
                     </div>
                   )}
                   {plan.maxProducts && (
                     <div className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-orange-500 shrink-0" />
+                      <Check className="h-4 w-4 text-amber-500 shrink-0" />
                       <span>{plan.maxProducts} products</span>
                     </div>
                   )}
                   {plan.maxCustomers && (
                     <div className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-orange-500 shrink-0" />
+                      <Check className="h-4 w-4 text-amber-500 shrink-0" />
                       <span>{plan.maxCustomers} customers</span>
                     </div>
                   )}
                   {!plan.maxUsers && !plan.maxInvoicesPerMonth && (
                     <div className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-orange-500 shrink-0" />
+                      <Check className="h-4 w-4 text-amber-500 shrink-0" />
                       <span>Unlimited everything</span>
                     </div>
                   )}
@@ -388,7 +388,7 @@ export function SubscriptionClient({
                   </Button>
                 ) : action === 'upgrade' ? (
                   <Button
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                    className="w-full bg-amber-500 hover:bg-amber-800 text-white"
                     onClick={() => handleUpgrade(plan.id)}
                     disabled={loading === plan.id}
                   >

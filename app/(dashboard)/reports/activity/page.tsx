@@ -174,7 +174,7 @@ export default function ActivityReportPage() {
                 <Activity className="h-4 w-4 text-muted-foreground" />
                 <div className="text-sm text-muted-foreground">Today</div>
               </div>
-              <div className="text-2xl font-bold text-orange-600">{data.summary.todayCount}</div>
+              <div className="text-2xl font-bold text-amber-800">{data.summary.todayCount}</div>
               <div className="text-xs text-muted-foreground mt-1">activities today</div>
             </CardContent>
           </Card>

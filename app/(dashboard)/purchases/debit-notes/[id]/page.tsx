@@ -120,7 +120,7 @@ async function DebitNoteDetails({ id }: { id: string }) {
                 <p className="text-sm text-gray-500">Original Bill</p>
                 <Link
                   href={`/purchases/bills/${debitNote.originalBill.id}`}
-                  className="font-medium text-orange-600 hover:text-orange-700"
+                  className="font-medium text-amber-800 hover:text-amber-900"
                 >
                   {debitNote.originalBill.billNumber}
                 </Link>
@@ -233,7 +233,7 @@ async function DebitNoteDetails({ id }: { id: string }) {
                   </div>
                   <div className="flex justify-between text-lg font-bold border-t pt-2">
                     <span>Unapplied Balance:</span>
-                    <span className="text-orange-600">
+                    <span className="text-amber-800">
                       {debitNote.currency} {parseFloat(debitNote.unappliedAmount).toFixed(2)}
                     </span>
                   </div>
@@ -260,7 +260,7 @@ async function DebitNoteDetails({ id }: { id: string }) {
                   <div>
                     <Link
                       href={`/purchases/bills/${application.bill?.id}`}
-                      className="font-medium text-orange-600 hover:text-orange-700"
+                      className="font-medium text-amber-800 hover:text-amber-900"
                     >
                       {application.bill?.billNumber || 'Unknown Bill'}
                     </Link>

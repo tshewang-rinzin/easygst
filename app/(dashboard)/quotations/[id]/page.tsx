@@ -163,7 +163,7 @@ async function QuotationDetails({ id }: { id: string }) {
               </div>
               <div className="flex justify-between text-lg font-bold border-t pt-2">
                 <span>Total:</span>
-                <span className="text-orange-600">{quotation.currency} {parseFloat(quotation.totalAmount).toFixed(2)}</span>
+                <span className="text-amber-800">{quotation.currency} {parseFloat(quotation.totalAmount).toFixed(2)}</span>
               </div>
             </div>
           </div>

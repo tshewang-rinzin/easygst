@@ -142,7 +142,7 @@ export function FileAttachments({
         <div
           className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors cursor-pointer ${
             dragOver
-              ? 'border-orange-400 bg-orange-50'
+              ? 'border-amber-500 bg-amber-50'
               : 'border-gray-200 hover:border-gray-300'
           }`}
           onDragOver={(e) => {
@@ -174,7 +174,7 @@ export function FileAttachments({
             <div className="flex flex-col items-center gap-1">
               <Upload className="h-5 w-5 text-gray-400" />
               <p className="text-sm text-gray-500">
-                Drop files here or <span className="text-orange-600 font-medium">browse</span>
+                Drop files here or <span className="text-amber-800 font-medium">browse</span>
               </p>
               <p className="text-xs text-gray-400">
                 Images, PDF, Excel, Word, CSV — max 10MB
@@ -231,7 +231,7 @@ export function FileAttachments({
                   href={attachment.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm font-medium text-gray-900 hover:text-orange-600 truncate block"
+                  className="text-sm font-medium text-gray-900 hover:text-amber-800 truncate block"
                 >
                   {attachment.filename}
                 </a>

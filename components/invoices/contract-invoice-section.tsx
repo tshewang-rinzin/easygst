@@ -198,14 +198,14 @@ export function ContractInvoiceSection({ customerId, onApply }: ContractInvoiceS
                   <span>Already Invoiced:</span>
                   <span className="font-medium">{fmt(parseFloat(selectedContract.totalInvoiced), selectedContract.currency)}</span>
                 </div>
-                <div className="flex justify-between font-semibold text-orange-600">
+                <div className="flex justify-between font-semibold text-amber-800">
                   <span>Remaining:</span>
                   <span>{fmt(remaining, selectedContract.currency)}</span>
                 </div>
                 {/* Progress bar */}
                 <div className="w-full bg-gray-100 rounded-full h-1.5 mt-1">
                   <div
-                    className="bg-orange-500 h-1.5 rounded-full"
+                    className="bg-amber-500 h-1.5 rounded-full"
                     style={{
                       width: `${Math.min(100, (parseFloat(selectedContract.totalInvoiced) / parseFloat(selectedContract.totalValue)) * 100)}%`
                     }}

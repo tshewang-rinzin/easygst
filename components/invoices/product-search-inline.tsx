@@ -173,7 +173,7 @@ export function ProductSearchInline({
                     key={product.id}
                     type="button"
                     onClick={() => handleSelect(product)}
-                    className="w-full px-3 py-2 text-left hover:bg-orange-50 border-b last:border-b-0 transition-colors focus:bg-orange-50 focus:outline-none"
+                    className="w-full px-3 py-2 text-left hover:bg-amber-50 border-b last:border-b-0 transition-colors focus:bg-amber-50 focus:outline-none"
                   >
                     <div className="font-semibold text-sm text-gray-900">{product.name}</div>
                     <div className="text-xs text-gray-600 mt-0.5">
@@ -201,7 +201,7 @@ export function ProductSearchInline({
                       key={variant.id}
                       type="button"
                       onClick={() => handleVariantSelect(product, variant)}
-                      className="w-full pl-6 pr-3 py-1.5 text-left hover:bg-orange-50 transition-colors focus:bg-orange-50 focus:outline-none"
+                      className="w-full pl-6 pr-3 py-1.5 text-left hover:bg-amber-50 transition-colors focus:bg-amber-50 focus:outline-none"
                     >
                       <div className="text-sm text-gray-700">
                         <span className="text-gray-400 mr-1">↳</span>

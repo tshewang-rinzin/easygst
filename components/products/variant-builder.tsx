@@ -71,7 +71,7 @@ function BulkAction({ label, onApply }: { label: string; onApply: (value: string
       <Button
         type="button"
         size="sm"
-        className="h-7 text-xs bg-orange-500 hover:bg-orange-600"
+        className="h-7 text-xs bg-amber-500 hover:bg-amber-800"
         onClick={() => { onApply(value); setOpen(false); setValue(''); }}
       >
         Apply
@@ -285,7 +285,7 @@ export function VariantBuilder({ productId, productSku = '', trackInventory }: V
             <Button
               type="button"
               onClick={generateVariants}
-              className="bg-orange-500 hover:bg-orange-600"
+              className="bg-amber-500 hover:bg-amber-800"
               size="sm"
             >
               Generate Variants ({attributes.reduce((total, attr) => total * attr.values.length, 1)})
@@ -410,7 +410,7 @@ export function VariantBuilder({ productId, productSku = '', trackInventory }: V
           <Button
             type="submit"
             disabled={saving}
-            className="bg-orange-500 hover:bg-orange-600"
+            className="bg-amber-500 hover:bg-amber-800"
           >
             {saving ? (
               <>

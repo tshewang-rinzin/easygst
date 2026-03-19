@@ -27,7 +27,7 @@ async function SupplierBillsList() {
             Create your first supplier bill to track purchases
           </p>
           <Link href="/purchases/bills/new">
-            <Button className="bg-orange-500 hover:bg-orange-600">
+            <Button className="bg-amber-500 hover:bg-amber-800">
               <PlusCircle className="mr-2 h-4 w-4" />
               New Bill
             </Button>
@@ -80,7 +80,7 @@ async function SupplierBillsList() {
                 <TableCell className="font-medium">
                   <Link
                     href={`/purchases/bills/${bill.id}`}
-                    className="text-orange-600 hover:text-orange-700"
+                    className="text-amber-800 hover:text-amber-900"
                   >
                     {bill.billNumber}
                   </Link>
@@ -163,7 +163,7 @@ export default function SupplierBillsPage() {
           </p>
         </div>
         <Link href="/purchases/bills/new">
-          <Button className="bg-orange-500 hover:bg-orange-600">
+          <Button className="bg-amber-500 hover:bg-amber-800">
             <PlusCircle className="mr-2 h-4 w-4" />
             New Bill
           </Button>

@@ -98,7 +98,7 @@ export default function SubscriptionDetailPage() {
     return (
       <div className="p-6 text-center text-gray-500">
         Subscription not found.{' '}
-        <Link href="/subscriptions" className="text-orange-600 hover:underline">Go back</Link>
+        <Link href="/subscriptions" className="text-amber-800 hover:underline">Go back</Link>
       </div>
     );
   }
@@ -261,7 +261,7 @@ export default function SubscriptionDetailPage() {
                       <td className="px-4 py-2 text-sm">
                         <Link
                           href={`/sales/invoices/${inv.invoiceId}`}
-                          className="text-orange-600 hover:underline"
+                          className="text-amber-800 hover:underline"
                         >
                           {inv.invoiceNumber}
                         </Link>

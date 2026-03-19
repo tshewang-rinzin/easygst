@@ -103,7 +103,7 @@ function BusinessTypeSelector({ teamBusinessTypeId }: { teamBusinessTypeId?: str
           <button
             type="button"
             onClick={() => setOpen(!open)}
-            className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-2 focus:ring-amber-500"
           >
             {selectedBt ? (
               <span className="flex items-center gap-2">
@@ -124,7 +124,7 @@ function BusinessTypeSelector({ teamBusinessTypeId }: { teamBusinessTypeId?: str
                   placeholder="Search business type..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                   autoFocus
                 />
               </div>
@@ -139,7 +139,7 @@ function BusinessTypeSelector({ teamBusinessTypeId }: { teamBusinessTypeId?: str
                         key={bt.id}
                         type="button"
                         onClick={() => handleBusinessTypeChange(bt.id)}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-orange-50 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-amber-50 transition-colors"
                       >
                         <Icon className="h-4 w-4 text-gray-500 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
@@ -148,7 +148,7 @@ function BusinessTypeSelector({ teamBusinessTypeId }: { teamBusinessTypeId?: str
                             <div className="text-xs text-gray-500 truncate">{bt.description}</div>
                           )}
                         </div>
-                        {bt.id === selectedType && <Check className="h-4 w-4 text-orange-500 flex-shrink-0" />}
+                        {bt.id === selectedType && <Check className="h-4 w-4 text-amber-500 flex-shrink-0" />}
                       </button>
                     );
                   })
@@ -164,23 +164,23 @@ function BusinessTypeSelector({ teamBusinessTypeId }: { teamBusinessTypeId?: str
 
       {/* Catalog Prompt */}
       {showCatalogPrompt && (
-        <Card className="bg-orange-50 border-orange-200">
+        <Card className="bg-amber-50 border-amber-200">
           <CardContent className="pt-4">
             <div className="flex items-start gap-3">
-              <div className="bg-orange-100 p-2 rounded-full">
+              <div className="bg-amber-100 p-2 rounded-full">
                 🛍️
               </div>
               <div className="flex-1">
-                <h4 className="font-medium text-orange-900 mb-1">
+                <h4 className="font-medium text-amber-950 mb-1">
                   Browse products for your business type?
                 </h4>
-                <p className="text-sm text-orange-700 mb-3">
+                <p className="text-sm text-amber-900 mb-3">
                   We have a catalog of products specifically curated for your business type. 
                   You can browse and add them to your inventory.
                 </p>
                 <div className="flex gap-2">
                   <Link href="/products/catalog">
-                    <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+                    <Button size="sm" className="bg-amber-500 hover:bg-amber-800">
                       Browse Catalog
                     </Button>
                   </Link>
@@ -188,7 +188,7 @@ function BusinessTypeSelector({ teamBusinessTypeId }: { teamBusinessTypeId?: str
                     size="sm" 
                     variant="outline" 
                     onClick={() => setShowCatalogPrompt(false)}
-                    className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                    className="border-amber-300 text-amber-900 hover:bg-amber-100"
                   >
                     Maybe Later
                   </Button>
@@ -258,7 +258,7 @@ function DefaultBankAccountCard() {
                 key={account.id}
                 className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
                   account.isDefault
-                    ? 'border-orange-500 bg-orange-50'
+                    ? 'border-amber-500 bg-amber-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
@@ -269,7 +269,7 @@ function DefaultBankAccountCard() {
                       <span className="text-xs text-gray-500">({account.branch})</span>
                     )}
                     {account.isDefault && (
-                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-900">
                         Default
                       </span>
                     )}
@@ -528,7 +528,7 @@ function BusinessForm({ state, team }: BusinessFormProps) {
               <select
                 id="defaultCurrency"
                 name="defaultCurrency"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                 defaultValue={team?.defaultCurrency || 'BTN'}
                 required
               >
@@ -687,7 +687,7 @@ export default function BusinessSettingsPage() {
         <div className="flex justify-end">
           <Button
             type="submit"
-            className="bg-orange-500 hover:bg-orange-600 text-white px-8"
+            className="bg-amber-500 hover:bg-amber-800 text-white px-8"
             disabled={isPending}
           >
             {isPending ? (

@@ -52,7 +52,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   return (
     <div className="min-h-[100dvh] flex">
       {/* Left Panel - Branding (Hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-amber-500 via-amber-800 to-amber-900 relative overflow-hidden">
         {/* Background decorative elements */}
         <div className="absolute inset-0">
           <div className="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
@@ -66,7 +66,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
           {/* Logo */}
           <div className="mb-12">
             <h1 className="text-5xl font-bold tracking-tight">EasyGST</h1>
-            <p className="text-xl font-medium text-orange-100 mt-2">
+            <p className="text-xl font-medium text-amber-100 mt-2">
               Simple GST Invoicing for Bhutan
             </p>
           </div>
@@ -79,7 +79,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               </div>
               <div>
                 <h3 className="font-semibold text-lg">Easy Invoice Generation</h3>
-                <p className="text-orange-100 text-sm">Create professional invoices in minutes</p>
+                <p className="text-amber-100 text-sm">Create professional invoices in minutes</p>
               </div>
             </div>
 
@@ -89,7 +89,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               </div>
               <div>
                 <h3 className="font-semibold text-lg">GST Compliant</h3>
-                <p className="text-orange-100 text-sm">Fully compliant with Bhutan's GST regulations</p>
+                <p className="text-amber-100 text-sm">Fully compliant with Bhutan's GST regulations</p>
               </div>
             </div>
 
@@ -99,7 +99,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               </div>
               <div>
                 <h3 className="font-semibold text-lg">Multi-Business Support</h3>
-                <p className="text-orange-100 text-sm">Manage multiple businesses from one account</p>
+                <p className="text-amber-100 text-sm">Manage multiple businesses from one account</p>
               </div>
             </div>
 
@@ -109,7 +109,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               </div>
               <div>
                 <h3 className="font-semibold text-lg">Real-Time Reports</h3>
-                <p className="text-orange-100 text-sm">Track your business performance instantly</p>
+                <p className="text-amber-100 text-sm">Track your business performance instantly</p>
               </div>
             </div>
           </div>
@@ -121,7 +121,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
         <div className="w-full max-w-md mx-auto">
           {/* Mobile logo (shown only on small screens) */}
           <div className="lg:hidden mb-8 text-center">
-            <h1 className="text-3xl font-bold text-orange-600">EasyGST</h1>
+            <h1 className="text-3xl font-bold text-amber-800">EasyGST</h1>
             <p className="text-gray-600 text-sm mt-1">Simple GST Invoicing for Bhutan</p>
           </div>
 
@@ -190,7 +190,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                   autoComplete="name"
                   required
                   maxLength={100}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
                   placeholder="Enter your full name"
                 />
               </div>
@@ -209,7 +209,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                 readOnly={!!invitationDetails}
                 required
                 maxLength={50}
-                className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors ${
+                className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors ${
                   invitationDetails ? 'bg-gray-50 cursor-not-allowed' : ''
                 }`}
                 placeholder="Enter your email address"
@@ -224,7 +224,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                 {mode === 'signin' && (
                   <Link
                     href="/forgot-password"
-                    className="text-sm font-medium text-orange-600 hover:text-orange-500 transition-colors"
+                    className="text-sm font-medium text-amber-800 hover:text-amber-500 transition-colors"
                   >
                     Forgot password?
                   </Link>
@@ -239,7 +239,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                 required
                 minLength={8}
                 maxLength={100}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
                 placeholder="Enter your password"
               />
             </div>
@@ -281,7 +281,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
             {/* Submit Button */}
             <Button
               type="submit"
-              className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+              className="w-full bg-amber-800 hover:bg-amber-900 text-white font-semibold py-3 px-4 rounded-lg transition-colors focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
               disabled={pending}
             >
               {pending ? (
@@ -317,7 +317,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                 href={`${mode === 'signin' ? '/sign-up' : '/sign-in'}${
                   redirect ? `?redirect=${redirect}` : ''
                 }${priceId ? `&priceId=${priceId}` : ''}`}
-                className="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                className="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
               >
                 {mode === 'signin' ? 'Create an account' : 'Sign in to existing account'}
               </Link>

@@ -49,7 +49,7 @@ export default function NewSupplierPage() {
           <Button
             type="submit"
             disabled={isPending}
-            className="bg-orange-500 hover:bg-orange-600"
+            className="bg-amber-500 hover:bg-amber-800"
           >
             {isPending ? 'Creating...' : 'Create Supplier'}
           </Button>

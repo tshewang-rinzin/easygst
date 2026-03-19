@@ -95,7 +95,7 @@ export default function UnpaidBillsReportPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-sm text-muted-foreground">Total Unpaid</div>
-              <div className="text-2xl font-bold text-orange-600">
+              <div className="text-2xl font-bold text-amber-800">
                 {formatCurrency(data.summary.totalUnpaid, 'BTN')}
               </div>
               <div className="text-xs text-muted-foreground mt-1">

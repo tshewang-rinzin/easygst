@@ -254,7 +254,7 @@ function Sidebar() {
     <aside className="hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 bg-gray-50 border-r border-gray-200">
       <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
         <div className="flex items-center flex-shrink-0 px-4 mb-5">
-          <CircleIcon className="h-8 w-8 text-orange-500" />
+          <CircleIcon className="h-8 w-8 text-amber-500" />
           <span className="ml-2 text-xl font-semibold text-gray-900">
             EasyGST
           </span>
@@ -274,7 +274,7 @@ function Sidebar() {
                     className={cn(
                       'w-full group flex items-center justify-between px-2 py-2 text-sm font-medium rounded-md',
                       hasActiveChild
-                        ? 'bg-orange-50 text-orange-600'
+                        ? 'bg-amber-50 text-amber-800'
                         : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                     )}
                   >
@@ -283,7 +283,7 @@ function Sidebar() {
                         className={cn(
                           'mr-3 flex-shrink-0 h-5 w-5',
                           hasActiveChild
-                            ? 'text-orange-600'
+                            ? 'text-amber-800'
                             : 'text-gray-400 group-hover:text-gray-500'
                         )}
                       />
@@ -307,7 +307,7 @@ function Sidebar() {
                             className={cn(
                               'group flex items-center px-2 py-2 text-sm rounded-md',
                               isActive
-                                ? 'bg-orange-100 text-orange-700 font-medium'
+                                ? 'bg-amber-100 text-amber-900 font-medium'
                                 : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                             )}
                           >
@@ -328,7 +328,7 @@ function Sidebar() {
                   className={cn(
                     'group flex items-center px-2 py-2 text-sm font-medium rounded-md',
                     isActive
-                      ? 'bg-orange-100 text-orange-600'
+                      ? 'bg-amber-100 text-amber-800'
                       : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                   )}
                 >
@@ -336,7 +336,7 @@ function Sidebar() {
                     className={cn(
                       'mr-3 flex-shrink-0 h-5 w-5',
                       isActive
-                        ? 'text-orange-600'
+                        ? 'text-amber-800'
                         : 'text-gray-400 group-hover:text-gray-500'
                     )}
                   />
@@ -396,7 +396,7 @@ function MobileMenu() {
             <div className="flex flex-col h-full">
               <div className="flex items-center justify-between p-4 border-b">
                 <div className="flex items-center">
-                  <CircleIcon className="h-8 w-8 text-orange-500" />
+                  <CircleIcon className="h-8 w-8 text-amber-500" />
                   <span className="ml-2 text-xl font-semibold text-gray-900">
                     EasyGST
                   </span>
@@ -420,7 +420,7 @@ function MobileMenu() {
                           className={cn(
                             'w-full group flex items-center justify-between px-2 py-2 text-sm font-medium rounded-md',
                             hasActiveChild
-                              ? 'bg-orange-50 text-orange-600'
+                              ? 'bg-amber-50 text-amber-800'
                               : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                           )}
                         >
@@ -429,7 +429,7 @@ function MobileMenu() {
                               className={cn(
                                 'mr-3 flex-shrink-0 h-5 w-5',
                                 hasActiveChild
-                                  ? 'text-orange-600'
+                                  ? 'text-amber-800'
                                   : 'text-gray-400 group-hover:text-gray-500'
                               )}
                             />
@@ -454,7 +454,7 @@ function MobileMenu() {
                                   className={cn(
                                     'group flex items-center px-2 py-2 text-sm rounded-md',
                                     isActive
-                                      ? 'bg-orange-100 text-orange-700 font-medium'
+                                      ? 'bg-amber-100 text-amber-900 font-medium'
                                       : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                                   )}
                                 >
@@ -476,7 +476,7 @@ function MobileMenu() {
                         className={cn(
                           'group flex items-center px-2 py-2 text-sm font-medium rounded-md',
                           isActive
-                            ? 'bg-orange-100 text-orange-600'
+                            ? 'bg-amber-100 text-amber-800'
                             : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                         )}
                       >
@@ -484,7 +484,7 @@ function MobileMenu() {
                           className={cn(
                             'mr-3 flex-shrink-0 h-5 w-5',
                             isActive
-                              ? 'text-orange-600'
+                              ? 'text-amber-800'
                               : 'text-gray-400 group-hover:text-gray-500'
                           )}
                         />
@@ -509,7 +509,7 @@ function Header() {
         <div className="flex items-center gap-3">
           <MobileMenu />
           <div className="md:hidden flex items-center">
-            <CircleIcon className="h-6 w-6 text-orange-500" />
+            <CircleIcon className="h-6 w-6 text-amber-500" />
             <span className="ml-2 text-xl font-semibold text-gray-900">
               EasyGST
             </span>

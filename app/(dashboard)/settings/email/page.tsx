@@ -328,7 +328,7 @@ export default function EmailSettingsPage() {
               <div className="flex justify-end pt-4">
                 <Button
                   type="submit"
-                  className="bg-orange-500 hover:bg-orange-600 text-white"
+                  className="bg-amber-500 hover:bg-amber-800 text-white"
                   disabled={isPending}
                 >
                   {isPending ? (

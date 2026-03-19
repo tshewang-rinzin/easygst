@@ -120,7 +120,7 @@ export function SearchableCustomerSelect({
       <div className="relative">
         {selectedCustomer && !isOpen ? (
           <div
-            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white cursor-pointer hover:border-orange-400 transition-colors"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white cursor-pointer hover:border-amber-500 transition-colors"
             onClick={() => setIsOpen(true)}
           >
             <div className="flex items-center justify-between">
@@ -161,7 +161,7 @@ export function SearchableCustomerSelect({
               }}
               onFocus={() => setIsOpen(true)}
               onKeyDown={handleKeyDown}
-              className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               autoComplete="off"
             />
             <ChevronDown
@@ -183,7 +183,7 @@ export function SearchableCustomerSelect({
                   key={customer.id}
                   className={`px-3 py-2 cursor-pointer transition-colors ${
                     index === highlightedIndex
-                      ? 'bg-orange-50 text-orange-900'
+                      ? 'bg-amber-50 text-amber-950'
                       : 'hover:bg-gray-50'
                   }`}
                   onClick={() => handleSelectCustomer(customer)}
@@ -199,7 +199,7 @@ export function SearchableCustomerSelect({
                       </div>
                     </div>
                     {selectedCustomer?.id === customer.id && (
-                      <Check className="h-4 w-4 text-orange-500 ml-2 flex-shrink-0" />
+                      <Check className="h-4 w-4 text-amber-500 ml-2 flex-shrink-0" />
                     )}
                   </div>
                 </li>
@@ -217,7 +217,7 @@ export function SearchableCustomerSelect({
                       setSearchTerm('');
                       setIsOpen(false);
                     }}
-                    className="text-orange-600 hover:text-orange-700 underline"
+                    className="text-amber-800 hover:text-amber-900 underline"
                   >
                     clear search
                   </button>
@@ -232,7 +232,7 @@ export function SearchableCustomerSelect({
               href="/customers/new"
               target="_blank"
               rel="noopener noreferrer"
-              className="block px-3 py-2 text-sm text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded transition-colors text-center"
+              className="block px-3 py-2 text-sm text-amber-800 hover:text-amber-900 hover:bg-amber-50 rounded transition-colors text-center"
             >
               + Add New Customer
             </a>

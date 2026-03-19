@@ -144,7 +144,7 @@ export function SearchableInvoiceSelect({
       <div className="relative">
         {selectedInvoice && !isOpen ? (
           <div
-            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white cursor-pointer hover:border-orange-400 transition-colors"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white cursor-pointer hover:border-amber-500 transition-colors"
             onClick={() => setIsOpen(true)}
           >
             <div className="flex items-center justify-between">
@@ -160,7 +160,7 @@ export function SearchableInvoiceSelect({
                 </div>
                 <div className="flex gap-3 text-xs text-gray-500 mt-1">
                   <span>Due: {formatDate(selectedInvoice.dueDate)}</span>
-                  <span className="font-semibold text-orange-600">
+                  <span className="font-semibold text-amber-800">
                     {selectedInvoice.currency} {parseFloat(selectedInvoice.amountDue).toFixed(2)} due
                   </span>
                 </div>
@@ -195,7 +195,7 @@ export function SearchableInvoiceSelect({
               }}
               onFocus={() => setIsOpen(true)}
               onKeyDown={handleKeyDown}
-              className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               autoComplete="off"
             />
             <ChevronDown
@@ -219,7 +219,7 @@ export function SearchableInvoiceSelect({
                     key={invoice.id}
                     className={`px-3 py-2 cursor-pointer transition-colors ${
                       index === highlightedIndex
-                        ? 'bg-orange-50 text-orange-900'
+                        ? 'bg-amber-50 text-amber-950'
                         : 'hover:bg-gray-50'
                     }`}
                     onClick={() => handleSelectInvoice(invoice.id)}
@@ -245,14 +245,14 @@ export function SearchableInvoiceSelect({
                           </div>
                           <div className="flex gap-3">
                             <span>Total: {invoice.currency} {parseFloat(invoice.totalAmount).toFixed(2)}</span>
-                            <span className="font-semibold text-orange-600">
+                            <span className="font-semibold text-amber-800">
                               Due: {invoice.currency} {parseFloat(invoice.amountDue).toFixed(2)}
                             </span>
                           </div>
                         </div>
                       </div>
                       {selectedInvoiceId === invoice.id && (
-                        <Check className="h-4 w-4 text-orange-500 ml-2 flex-shrink-0" />
+                        <Check className="h-4 w-4 text-amber-500 ml-2 flex-shrink-0" />
                       )}
                     </div>
                   </li>
@@ -272,7 +272,7 @@ export function SearchableInvoiceSelect({
                       setSearchTerm('');
                       setIsOpen(false);
                     }}
-                    className="text-orange-600 hover:text-orange-700 underline"
+                    className="text-amber-800 hover:text-amber-900 underline"
                   >
                     clear search
                   </button>

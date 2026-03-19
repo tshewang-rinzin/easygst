@@ -56,7 +56,7 @@ export default function PaySuppliersPage() {
     <section className="flex-1 p-4 lg:p-8">
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-2">
-          <Banknote className="h-6 w-6 text-orange-500" />
+          <Banknote className="h-6 w-6 text-amber-500" />
           <h1 className="text-lg lg:text-2xl font-medium text-gray-900">Pay Suppliers</h1>
         </div>
         <p className="text-sm text-gray-500">Manage supplier payments and outstanding bills</p>
@@ -73,7 +73,7 @@ export default function PaySuppliersPage() {
                   BTN {totalOutstanding.toFixed(2)}
                 </p>
               </div>
-              <TrendingUp className="h-8 w-8 text-orange-500" />
+              <TrendingUp className="h-8 w-8 text-amber-500" />
             </div>
           </CardContent>
         </Card>
@@ -166,7 +166,7 @@ export default function PaySuppliersPage() {
                     </Link>
                     {item.bills.length > 0 && (
                       <Link href={`/purchases/bills/${item.bills[0].id}`}>
-                        <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+                        <Button size="sm" className="bg-amber-500 hover:bg-amber-800">
                           Pay Now
                         </Button>
                       </Link>
@@ -180,7 +180,7 @@ export default function PaySuppliersPage() {
               <Banknote className="h-12 w-12 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500 mb-2">No outstanding supplier bills</p>
               <Link href="/purchases/bills/new">
-                <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+                <Button size="sm" className="bg-amber-500 hover:bg-amber-800">
                   Create Supplier Bill
                 </Button>
               </Link>
@@ -209,7 +209,7 @@ export default function PaySuppliersPage() {
                 return (
                   <div
                     key={supplier.id}
-                    className="p-4 border border-gray-200 rounded-lg hover:border-orange-300 transition-colors"
+                    className="p-4 border border-gray-200 rounded-lg hover:border-amber-300 transition-colors"
                   >
                     <div className="flex justify-between items-start mb-2">
                       <h4 className="font-semibold text-gray-900">{supplier.name}</h4>
@@ -252,7 +252,7 @@ export default function PaySuppliersPage() {
             <div className="text-center py-8 text-gray-500">
               <p className="mb-2">No suppliers found</p>
               <Link href="/suppliers/new">
-                <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+                <Button size="sm" className="bg-amber-500 hover:bg-amber-800">
                   Add First Supplier
                 </Button>
               </Link>

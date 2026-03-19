@@ -19,7 +19,7 @@ function statusBadge(status: string) {
     draft: 'bg-gray-100 text-gray-700 hover:bg-gray-100',
     sent: 'bg-blue-100 text-blue-700 hover:bg-blue-100',
     viewed: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100',
-    partial: 'bg-orange-100 text-orange-700 hover:bg-orange-100',
+    partial: 'bg-amber-100 text-amber-900 hover:bg-amber-100',
     paid: 'bg-green-100 text-green-700 hover:bg-green-100',
     overdue: 'bg-red-100 text-red-700 hover:bg-red-100',
     cancelled: 'bg-gray-100 text-gray-500 hover:bg-gray-100',
@@ -78,7 +78,7 @@ async function StatsCards() {
         <Card className="hover:shadow-md transition-shadow cursor-pointer">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="rounded-full bg-orange-100 p-2"><DollarSign className="h-5 w-5 text-orange-600" /></div>
+              <div className="rounded-full bg-amber-100 p-2"><DollarSign className="h-5 w-5 text-amber-800" /></div>
               <div>
                 <p className="text-sm text-gray-500">Outstanding</p>
                 <p className="text-2xl font-bold">USD {parseFloat(stats.outstanding).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
@@ -109,7 +109,7 @@ async function TourInvoiceList({
         <h3 className="text-lg font-medium text-gray-900 mb-2">No tour invoices yet</h3>
         <p className="text-gray-500 mb-4">Create your first tour invoice to get started</p>
         <Link href="/tour-invoices/new">
-          <Button className="bg-orange-500 hover:bg-orange-600">
+          <Button className="bg-amber-500 hover:bg-amber-800">
             <PlusCircle className="mr-2 h-4 w-4" />
             New Tour Invoice
           </Button>
@@ -205,7 +205,7 @@ export default async function TourInvoicesPage({
             </Button>
           </a>
           <Link href="/tour-invoices/new">
-            <Button className="bg-orange-500 hover:bg-orange-600">
+            <Button className="bg-amber-500 hover:bg-amber-800">
               <PlusCircle className="mr-2 h-4 w-4" />
               New Tour Invoice
             </Button>
@@ -229,13 +229,13 @@ export default async function TourInvoicesPage({
                   name="search"
                   placeholder="Search by invoice #, tour name, or customer..."
                   defaultValue={params.search}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
               <select
                 name="status"
                 defaultValue={params.status || ''}
-                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               >
                 <option value="">All Status</option>
                 <option value="draft">Draft</option>

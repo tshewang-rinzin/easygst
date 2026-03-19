@@ -188,7 +188,7 @@ export default function ProductCatalogPage() {
           {selectedProducts.length > 0 && (
             <Sheet open={showAddSheet} onOpenChange={setShowAddSheet}>
               <SheetTrigger asChild>
-                <Button className="bg-orange-500 hover:bg-orange-600">
+                <Button className="bg-amber-500 hover:bg-amber-800">
                   <ShoppingCart className="h-4 w-4 mr-2" />
                   Add Selected ({selectedProducts.length})
                 </Button>
@@ -260,7 +260,7 @@ export default function ProductCatalogPage() {
                       Cancel
                     </Button>
                     <Button
-                      className="flex-1 bg-orange-500 hover:bg-orange-600"
+                      className="flex-1 bg-amber-500 hover:bg-amber-800"
                       onClick={handleAddProducts}
                       disabled={!canAddProducts || isAdding}
                     >
@@ -350,7 +350,7 @@ export default function ProductCatalogPage() {
       {/* Products */}
       {isLoading ? (
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500 mx-auto"></div>
           <p className="text-gray-500 mt-2">Loading products...</p>
         </div>
       ) : data?.products.length === 0 ? (
@@ -378,8 +378,8 @@ export default function ProductCatalogPage() {
                     onClick={() => toggleProductSelection(product.id, product)}
                     className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
                       selectedProducts.includes(product.id)
-                        ? 'bg-orange-500 border-orange-500 text-white'
-                        : 'border-gray-300 hover:border-orange-300'
+                        ? 'bg-amber-500 border-amber-500 text-white'
+                        : 'border-gray-300 hover:border-amber-300'
                     }`}
                   >
                     {selectedProducts.includes(product.id) && <Check className="h-3 w-3" />}
@@ -415,8 +415,8 @@ export default function ProductCatalogPage() {
                           onClick={() => toggleProductSelection(product.id, product)}
                           className={`w-6 h-6 rounded border-2 flex items-center justify-center mt-1 ${
                             selectedProducts.includes(product.id)
-                              ? 'bg-orange-500 border-orange-500 text-white'
-                              : 'border-gray-300 hover:border-orange-300'
+                              ? 'bg-amber-500 border-amber-500 text-white'
+                              : 'border-gray-300 hover:border-amber-300'
                           }`}
                         >
                           {selectedProducts.includes(product.id) && <Check className="h-3 w-3" />}

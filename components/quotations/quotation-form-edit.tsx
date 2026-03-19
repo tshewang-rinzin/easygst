@@ -249,7 +249,7 @@ export function QuotationFormEdit({
               </div>
               <div>
                 <Label className="text-sm font-medium text-gray-700 mb-2 block">Currency</Label>
-                <select id="currency" name="currency" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" defaultValue={quotation.currency}>
+                <select id="currency" name="currency" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500" defaultValue={quotation.currency}>
                   <option value="BTN">BTN - Ngultrum</option>
                   <option value="INR">INR - Rupee</option>
                   <option value="USD">USD - Dollar</option>
@@ -293,7 +293,7 @@ export function QuotationFormEdit({
                     </td>
                     <td className="py-3 px-2"><Input type="number" step="0.01" min="0.01" value={item.quantity} onChange={(e) => updateLineItem(item.id, 'quantity', e.target.value)} className="h-9 text-sm" /></td>
                     <td className="py-3 px-2">
-                      <select value={item.unit} onChange={(e) => updateLineItem(item.id, 'unit', e.target.value)} className="w-full h-9 px-2 py-1 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-500">
+                      <select value={item.unit} onChange={(e) => updateLineItem(item.id, 'unit', e.target.value)} className="w-full h-9 px-2 py-1 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
                         {units && units.length > 0 ? units.map((u) => (<option key={u.id} value={u.name}>{u.name}</option>)) : (
                           <><option value="piece">Piece</option><option value="hour">Hour</option><option value="day">Day</option><option value="month">Month</option><option value="kg">Kg</option><option value="service">Service</option></>
                         )}
@@ -302,14 +302,14 @@ export function QuotationFormEdit({
                     <td className="py-3 px-2"><Input type="number" step="0.01" min="0" value={item.unitPrice} onChange={(e) => updateLineItem(item.id, 'unitPrice', e.target.value)} placeholder="0.00" className="h-9 text-sm" /></td>
                     <td className="py-3 px-2"><Input type="number" step="0.01" min="0" max="100" value={item.discountPercent} onChange={(e) => updateLineItem(item.id, 'discountPercent', e.target.value)} className="h-9 text-sm" /></td>
                     <td className="py-3 px-2">
-                      <select value={item.taxRate} onChange={(e) => updateLineItem(item.id, 'taxRate', e.target.value)} disabled={item.isTaxExempt} className="w-full h-9 px-2 py-1 border border-gray-300 rounded-md text-sm bg-white disabled:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                      <select value={item.taxRate} onChange={(e) => updateLineItem(item.id, 'taxRate', e.target.value)} disabled={item.isTaxExempt} className="w-full h-9 px-2 py-1 border border-gray-300 rounded-md text-sm bg-white disabled:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-amber-500">
                         {taxClassifications && taxClassifications.length > 0 ? taxClassifications.sort((a, b) => a.sortOrder - b.sortOrder).filter((tc) => tc.isActive).map((c) => (
                           <option key={c.id} value={parseFloat(c.taxRate).toString()}>{c.name} ({parseFloat(c.taxRate)}%)</option>
                         )) : (<><option value="0">0%</option><option value="5">5%</option><option value="10">10%</option><option value="20">20%</option><option value="30">30%</option><option value="50">50%</option></>)}
                       </select>
                     </td>
                     <td className="py-3 px-2 text-center">
-                      <input type="checkbox" checked={item.isTaxExempt} onChange={(e) => updateLineItem(item.id, 'isTaxExempt', e.target.checked)} className="h-4 w-4 text-orange-500 focus:ring-orange-500 border-gray-300 rounded cursor-pointer" />
+                      <input type="checkbox" checked={item.isTaxExempt} onChange={(e) => updateLineItem(item.id, 'isTaxExempt', e.target.checked)} className="h-4 w-4 text-amber-500 focus:ring-amber-500 border-gray-300 rounded cursor-pointer" />
                     </td>
                     <td className="py-3 px-2 text-right"><span className="text-sm font-semibold text-gray-900">{calculateItemTotal(item).toFixed(2)}</span></td>
                     <td className="py-3 px-2 text-center">
@@ -328,7 +328,7 @@ export function QuotationFormEdit({
                 <div className="flex justify-between text-sm"><span className="text-gray-600">Subtotal:</span><span className="font-semibold">{totals.subtotal.toFixed(2)}</span></div>
                 {totals.totalDiscount > 0 && <div className="flex justify-between text-sm text-green-600"><span>Discount:</span><span className="font-semibold">-{totals.totalDiscount.toFixed(2)}</span></div>}
                 <div className="flex justify-between text-sm"><span className="text-gray-600">GST:</span><span className="font-semibold">{totals.totalTax.toFixed(2)}</span></div>
-                <div className="flex justify-between text-lg font-bold border-t border-gray-300 pt-3"><span>Total:</span><span className="text-orange-600">{totals.total.toFixed(2)}</span></div>
+                <div className="flex justify-between text-lg font-bold border-t border-gray-300 pt-3"><span>Total:</span><span className="text-amber-800">{totals.total.toFixed(2)}</span></div>
               </div>
             </div>
           </div>
@@ -356,7 +356,7 @@ export function QuotationFormEdit({
         {error && <div className="p-4 bg-red-50 border border-red-200 rounded-lg"><p className="text-sm font-medium text-red-600">{error}</p></div>}
 
         <div className="flex gap-4 pb-8">
-          <Button type="submit" disabled={isSubmitting || !selectedCustomer} className="bg-orange-500 hover:bg-orange-600">
+          <Button type="submit" disabled={isSubmitting || !selectedCustomer} className="bg-amber-500 hover:bg-amber-800">
             {isSubmitting ? 'Saving...' : 'Save Quotation'}
           </Button>
           <Link href={`/quotations/${quotation.id}`}><Button type="button" variant="outline">Cancel</Button></Link>

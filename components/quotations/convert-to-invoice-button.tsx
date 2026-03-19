@@ -38,7 +38,7 @@ export function ConvertToInvoiceButton({ quotationId, quotationNumber }: Props) 
     <Button
       onClick={handleConvert}
       disabled={isConverting}
-      className="bg-orange-500 hover:bg-orange-600"
+      className="bg-amber-500 hover:bg-amber-800"
     >
       <FileText className="h-4 w-4 mr-2" />
       {isConverting ? 'Converting...' : 'Convert to Invoice'}

@@ -53,7 +53,7 @@ async function DebitNotesList() {
             Debit notes are used to adjust or reduce amounts owed to suppliers.
           </p>
           <Link href="/purchases/debit-notes/new">
-            <Button className="bg-orange-500 hover:bg-orange-600">
+            <Button className="bg-amber-500 hover:bg-amber-800">
               <Plus className="h-4 w-4 mr-2" />
               Create Debit Note
             </Button>
@@ -116,7 +116,7 @@ async function DebitNotesList() {
                     </p>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <p className={parseFloat(debitNote.unappliedAmount) > 0 ? 'text-orange-600 font-medium' : 'text-gray-500'}>
+                    <p className={parseFloat(debitNote.unappliedAmount) > 0 ? 'text-amber-800 font-medium' : 'text-gray-500'}>
                       {debitNote.currency} {parseFloat(debitNote.unappliedAmount).toFixed(2)}
                     </p>
                   </td>
@@ -151,7 +151,7 @@ export default function DebitNotesPage() {
           </p>
         </div>
         <Link href="/purchases/debit-notes/new">
-          <Button className="bg-orange-500 hover:bg-orange-600">
+          <Button className="bg-amber-500 hover:bg-amber-800">
             <Plus className="h-4 w-4 mr-2" />
             New Debit Note
           </Button>

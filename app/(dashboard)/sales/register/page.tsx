@@ -133,7 +133,7 @@ export default function SalesRegisterPage() {
     <section className="flex-1 p-4 lg:p-8">
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-2">
-          <FileSpreadsheet className="h-6 w-6 text-orange-500" />
+          <FileSpreadsheet className="h-6 w-6 text-amber-500" />
           <h1 className="text-lg lg:text-2xl font-medium text-gray-900">
             Sales Register
           </h1>
@@ -180,7 +180,7 @@ export default function SalesRegisterPage() {
             <div className="flex gap-2">
               <Button
                 onClick={fetchSalesRegister}
-                className="bg-orange-500 hover:bg-orange-600"
+                className="bg-amber-500 hover:bg-amber-800"
               >
                 Apply Filter
               </Button>
@@ -242,7 +242,7 @@ export default function SalesRegisterPage() {
               </div>
               <div>
                 <p className="text-xs text-gray-500 mb-1">Total GST</p>
-                <p className="text-lg font-semibold text-orange-600">
+                <p className="text-lg font-semibold text-amber-800">
                   BTN {summary.totalGst.toFixed(2)}
                 </p>
               </div>
@@ -269,7 +269,7 @@ export default function SalesRegisterPage() {
               <p className="text-gray-500 mb-2">No sales found for this period</p>
               <p className="text-sm text-gray-400">
                 Try adjusting your date range or{' '}
-                <Link href="/sales/invoices/new" className="text-orange-600 hover:text-orange-700">
+                <Link href="/sales/invoices/new" className="text-amber-800 hover:text-amber-900">
                   create an invoice
                 </Link>
               </p>
@@ -308,7 +308,7 @@ export default function SalesRegisterPage() {
                       <TableCell className="text-sm">
                         <Link
                           href={`/invoices/${entry.id}`}
-                          className="text-orange-600 hover:text-orange-700 font-medium"
+                          className="text-amber-800 hover:text-amber-900 font-medium"
                         >
                           {entry.number}
                         </Link>
@@ -323,7 +323,7 @@ export default function SalesRegisterPage() {
                       <TableCell className="text-sm text-right">
                         {parseFloat(entry.gstRate).toFixed(2)}%
                       </TableCell>
-                      <TableCell className="text-sm text-right font-medium text-orange-600">
+                      <TableCell className="text-sm text-right font-medium text-amber-800">
                         {entry.currency} {parseFloat(entry.gstAmount).toFixed(2)}
                       </TableCell>
                       <TableCell className="text-sm text-right font-semibold">

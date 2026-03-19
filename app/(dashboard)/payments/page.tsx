@@ -70,7 +70,7 @@ async function PaymentsList() {
                   <td className="py-3 px-4 text-sm">
                     <Link
                       href={`/invoices/${invoice?.id}`}
-                      className="text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1"
+                      className="text-amber-800 hover:text-amber-900 font-medium flex items-center gap-1"
                     >
                       <FileText className="h-3 w-3" />
                       {invoice?.invoiceNumber}
@@ -93,7 +93,7 @@ async function PaymentsList() {
                         <span className={`font-medium ${
                           parseFloat(payment.adjustmentAmount || '0') < 0
                             ? 'text-green-600'
-                            : 'text-orange-600'
+                            : 'text-amber-800'
                         }`}>
                           {parseFloat(payment.adjustmentAmount || '0') > 0 ? '+' : ''}
                           {payment.currency} {parseFloat(payment.adjustmentAmount || '0').toFixed(2)}

@@ -88,7 +88,7 @@ export default function PlansPage() {
           <Button onClick={handleSeed} disabled={isSeeding} variant="outline">
             {isSeeding ? 'Seeding...' : 'Seed Defaults'}
           </Button>
-          <Button onClick={() => { setEditingPlan(null); setShowCreateDialog(true); }} className="bg-orange-500 hover:bg-orange-600">
+          <Button onClick={() => { setEditingPlan(null); setShowCreateDialog(true); }} className="bg-amber-500 hover:bg-amber-800">
             <Plus className="h-4 w-4 mr-2" />
             New Plan
           </Button>
@@ -107,11 +107,11 @@ export default function PlansPage() {
           {plans.map((plan, idx) => {
             const Icon = planIcons[idx % planIcons.length];
             return (
-              <Card key={plan.id} className={plan.isDefault ? 'border-orange-300 bg-orange-50/30' : ''}>
+              <Card key={plan.id} className={plan.isDefault ? 'border-amber-300 bg-amber-50/30' : ''}>
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Icon className="h-5 w-5 text-orange-500" />
+                      <Icon className="h-5 w-5 text-amber-500" />
                       <CardTitle className="text-lg">{plan.name}</CardTitle>
                     </div>
                     <div className="flex gap-1">
@@ -123,7 +123,7 @@ export default function PlansPage() {
                       </Button>
                     </div>
                   </div>
-                  {plan.isDefault && <Badge className="bg-orange-100 text-orange-700 w-fit">Default</Badge>}
+                  {plan.isDefault && <Badge className="bg-amber-100 text-amber-900 w-fit">Default</Badge>}
                   <CardDescription>{plan.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -178,7 +178,7 @@ export default function PlansPage() {
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Package className="h-12 w-12 text-gray-300 mb-4" />
             <p className="text-gray-500 mb-4">No plans configured yet</p>
-            <Button onClick={handleSeed} className="bg-orange-500 hover:bg-orange-600">
+            <Button onClick={handleSeed} className="bg-amber-500 hover:bg-amber-800">
               Seed Default Plans & Features
             </Button>
           </CardContent>
@@ -391,7 +391,7 @@ function PlanDialog({ plan, features, onClose, onSaved }: {
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSave} disabled={saving || !name} className="bg-orange-500 hover:bg-orange-600">
+          <Button onClick={handleSave} disabled={saving || !name} className="bg-amber-500 hover:bg-amber-800">
             {saving ? 'Saving...' : plan ? 'Update Plan' : 'Create Plan'}
           </Button>
         </DialogFooter>

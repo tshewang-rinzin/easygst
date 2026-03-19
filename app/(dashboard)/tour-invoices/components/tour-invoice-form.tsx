@@ -531,7 +531,7 @@ export function TourInvoiceForm({ existingInvoice, existingItems, existingGuests
                           key={c.id}
                           type="button"
                           onClick={() => handleSelectCustomer(c)}
-                          className="w-full px-4 py-3 text-left hover:bg-orange-50 border-b last:border-b-0"
+                          className="w-full px-4 py-3 text-left hover:bg-amber-50 border-b last:border-b-0"
                         >
                           <div className="font-medium text-gray-900">{c.name}</div>
                           <div className="text-sm text-gray-500">
@@ -1143,7 +1143,7 @@ export function TourInvoiceForm({ existingInvoice, existingItems, existingGuests
         <Button variant="outline" onClick={() => router.push('/tour-invoices')} disabled={isSubmitting}>
           Cancel
         </Button>
-        <Button onClick={() => handleSubmit(false)} disabled={isSubmitting} className="bg-orange-500 hover:bg-orange-600">
+        <Button onClick={() => handleSubmit(false)} disabled={isSubmitting} className="bg-amber-500 hover:bg-amber-800">
           <Save className="mr-2 h-4 w-4" />
           {isSubmitting ? 'Saving...' : existingInvoice ? 'Update' : 'Save as Draft'}
         </Button>

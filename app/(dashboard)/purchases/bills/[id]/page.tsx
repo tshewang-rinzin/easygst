@@ -320,7 +320,7 @@ export default function ViewSupplierBillPage() {
                   <Button
                     size="sm"
                     onClick={() => setShowPaymentDialog(true)}
-                    className="bg-orange-500 hover:bg-orange-600"
+                    className="bg-amber-500 hover:bg-amber-800"
                   >
                     <DollarSign className="h-4 w-4 mr-2" />
                     Record Payment

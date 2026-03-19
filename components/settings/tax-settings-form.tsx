@@ -83,7 +83,7 @@ export function TaxSettingsForm({ team }: TaxSettingsFormProps) {
               <span>Default GST Rate (%) <span className="text-red-500">*</span></span>
               <Link
                 href="/settings/tax-classifications"
-                className="text-xs text-orange-600 hover:text-orange-700"
+                className="text-xs text-amber-800 hover:text-amber-900"
               >
                 Manage Classifications
               </Link>
@@ -92,7 +92,7 @@ export function TaxSettingsForm({ team }: TaxSettingsFormProps) {
               <select
                 id="defaultGstRate"
                 name="defaultGstRate"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                 value={selectedRate}
                 onChange={(e) => setSelectedRate(e.target.value)}
                 required
@@ -125,7 +125,7 @@ export function TaxSettingsForm({ team }: TaxSettingsFormProps) {
               </p>
             )}
             {taxableClassifications.length === 0 && !taxError && (
-              <p className="text-xs text-orange-600 mt-2">
+              <p className="text-xs text-amber-800 mt-2">
                 <Link href="/settings/tax-classifications" className="hover:underline">
                   Configure tax classifications
                 </Link> or use the "Reset to Defaults" button to create Standard (5%) and Zero-Rated (0%) classifications.
@@ -177,7 +177,7 @@ export function TaxSettingsForm({ team }: TaxSettingsFormProps) {
           <Button
             type="submit"
             disabled={isPending}
-            className="bg-orange-500 hover:bg-orange-600 text-white"
+            className="bg-amber-500 hover:bg-amber-800 text-white"
           >
             {isPending ? (
               <>

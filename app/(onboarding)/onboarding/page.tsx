@@ -315,9 +315,9 @@ function OnboardingWizardContent() {
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all ${
                     isCompleted
-                      ? 'bg-orange-500 text-white'
+                      ? 'bg-amber-500 text-white'
                       : isActive
-                      ? 'bg-orange-500 text-white ring-4 ring-orange-100'
+                      ? 'bg-amber-500 text-white ring-4 ring-amber-100'
                       : 'bg-gray-200 text-gray-500'
                   }`}
                 >
@@ -329,7 +329,7 @@ function OnboardingWizardContent() {
                 </div>
                 <span
                   className={`text-xs mt-1 hidden sm:block ${
-                    isActive ? 'text-orange-600 font-medium' : 'text-gray-400'
+                    isActive ? 'text-amber-800 font-medium' : 'text-gray-400'
                   }`}
                 >
                   {step.label}
@@ -338,7 +338,7 @@ function OnboardingWizardContent() {
               {i < STEPS.length - 1 && (
                 <div
                   className={`w-8 sm:w-12 h-0.5 mx-1 ${
-                    stepNum < currentStep ? 'bg-orange-500' : 'bg-gray-200'
+                    stepNum < currentStep ? 'bg-amber-500' : 'bg-gray-200'
                   }`}
                 />
               )}
@@ -350,7 +350,7 @@ function OnboardingWizardContent() {
       {/* Progress Bar */}
       <div className="w-full bg-gray-200 rounded-full h-2">
         <div
-          className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+          className="bg-amber-500 h-2 rounded-full transition-all duration-300"
           style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
         />
       </div>
@@ -388,7 +388,7 @@ function OnboardingWizardContent() {
                 <Label htmlFor="businessTypeId">Business Type</Label>
                 <select
                   id="businessTypeId"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                   value={businessTypeId}
                   onChange={(e) => setBusinessTypeId(e.target.value)}
                 >
@@ -473,7 +473,7 @@ function OnboardingWizardContent() {
                   <Label htmlFor="dzongkhag">Dzongkhag</Label>
                   <select
                     id="dzongkhag"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                     value={dzongkhag}
                     onChange={(e) => setDzongkhag(e.target.value)}
                   >
@@ -522,7 +522,7 @@ function OnboardingWizardContent() {
                 ) : (
                   <label
                     htmlFor="logoUpload"
-                    className="w-40 h-40 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-orange-400 hover:bg-orange-50 transition-colors"
+                    className="w-40 h-40 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-amber-500 hover:bg-amber-50 transition-colors"
                   >
                     <Upload className="h-8 w-8 text-gray-400 mb-2" />
                     <span className="text-sm text-gray-500">Click to upload</span>
@@ -539,7 +539,7 @@ function OnboardingWizardContent() {
                 {logoPreview && (
                   <label
                     htmlFor="logoUpload"
-                    className="text-sm text-orange-600 cursor-pointer hover:underline"
+                    className="text-sm text-amber-800 cursor-pointer hover:underline"
                   >
                     Change logo
                   </label>
@@ -631,7 +631,7 @@ function OnboardingWizardContent() {
                   <Label htmlFor="defaultCurrency">Default Currency</Label>
                   <select
                     id="defaultCurrency"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                     value={defaultCurrency}
                     onChange={(e) => setDefaultCurrency(e.target.value)}
                   >
@@ -661,7 +661,7 @@ function OnboardingWizardContent() {
                       onClick={() => setInvoiceTemplate(t)}
                       className={`p-4 rounded-lg border-2 text-center transition-all ${
                         invoiceTemplate === t
-                          ? 'border-orange-500 bg-orange-50 text-orange-700'
+                          ? 'border-amber-500 bg-amber-50 text-amber-900'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
@@ -766,7 +766,7 @@ function OnboardingWizardContent() {
             <Button
               onClick={handleNext}
               disabled={saving}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
+              className="bg-amber-500 hover:bg-amber-800 text-white"
             >
               {saving ? (
                 <>
@@ -807,7 +807,7 @@ export default function OnboardingPage() {
     <Suspense
       fallback={
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
         </div>
       }
     >

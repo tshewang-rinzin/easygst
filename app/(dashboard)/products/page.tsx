@@ -31,7 +31,7 @@ async function ProductList({ searchTerm }: { searchTerm?: string }) {
           Get started by adding your first product or service
         </p>
         <Link href="/products/new">
-          <Button className="bg-orange-500 hover:bg-orange-600">
+          <Button className="bg-amber-500 hover:bg-amber-800">
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Product
           </Button>
@@ -65,7 +65,7 @@ async function ProductList({ searchTerm }: { searchTerm?: string }) {
                     <div className="font-medium flex items-center gap-2">
                       {product.name}
                       {Number(product.variantCount) > 0 && (
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-orange-50 text-orange-700 border-orange-200">
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-amber-50 text-amber-900 border-amber-200">
                           {product.variantCount} variant{Number(product.variantCount) !== 1 ? 's' : ''}
                         </Badge>
                       )}
@@ -221,7 +221,7 @@ export default async function ProductsPage({
           </p>
         </div>
         <Link href="/products/new">
-          <Button className="bg-orange-500 hover:bg-orange-600">
+          <Button className="bg-amber-500 hover:bg-amber-800">
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Product
           </Button>
@@ -239,7 +239,7 @@ export default async function ProductsPage({
                 name="search"
                 placeholder="Search by name, SKU, or description..."
                 defaultValue={searchTerm}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
             <Button type="submit" variant="outline">

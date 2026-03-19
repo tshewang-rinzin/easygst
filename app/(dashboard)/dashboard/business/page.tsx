@@ -246,7 +246,7 @@ function BusinessForm({ state, team }: BusinessFormProps) {
               <select
                 id="defaultCurrency"
                 name="defaultCurrency"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                 defaultValue={team?.defaultCurrency || 'BTN'}
                 required
               >
@@ -342,7 +342,7 @@ export default function BusinessSettingsPage() {
         <div className="flex justify-end">
           <Button
             type="submit"
-            className="bg-orange-500 hover:bg-orange-600 text-white px-8"
+            className="bg-amber-500 hover:bg-amber-800 text-white px-8"
             disabled={isPending}
           >
             {isPending ? (

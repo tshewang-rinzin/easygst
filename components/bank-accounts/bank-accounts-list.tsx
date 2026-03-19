@@ -87,7 +87,7 @@ export function BankAccountsList({ initialAccounts }: BankAccountsListProps) {
       <div className="flex justify-end">
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+            <Button className="bg-amber-500 hover:bg-amber-800 text-white">
               <Plus className="mr-2 h-4 w-4" />
               Add Bank Account
             </Button>
@@ -108,14 +108,14 @@ export function BankAccountsList({ initialAccounts }: BankAccountsListProps) {
       {accounts && accounts.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2">
           {accounts.map((account) => (
-            <Card key={account.id} className={account.isDefault ? 'border-orange-500 border-2' : ''}>
+            <Card key={account.id} className={account.isDefault ? 'border-amber-500 border-2' : ''}>
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <CardTitle className="text-lg">{account.bankName}</CardTitle>
                       {account.isDefault && (
-                        <Badge className="bg-orange-500">
+                        <Badge className="bg-amber-500">
                           <Star className="h-3 w-3 mr-1" />
                           Default
                         </Badge>
@@ -248,7 +248,7 @@ export function BankAccountsList({ initialAccounts }: BankAccountsListProps) {
             </p>
             <Button
               onClick={() => setIsAddDialogOpen(true)}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
+              className="bg-amber-500 hover:bg-amber-800 text-white"
             >
               <Plus className="mr-2 h-4 w-4" />
               Add Bank Account

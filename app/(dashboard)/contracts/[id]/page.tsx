@@ -357,7 +357,7 @@ function CreateInvoiceDialog({
                     )}
                     <div className="flex justify-between text-sm font-bold border-t border-gray-300 pt-2">
                       <span>Total (incl. GST)</span>
-                      <span className="text-orange-600">{fmt(inclusiveAmount)}</span>
+                      <span className="text-amber-800">{fmt(inclusiveAmount)}</span>
                     </div>
                   </div>
                 );
@@ -379,7 +379,7 @@ function CreateInvoiceDialog({
             <Button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="bg-orange-500 hover:bg-orange-600"
+              className="bg-amber-500 hover:bg-amber-800"
             >
               {isSubmitting ? 'Creating...' : 'Create Invoice'}
             </Button>
@@ -407,7 +407,7 @@ export default function ContractDetailPage() {
     return (
       <div className="p-8">
         <p className="text-red-600">Contract not found</p>
-        <Link href="/contracts" className="text-sm text-orange-500 hover:underline mt-2 block">
+        <Link href="/contracts" className="text-sm text-amber-500 hover:underline mt-2 block">
           Back to Contracts
         </Link>
       </div>
@@ -471,7 +471,7 @@ export default function ContractDetailPage() {
             <div className="flex items-center gap-2 mb-2">
               <span className="text-sm font-mono text-gray-500">{c.contractNumber}</span>
               <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                c.type === 'project' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700'
+                c.type === 'project' ? 'bg-purple-100 text-purple-700' : 'bg-amber-100 text-amber-900'
               }`}>
                 {c.type === 'project' ? 'Project' : 'AMC'}
               </span>
@@ -495,7 +495,7 @@ export default function ContractDetailPage() {
               <>
                 <Button
                   onClick={() => setShowInvoiceDialog(true)}
-                  className="bg-orange-500 hover:bg-orange-600"
+                  className="bg-amber-500 hover:bg-amber-800"
                 >
                   <FileText className="h-4 w-4 mr-2" />
                   Create Invoice
@@ -556,7 +556,7 @@ export default function ContractDetailPage() {
           </div>
           <div>
             <p className="text-xs text-gray-500 uppercase font-medium">Remaining</p>
-            <p className="text-xl font-bold text-orange-600">{formatCurrency(c.remainingValue)}</p>
+            <p className="text-xl font-bold text-amber-800">{formatCurrency(c.remainingValue)}</p>
           </div>
         </div>
 
@@ -564,7 +564,7 @@ export default function ContractDetailPage() {
         <div className="mt-4">
           <div className="w-full bg-gray-100 rounded-full h-3">
             <div
-              className="bg-orange-500 h-3 rounded-full transition-all"
+              className="bg-amber-500 h-3 rounded-full transition-all"
               style={{ width: `${Math.min(100, progress)}%` }}
             />
           </div>
@@ -612,7 +612,7 @@ export default function ContractDetailPage() {
                     <StatusBadge status={m.status} />
                     {m.invoiceId && (
                       <Link href={`/invoices/${m.invoiceId}`}>
-                        <ExternalLink className="h-4 w-4 text-gray-400 hover:text-orange-500" />
+                        <ExternalLink className="h-4 w-4 text-gray-400 hover:text-amber-500" />
                       </Link>
                     )}
                   </div>
@@ -643,7 +643,7 @@ export default function ContractDetailPage() {
                     <StatusBadge status={b.status} />
                     {b.invoiceId && (
                       <Link href={`/invoices/${b.invoiceId}`}>
-                        <ExternalLink className="h-4 w-4 text-gray-400 hover:text-orange-500" />
+                        <ExternalLink className="h-4 w-4 text-gray-400 hover:text-amber-500" />
                       </Link>
                     )}
                   </div>
@@ -664,7 +664,7 @@ export default function ContractDetailPage() {
                 <Link
                   key={inv.id}
                   href={`/invoices/${inv.id}`}
-                  className="flex justify-between items-center p-3 border border-gray-100 rounded-lg hover:border-orange-200 transition-all"
+                  className="flex justify-between items-center p-3 border border-gray-100 rounded-lg hover:border-amber-200 transition-all"
                 >
                   <div>
                     <p className="font-medium text-gray-900">{inv.invoiceNumber}</p>

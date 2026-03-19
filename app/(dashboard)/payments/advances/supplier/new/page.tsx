@@ -73,7 +73,7 @@ export default function NewSupplierAdvancePage() {
         <Card className="max-w-3xl">
           <CardHeader className="border-b bg-gray-50/50">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Wallet className="h-5 w-5 text-orange-500" />
+              <Wallet className="h-5 w-5 text-amber-500" />
               Advance Details
             </CardTitle>
             <CardDescription>
@@ -254,7 +254,7 @@ export default function NewSupplierAdvancePage() {
               <Button
                 type="submit"
                 disabled={isPending || !selectedSupplier}
-                className="bg-orange-500 hover:bg-orange-600 min-w-[140px]"
+                className="bg-amber-500 hover:bg-amber-800 min-w-[140px]"
               >
                 {isPending ? (
                   <>

@@ -52,7 +52,7 @@ export function IssueCreditNoteButton({
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+        <Button size="sm" className="bg-amber-500 hover:bg-amber-800">
           <Send className="h-4 w-4 mr-2" />
           Issue
         </Button>
@@ -77,7 +77,7 @@ export function IssueCreditNoteButton({
           <AlertDialogAction
             onClick={handleIssue}
             disabled={isPending}
-            className="bg-orange-500 hover:bg-orange-600"
+            className="bg-amber-500 hover:bg-amber-800"
           >
             {isPending ? (
               <>

@@ -27,7 +27,7 @@ async function InvoiceAdjustmentsList() {
             Create credit notes, debit notes, or add discounts and late fees to invoices.
           </p>
           <Link href="/adjustments/new">
-            <Button className="bg-orange-500 hover:bg-orange-600">
+            <Button className="bg-amber-500 hover:bg-amber-800">
               <PlusCircle className="mr-2 h-4 w-4" />
               Create Adjustment
             </Button>
@@ -46,7 +46,7 @@ async function InvoiceAdjustmentsList() {
       case 'discount':
         return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Discount</Badge>;
       case 'late_fee':
-        return <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">Late Fee</Badge>;
+        return <Badge className="bg-amber-100 text-amber-950 hover:bg-amber-100">Late Fee</Badge>;
       case 'bank_charges':
         return <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">Bank Charges</Badge>;
       default:
@@ -89,7 +89,7 @@ async function InvoiceAdjustmentsList() {
                   <TableCell className="text-sm">
                     <Link
                       href={`/invoices/${invoice?.id}`}
-                      className="text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1"
+                      className="text-amber-800 hover:text-amber-900 font-medium flex items-center gap-1"
                     >
                       <FileText className="h-3 w-3" />
                       {invoice?.invoiceNumber}
@@ -191,7 +191,7 @@ export default function InvoiceAdjustmentsPage() {
           </p>
         </div>
         <Link href="/adjustments/new">
-          <Button className="bg-orange-500 hover:bg-orange-600">
+          <Button className="bg-amber-500 hover:bg-amber-800">
             <PlusCircle className="mr-2 h-4 w-4" />
             Create Adjustment
           </Button>

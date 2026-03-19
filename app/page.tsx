@@ -46,14 +46,14 @@ export default async function HomePage() {
 
       <main>
         {/* Hero Section */}
-        <section className="pt-16 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-orange-50">
+        <section className="pt-16 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-amber-50">
           <div className="max-w-7xl mx-auto">
             <div className="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
               {/* Left Column - Content */}
               <div className="text-center lg:text-left">
                 <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 tracking-tight leading-tight">
                   Bhutan's Complete
-                  <span className="block mt-2 bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+                  <span className="block mt-2 bg-gradient-to-r from-amber-500 to-amber-800 bg-clip-text text-transparent">
                     GST Solution
                   </span>
                 </h1>
@@ -67,7 +67,7 @@ export default async function HomePage() {
                   <Link href="/sign-up">
                     <Button
                       size="lg"
-                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-lg px-8 py-6 rounded-xl shadow-xl shadow-orange-200 hover:shadow-2xl hover:shadow-orange-300 transition-all transform hover:scale-105"
+                      className="bg-gradient-to-r from-amber-500 to-amber-800 hover:from-amber-800 hover:to-amber-900 text-lg px-8 py-6 rounded-xl shadow-xl shadow-amber-200 hover:shadow-2xl hover:shadow-amber-300 transition-all transform hover:scale-105"
                     >
                       Start Free Now
                       <ArrowRight className="ml-2 h-5 w-5" />
@@ -77,7 +77,7 @@ export default async function HomePage() {
                     <Button
                       size="lg"
                       variant="outline"
-                      className="text-lg px-8 py-6 rounded-xl border-2 border-orange-200 hover:border-orange-300 hover:bg-orange-50 transition-all"
+                      className="text-lg px-8 py-6 rounded-xl border-2 border-amber-200 hover:border-amber-300 hover:bg-amber-50 transition-all"
                     >
                       See How It Works
                     </Button>
@@ -94,9 +94,9 @@ export default async function HomePage() {
                     <Shield className="h-4 w-4 text-blue-500 mr-2" />
                     <span className="text-blue-700 font-medium">DRC Compliant</span>
                   </div>
-                  <div className="flex items-center bg-orange-50 px-3 py-2 rounded-full">
-                    <Heart className="h-4 w-4 text-orange-500 mr-2" />
-                    <span className="text-orange-700 font-medium">Made in Bhutan</span>
+                  <div className="flex items-center bg-amber-50 px-3 py-2 rounded-full">
+                    <Heart className="h-4 w-4 text-amber-500 mr-2" />
+                    <span className="text-amber-900 font-medium">Made in Bhutan</span>
                   </div>
                 </div>
               </div>
@@ -105,22 +105,22 @@ export default async function HomePage() {
               <div className="mt-16 lg:mt-0">
                 <div className="relative">
                   {/* Background decorative elements */}
-                  <div className="absolute -top-4 -right-4 w-72 h-72 bg-orange-200 rounded-full mix-blend-multiply filter blur-xl opacity-70"></div>
-                  <div className="absolute -bottom-8 -left-4 w-72 h-72 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl opacity-70"></div>
+                  <div className="absolute -top-4 -right-4 w-72 h-72 bg-amber-200 rounded-full mix-blend-multiply filter blur-xl opacity-70"></div>
+                  <div className="absolute -bottom-8 -left-4 w-72 h-72 bg-amber-300 rounded-full mix-blend-multiply filter blur-xl opacity-70"></div>
                   
                   {/* Invoice Card */}
-                  <div className="relative bg-white rounded-2xl shadow-2xl border border-orange-100 overflow-hidden">
+                  <div className="relative bg-white rounded-2xl shadow-2xl border border-amber-100 overflow-hidden">
                     {/* Invoice Header */}
-                    <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4 text-white">
+                    <div className="bg-gradient-to-r from-amber-500 to-amber-800 px-6 py-4 text-white">
                       <div className="flex items-center justify-between">
                         <div>
                           <h3 className="font-bold text-lg">DRUK ENTERPRISE</h3>
-                          <p className="text-orange-100 text-sm">TPN: 100123456789</p>
-                          <p className="text-orange-100 text-sm">Thimphu, Bhutan</p>
+                          <p className="text-amber-100 text-sm">TPN: 100123456789</p>
+                          <p className="text-amber-100 text-sm">Thimphu, Bhutan</p>
                         </div>
                         <div className="text-right">
                           <p className="text-2xl font-bold">INVOICE</p>
-                          <p className="text-orange-100">#INV-2026-0042</p>
+                          <p className="text-amber-100">#INV-2026-0042</p>
                         </div>
                       </div>
                     </div>
@@ -170,7 +170,7 @@ export default async function HomePage() {
                           </div>
                           <div className="flex justify-between text-lg font-bold">
                             <span>Total:</span>
-                            <span className="text-orange-600">BTN 3,960.00</span>
+                            <span className="text-amber-800">BTN 3,960.00</span>
                           </div>
                         </div>
                       </div>
@@ -184,10 +184,10 @@ export default async function HomePage() {
                   </div>
 
                   {/* Floating Elements */}
-                  <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-lg border border-orange-100">
+                  <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-lg border border-amber-100">
                     <div className="flex items-center space-x-3">
-                      <div className="bg-orange-100 p-2 rounded-lg">
-                        <Receipt className="h-6 w-6 text-orange-600" />
+                      <div className="bg-amber-100 p-2 rounded-lg">
+                        <Receipt className="h-6 w-6 text-amber-800" />
                       </div>
                       <div>
                         <div className="text-xs text-gray-500 uppercase tracking-wide">Auto Calculate</div>
@@ -210,8 +210,8 @@ export default async function HomePage() {
             </div>
             <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
               <div className="flex flex-col items-center text-center">
-                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-2">
-                  <ShoppingCart className="h-6 w-6 text-orange-600" />
+                <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-2">
+                  <ShoppingCart className="h-6 w-6 text-amber-800" />
                 </div>
                 <span className="text-sm font-medium text-gray-700">Grocery</span>
               </div>
@@ -257,8 +257,8 @@ export default async function HomePage() {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {/* Feature 1 */}
-              <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 group hover:border-orange-200">
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 group hover:border-amber-200">
+                <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-800 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <FileText className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">GST-Compliant Invoicing</h3>
@@ -268,7 +268,7 @@ export default async function HomePage() {
               </div>
 
               {/* Feature 2 */}
-              <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 group hover:border-orange-200">
+              <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 group hover:border-amber-200">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Package className="h-6 w-6 text-white" />
                 </div>
@@ -279,7 +279,7 @@ export default async function HomePage() {
               </div>
 
               {/* Feature 3 */}
-              <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 group hover:border-orange-200">
+              <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 group hover:border-amber-200">
                 <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Database className="h-6 w-6 text-white" />
                 </div>
@@ -290,7 +290,7 @@ export default async function HomePage() {
               </div>
 
               {/* Feature 4 */}
-              <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 group hover:border-orange-200">
+              <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 group hover:border-amber-200">
                 <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <CreditCard className="h-6 w-6 text-white" />
                 </div>
@@ -301,7 +301,7 @@ export default async function HomePage() {
               </div>
 
               {/* Feature 5 */}
-              <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 group hover:border-orange-200">
+              <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 group hover:border-amber-200">
                 <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Receipt className="h-6 w-6 text-white" />
                 </div>
@@ -312,7 +312,7 @@ export default async function HomePage() {
               </div>
 
               {/* Feature 6 */}
-              <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 group hover:border-orange-200">
+              <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 group hover:border-amber-200">
                 <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <BarChart3 className="h-6 w-6 text-white" />
                 </div>
@@ -323,7 +323,7 @@ export default async function HomePage() {
               </div>
 
               {/* Feature 7 */}
-              <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 group hover:border-orange-200">
+              <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 group hover:border-amber-200">
                 <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Users className="h-6 w-6 text-white" />
                 </div>
@@ -334,7 +334,7 @@ export default async function HomePage() {
               </div>
 
               {/* Feature 8 */}
-              <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 group hover:border-orange-200">
+              <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 group hover:border-amber-200">
                 <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Smartphone className="h-6 w-6 text-white" />
                 </div>
@@ -363,10 +363,10 @@ export default async function HomePage() {
               {/* Step 1 */}
               <div className="text-center group">
                 <div className="relative mb-6">
-                  <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                  <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-amber-800 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
                     <span className="text-2xl font-bold text-white">1</span>
                   </div>
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-orange-200 rounded-full"></div>
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-amber-200 rounded-full"></div>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Sign up & Choose Business Type</h3>
                 <p className="text-gray-600 leading-relaxed">
@@ -406,7 +406,7 @@ export default async function HomePage() {
             {/* Arrow connectors for desktop */}
             <div className="hidden md:flex justify-center mt-8">
               <div className="flex items-center space-x-8">
-                <ArrowRight className="h-6 w-6 text-orange-400" />
+                <ArrowRight className="h-6 w-6 text-amber-500" />
                 <ArrowRight className="h-6 w-6 text-blue-400" />
               </div>
             </div>
@@ -495,16 +495,16 @@ export default async function HomePage() {
               </div>
 
               {/* Pro Plan (Most Popular) */}
-              <div className="bg-white rounded-2xl shadow-xl border-2 border-orange-400 p-6 hover:shadow-2xl transition-all relative">
+              <div className="bg-white rounded-2xl shadow-xl border-2 border-amber-500 p-6 hover:shadow-2xl transition-all relative">
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                  <span className="bg-gradient-to-r from-amber-500 to-amber-800 text-white px-4 py-2 rounded-full text-sm font-semibold">
                     Most Popular
                   </span>
                 </div>
                 <div className="text-center mb-6 pt-2">
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">Pro</h3>
                   <div className="text-3xl font-bold text-gray-900 mb-1">
-                    BTN <span className="text-4xl text-orange-600">999</span>
+                    BTN <span className="text-4xl text-amber-800">999</span>
                   </div>
                   <p className="text-gray-600 text-sm">per month</p>
                 </div>
@@ -535,7 +535,7 @@ export default async function HomePage() {
                   </div>
                 </div>
                 <Link href="/sign-up" className="block">
-                  <Button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700">
+                  <Button className="w-full bg-gradient-to-r from-amber-500 to-amber-800 hover:from-amber-800 hover:to-amber-900">
                     Choose Plan
                   </Button>
                 </Link>
@@ -645,12 +645,12 @@ export default async function HomePage() {
         </section>
 
         {/* Final CTA Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-amber-500 to-amber-800 text-white">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl font-bold mb-6">
               Ready to Simplify Your GST?
             </h2>
-            <p className="text-xl text-orange-100 mb-10 leading-relaxed">
+            <p className="text-xl text-amber-100 mb-10 leading-relaxed">
               Join hundreds of Bhutanese businesses who trust EasyGST for their GST compliance.
               Start creating professional invoices, tracking payments, and filing returns with confidence.
             </p>
@@ -658,7 +658,7 @@ export default async function HomePage() {
               <Link href="/sign-up">
                 <Button
                   size="lg"
-                  className="bg-white text-orange-600 hover:bg-orange-50 text-lg px-10 py-6 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+                  className="bg-white text-amber-800 hover:bg-amber-50 text-lg px-10 py-6 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
                 >
                   Start Your Free Trial
                   <ArrowRight className="ml-3 h-6 w-6" />
@@ -674,7 +674,7 @@ export default async function HomePage() {
                 </Button>
               </Link>
             </div>
-            <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm text-orange-100">
+            <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm text-amber-100">
               <div className="flex items-center">
                 <CheckCircle2 className="h-4 w-4 mr-2" />
                 Free forever plan available
@@ -699,7 +699,7 @@ export default async function HomePage() {
             {/* Company Info */}
             <div className="lg:col-span-2">
               <div className="flex items-center mb-6">
-                <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-2 rounded-lg">
+                <div className="bg-gradient-to-br from-amber-500 to-amber-800 p-2 rounded-lg">
                   <FileText className="h-6 w-6 text-white" />
                 </div>
                 <span className="ml-3 text-2xl font-bold text-white">EasyGST</span>
@@ -726,11 +726,11 @@ export default async function HomePage() {
             <div>
               <h3 className="text-white font-semibold mb-6">Product</h3>
               <ul className="space-y-3 text-sm">
-                <li><Link href="#features" className="hover:text-orange-400 transition-colors">Features</Link></li>
-                <li><Link href="#pricing" className="hover:text-orange-400 transition-colors">Pricing</Link></li>
-                <li><Link href="#how-it-works" className="hover:text-orange-400 transition-colors">How It Works</Link></li>
-                <li><span className="hover:text-orange-400 transition-colors cursor-pointer">Integrations</span></li>
-                <li><span className="hover:text-orange-400 transition-colors cursor-pointer">API</span></li>
+                <li><Link href="#features" className="hover:text-amber-500 transition-colors">Features</Link></li>
+                <li><Link href="#pricing" className="hover:text-amber-500 transition-colors">Pricing</Link></li>
+                <li><Link href="#how-it-works" className="hover:text-amber-500 transition-colors">How It Works</Link></li>
+                <li><span className="hover:text-amber-500 transition-colors cursor-pointer">Integrations</span></li>
+                <li><span className="hover:text-amber-500 transition-colors cursor-pointer">API</span></li>
               </ul>
             </div>
 
@@ -738,11 +738,11 @@ export default async function HomePage() {
             <div>
               <h3 className="text-white font-semibold mb-6">Solutions</h3>
               <ul className="space-y-3 text-sm">
-                <li><span className="hover:text-orange-400 transition-colors cursor-pointer">Grocery Stores</span></li>
-                <li><span className="hover:text-orange-400 transition-colors cursor-pointer">Restaurants</span></li>
-                <li><span className="hover:text-orange-400 transition-colors cursor-pointer">Retail Shops</span></li>
-                <li><span className="hover:text-orange-400 transition-colors cursor-pointer">Hardware Stores</span></li>
-                <li><span className="hover:text-orange-400 transition-colors cursor-pointer">Pharmacies</span></li>
+                <li><span className="hover:text-amber-500 transition-colors cursor-pointer">Grocery Stores</span></li>
+                <li><span className="hover:text-amber-500 transition-colors cursor-pointer">Restaurants</span></li>
+                <li><span className="hover:text-amber-500 transition-colors cursor-pointer">Retail Shops</span></li>
+                <li><span className="hover:text-amber-500 transition-colors cursor-pointer">Hardware Stores</span></li>
+                <li><span className="hover:text-amber-500 transition-colors cursor-pointer">Pharmacies</span></li>
               </ul>
             </div>
 
@@ -750,11 +750,11 @@ export default async function HomePage() {
             <div>
               <h3 className="text-white font-semibold mb-6">Company</h3>
               <ul className="space-y-3 text-sm">
-                <li><span className="hover:text-orange-400 transition-colors cursor-pointer">About Us</span></li>
-                <li><span className="hover:text-orange-400 transition-colors cursor-pointer">Contact</span></li>
-                <li><span className="hover:text-orange-400 transition-colors cursor-pointer">Support Center</span></li>
-                <li><span className="hover:text-orange-400 transition-colors cursor-pointer">Privacy Policy</span></li>
-                <li><span className="hover:text-orange-400 transition-colors cursor-pointer">Terms of Service</span></li>
+                <li><span className="hover:text-amber-500 transition-colors cursor-pointer">About Us</span></li>
+                <li><span className="hover:text-amber-500 transition-colors cursor-pointer">Contact</span></li>
+                <li><span className="hover:text-amber-500 transition-colors cursor-pointer">Support Center</span></li>
+                <li><span className="hover:text-amber-500 transition-colors cursor-pointer">Privacy Policy</span></li>
+                <li><span className="hover:text-amber-500 transition-colors cursor-pointer">Terms of Service</span></li>
               </ul>
             </div>
           </div>

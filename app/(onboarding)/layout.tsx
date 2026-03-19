@@ -20,7 +20,7 @@ export default async function OnboardingLayout({
     <div className="min-h-screen bg-gray-50">
       <div className="flex flex-col items-center pt-8 pb-4 px-4">
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-2xl font-bold text-orange-600">EasyGST</span>
+          <span className="text-2xl font-bold text-amber-800">EasyGST</span>
         </div>
         <p className="text-sm text-gray-500">Set up your business in minutes</p>
       </div>

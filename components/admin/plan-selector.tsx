@@ -53,7 +53,7 @@ export function PlanSelector({ teamId, currentPlanId, currentPlanName }: PlanSel
 
   return (
     <div className="flex items-center gap-2">
-      {saving && <Loader2 className="h-4 w-4 animate-spin text-orange-500" />}
+      {saving && <Loader2 className="h-4 w-4 animate-spin text-amber-500" />}
       <Select
         defaultValue={currentPlanId || 'none'}
         onValueChange={handleChange}
@@ -69,7 +69,7 @@ export function PlanSelector({ teamId, currentPlanId, currentPlanName }: PlanSel
           {plans.map((plan: any) => (
             <SelectItem key={plan.id} value={plan.id}>
               <div className="flex items-center gap-1">
-                <Crown className="h-3 w-3 text-orange-500" />
+                <Crown className="h-3 w-3 text-amber-500" />
                 {plan.name}
               </div>
             </SelectItem>

@@ -73,11 +73,11 @@ async function CashSalesList() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total GST Collected</p>
-                <p className="text-2xl font-bold text-orange-600">
+                <p className="text-2xl font-bold text-amber-800">
                   BTN {totalTax.toFixed(2)}
                 </p>
               </div>
-              <Banknote className="h-8 w-8 text-orange-600" />
+              <Banknote className="h-8 w-8 text-amber-800" />
             </div>
           </CardContent>
         </Card>
@@ -132,7 +132,7 @@ async function CashSalesList() {
                     <td className="py-3 px-4 text-sm">
                       <Link
                         href={`/invoices/${invoice.id}`}
-                        className="text-orange-600 hover:text-orange-700 font-medium"
+                        className="text-amber-800 hover:text-amber-900 font-medium"
                       >
                         {invoice.invoiceNumber}
                       </Link>

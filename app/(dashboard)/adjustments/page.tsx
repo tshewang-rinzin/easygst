@@ -18,7 +18,7 @@ async function AdjustmentsList() {
             Adjustments allow you to add discounts, late fees, or other charges to invoices.
           </p>
           <Link href="/adjustments/new">
-            <Button className="bg-orange-500 hover:bg-orange-600">
+            <Button className="bg-amber-500 hover:bg-amber-800">
               <PlusCircle className="mr-2 h-4 w-4" />
               Create Adjustment
             </Button>
@@ -78,7 +78,7 @@ async function AdjustmentsList() {
                     <td className="py-3 px-4 text-sm">
                       <Link
                         href={`/invoices/${invoice?.id}`}
-                        className="text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1"
+                        className="text-amber-800 hover:text-amber-900 font-medium flex items-center gap-1"
                       >
                         <FileText className="h-3 w-3" />
                         {invoice?.invoiceNumber}
@@ -91,7 +91,7 @@ async function AdjustmentsList() {
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
                         isNegative
                           ? 'bg-green-50 text-green-700'
-                          : 'bg-orange-50 text-orange-700'
+                          : 'bg-amber-50 text-amber-900'
                       }`}>
                         {adjustment.adjustmentType.replace('_', ' ')}
                       </span>
@@ -101,7 +101,7 @@ async function AdjustmentsList() {
                     </td>
                     <td className="py-3 px-4 text-sm text-right">
                       <span className={`font-semibold ${
-                        isNegative ? 'text-green-600' : 'text-orange-600'
+                        isNegative ? 'text-green-600' : 'text-amber-800'
                       }`}>
                         {isNegative ? '' : '+'}{invoice?.currency} {Math.abs(amount).toFixed(2)}
                       </span>
@@ -183,7 +183,7 @@ export default function AdjustmentsPage() {
           </p>
         </div>
         <Link href="/adjustments/new">
-          <Button className="bg-orange-500 hover:bg-orange-600">
+          <Button className="bg-amber-500 hover:bg-amber-800">
             <PlusCircle className="mr-2 h-4 w-4" />
             Create Adjustment
           </Button>

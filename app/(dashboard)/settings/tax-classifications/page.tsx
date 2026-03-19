@@ -140,7 +140,7 @@ function TaxClassificationForm({ classification, onCancel, onSuccess }: TaxClass
           <select
             id="color"
             name="color"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
             defaultValue={classification?.color || 'blue'}
             disabled={isPending}
           >
@@ -215,7 +215,7 @@ function TaxClassificationForm({ classification, onCancel, onSuccess }: TaxClass
         <Button
           type="submit"
           disabled={isPending}
-          className="bg-orange-500 hover:bg-orange-600 text-white"
+          className="bg-amber-500 hover:bg-amber-800 text-white"
         >
           {isPending ? (
             <>
@@ -455,7 +455,7 @@ export default function TaxClassificationsPage() {
             <div className="flex gap-3">
               <Button
                 onClick={() => setShowForm(true)}
-                className="bg-orange-500 hover:bg-orange-600 text-white"
+                className="bg-amber-500 hover:bg-amber-800 text-white"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Tax Classification
@@ -464,7 +464,7 @@ export default function TaxClassificationsPage() {
                 onClick={handleReset}
                 disabled={isResetting}
                 variant="outline"
-                className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                className="border-amber-300 text-amber-800 hover:bg-amber-50"
               >
                 <RotateCcw className={`mr-2 h-4 w-4 ${isResetting ? 'animate-spin' : ''}`} />
                 {isResetting ? 'Resetting...' : 'Reset to Defaults'}

@@ -100,7 +100,7 @@ export function CategoryForm({ category, mode }: CategoryFormProps) {
             <select
               id="parentId"
               name="parentId"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               value={parentId}
               onChange={(e) => setParentId(e.target.value)}
             >
@@ -177,7 +177,7 @@ export function CategoryForm({ category, mode }: CategoryFormProps) {
           <Button
             type="submit"
             disabled={isPending}
-            className="bg-orange-500 hover:bg-orange-600 text-white"
+            className="bg-amber-500 hover:bg-amber-800 text-white"
           >
             {isPending ? (
               <>

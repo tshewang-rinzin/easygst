@@ -139,7 +139,7 @@ export default function MasterProductsPage() {
             </Button>
           </Link>
           <Link href="/admin/master-products/new">
-            <Button className="bg-orange-500 hover:bg-orange-600">
+            <Button className="bg-amber-500 hover:bg-amber-800">
               <Plus className="h-4 w-4 mr-2" />
               New Product
             </Button>
@@ -214,7 +214,7 @@ export default function MasterProductsPage() {
         <CardContent className="p-0">
           {isLoading ? (
             <div className="p-8 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500 mx-auto"></div>
               <p className="text-gray-500 mt-2">Loading products...</p>
             </div>
           ) : data?.products.length === 0 ? (
@@ -223,7 +223,7 @@ export default function MasterProductsPage() {
               <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
               <p className="text-gray-500 mb-4">Start by creating your first master product</p>
               <Link href="/admin/master-products/new">
-                <Button className="bg-orange-500 hover:bg-orange-600">
+                <Button className="bg-amber-500 hover:bg-amber-800">
                   <Plus className="h-4 w-4 mr-2" />
                   Create Product
                 </Button>

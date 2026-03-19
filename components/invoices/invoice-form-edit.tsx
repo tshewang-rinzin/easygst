@@ -372,7 +372,7 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
                   <select
                     id="currency"
                     name="currency"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                     defaultValue={invoice.currency}
                   >
                     <option value="BTN">BTN - Ngultrum</option>
@@ -523,7 +523,7 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
                       <select
                         value={item.unit}
                         onChange={(e) => updateLineItem(item.id, 'unit', e.target.value)}
-                        className="w-full h-9 px-2 py-1 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        className="w-full h-9 px-2 py-1 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
                       >
                         {units && units.length > 0 ? (
                           units.map((unit) => (
@@ -574,7 +574,7 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
                         value={item.taxRate}
                         onChange={(e) => updateLineItem(item.id, 'taxRate', e.target.value)}
                         disabled={item.isTaxExempt}
-                        className="w-full h-9 px-2 py-1 border border-gray-300 rounded-md text-sm bg-white disabled:bg-gray-100 disabled:text-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        className="w-full h-9 px-2 py-1 border border-gray-300 rounded-md text-sm bg-white disabled:bg-gray-100 disabled:text-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
                       >
                         {taxClassifications && taxClassifications.length > 0 ? (
                           taxClassifications
@@ -607,7 +607,7 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
                         onChange={(e) =>
                           updateLineItem(item.id, 'isTaxExempt', e.target.checked)
                         }
-                        className="h-4 w-4 text-orange-500 focus:ring-orange-500 border-gray-300 rounded cursor-pointer"
+                        className="h-4 w-4 text-amber-500 focus:ring-amber-500 border-gray-300 rounded cursor-pointer"
                       />
                     </td>
                     <td className="py-3 px-2 text-right">
@@ -655,7 +655,7 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
                 </div>
                 <div className="flex justify-between text-lg font-bold border-t border-gray-300 pt-3">
                   <span>Total:</span>
-                  <span className="text-orange-600">{totals.total.toFixed(2)}</span>
+                  <span className="text-amber-800">{totals.total.toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -719,7 +719,7 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="bg-orange-500 hover:bg-orange-600"
+            className="bg-amber-500 hover:bg-amber-800"
           >
             {isSubmitting ? 'Updating Invoice...' : 'Update Invoice'}
           </Button>

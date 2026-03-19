@@ -42,7 +42,7 @@ export default function PaymentReceiptsPage() {
     <section className="flex-1 p-4 lg:p-8">
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-2">
-          <Receipt className="h-6 w-6 text-orange-500" />
+          <Receipt className="h-6 w-6 text-amber-500" />
           <h1 className="text-lg lg:text-2xl font-medium text-gray-900">Payment Receipts</h1>
         </div>
         <p className="text-sm text-gray-500">View and download customer payment receipts</p>
@@ -110,7 +110,7 @@ export default function PaymentReceiptsPage() {
               Receipts ({filteredPayments?.length || 0})
             </CardTitle>
             <Link href="/payments/receive">
-              <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+              <Button size="sm" className="bg-amber-500 hover:bg-amber-800">
                 Receive Payment
               </Button>
             </Link>
@@ -130,10 +130,10 @@ export default function PaymentReceiptsPage() {
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <Receipt className="h-5 w-5 text-orange-500" />
+                      <Receipt className="h-5 w-5 text-amber-500" />
                       <Link
                         href={`/payments/receipts/${payment.id}`}
-                        className="text-lg font-semibold text-orange-600 hover:text-orange-700"
+                        className="text-lg font-semibold text-amber-800 hover:text-amber-900"
                       >
                         {payment.receiptNumber}
                       </Link>
@@ -199,7 +199,7 @@ export default function PaymentReceiptsPage() {
               <Receipt className="h-12 w-12 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500 mb-2">No payment receipts found</p>
               <Link href="/payments/receive">
-                <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
+                <Button size="sm" className="bg-amber-500 hover:bg-amber-800">
                   Receive First Payment
                 </Button>
               </Link>

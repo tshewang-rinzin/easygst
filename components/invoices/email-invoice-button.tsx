@@ -115,7 +115,7 @@ export function EmailInvoiceButton({
             type="button"
             onClick={handleSendEmail}
             disabled={isPending || success}
-            className="bg-orange-500 hover:bg-orange-600"
+            className="bg-amber-500 hover:bg-amber-800"
           >
             {isPending ? 'Sending...' : success ? 'Sent!' : 'Send Email'}
           </Button>

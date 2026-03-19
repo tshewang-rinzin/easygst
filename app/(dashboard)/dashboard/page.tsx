@@ -108,7 +108,7 @@ function SetupProgressCard() {
   }
 
   return (
-    <Card className="mb-8 border-orange-200">
+    <Card className="mb-8 border-amber-200">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>
@@ -118,7 +118,7 @@ function SetupProgressCard() {
             </p>
           </div>
           <Link href="/onboarding">
-            <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
+            <Button size="sm" className="bg-amber-500 hover:bg-amber-800 text-white">
               Complete Setup
             </Button>
           </Link>
@@ -127,7 +127,7 @@ function SetupProgressCard() {
       <CardContent>
         <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
           <div
-            className="bg-orange-500 h-2 rounded-full transition-all"
+            className="bg-amber-500 h-2 rounded-full transition-all"
             style={{ width: `${progress.percentage}%` }}
           />
         </div>
@@ -207,7 +207,7 @@ function DashboardOverview() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Sales Overview</h2>
           <Link href="/sales/invoices">
-            <Button variant="link" className="text-orange-600 hover:text-orange-700">
+            <Button variant="link" className="text-amber-800 hover:text-amber-900">
               View all sales <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </Link>
@@ -260,15 +260,15 @@ function DashboardOverview() {
           </Card>
 
           {/* Total Sales */}
-          <Card className="border-orange-200 bg-gradient-to-br from-orange-50 to-white hover:shadow-md transition-shadow">
+          <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-white hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">
                 Total Revenue
               </CardTitle>
-              <TrendingUp className="h-5 w-5 text-orange-600" />
+              <TrendingUp className="h-5 w-5 text-amber-800" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">
+              <div className="text-2xl font-bold text-amber-800">
                 {metrics?.totalSales?.count ?? 0}
               </div>
               <p className="text-sm text-gray-900 font-semibold mt-1">
@@ -285,7 +285,7 @@ function DashboardOverview() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">GST Summary</h2>
           <Link href="/reports/gst-summary">
-            <Button variant="link" className="text-orange-600 hover:text-orange-700">
+            <Button variant="link" className="text-amber-800 hover:text-amber-900">
               View GST report <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </Link>
@@ -324,20 +324,20 @@ function DashboardOverview() {
           </Card>
 
           {/* Net GST */}
-          <Card className="border-orange-200 bg-gradient-to-br from-orange-50 to-white hover:shadow-md transition-shadow">
+          <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-white hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">
                 Net GST Payable
               </CardTitle>
-              <Wallet className="h-5 w-5 text-orange-600" />
+              <Wallet className="h-5 w-5 text-amber-800" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">
+              <div className="text-2xl font-bold text-amber-800">
                 {formatCurrency(metrics?.gst?.net || '0.00', currency)}
               </div>
               <p className="text-xs text-gray-500 mt-1">Output GST - Input GST</p>
               <Link href="/gst-returns/prepare">
-                <Button variant="link" className="px-0 mt-2 text-orange-600">
+                <Button variant="link" className="px-0 mt-2 text-amber-800">
                   Prepare return →
                 </Button>
               </Link>
@@ -400,9 +400,9 @@ function DashboardOverview() {
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Link href="/sales/invoices/new">
-            <Card className="cursor-pointer hover:shadow-md transition-all hover:border-orange-300 border-2">
+            <Card className="cursor-pointer hover:shadow-md transition-all hover:border-amber-300 border-2">
               <CardContent className="pt-6 text-center">
-                <FileText className="h-8 w-8 text-orange-600 mx-auto mb-3" />
+                <FileText className="h-8 w-8 text-amber-800 mx-auto mb-3" />
                 <p className="font-medium text-gray-900">Create Tax Invoice</p>
                 <p className="text-xs text-gray-500 mt-1">Credit sale with payment terms</p>
               </CardContent>
@@ -604,7 +604,7 @@ function InviteTeamMember() {
           )}
           <Button
             type="submit"
-            className="bg-orange-500 hover:bg-orange-600 text-white"
+            className="bg-amber-500 hover:bg-amber-800 text-white"
             disabled={isInvitePending || !isOwner}
           >
             {isInvitePending ? (

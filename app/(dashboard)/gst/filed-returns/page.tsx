@@ -137,7 +137,7 @@ export default function FiledReturnsPage() {
                       <td className="p-3 text-right text-blue-600">
                         {formatCurrency(gstReturn.inputGst, 'BTN')}
                       </td>
-                      <td className="p-3 text-right font-semibold text-orange-600">
+                      <td className="p-3 text-right font-semibold text-amber-800">
                         {formatCurrency(gstReturn.netGstPayable, 'BTN')}
                       </td>
                       <td className="p-3">{getStatusBadge(gstReturn.status)}</td>

@@ -46,7 +46,7 @@ async function QuotationList({
           Get started by creating your first quotation
         </p>
         <Link href="/quotations/new">
-          <Button className="bg-orange-500 hover:bg-orange-600">
+          <Button className="bg-amber-500 hover:bg-amber-800">
             <PlusCircle className="mr-2 h-4 w-4" />
             Create Quotation
           </Button>
@@ -174,7 +174,7 @@ export default async function QuotationsPage({
           <p className="text-sm text-gray-500">Create and manage quotations for your customers</p>
         </div>
         <Link href="/quotations/new">
-          <Button className="bg-orange-500 hover:bg-orange-600">
+          <Button className="bg-amber-500 hover:bg-amber-800">
             <PlusCircle className="mr-2 h-4 w-4" />
             New Quotation
           </Button>
@@ -192,13 +192,13 @@ export default async function QuotationsPage({
                   name="search"
                   placeholder="Search by quotation number or customer..."
                   defaultValue={params.search}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
               <select
                 name="status"
                 defaultValue={params.status || ''}
-                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               >
                 <option value="">All Status</option>
                 <option value="draft">Draft</option>

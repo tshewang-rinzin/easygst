@@ -29,7 +29,7 @@ async function CustomerList({ searchTerm }: { searchTerm?: string }) {
           Get started by creating your first customer
         </p>
         <Link href="/customers/new">
-          <Button className="bg-orange-500 hover:bg-orange-600">
+          <Button className="bg-amber-500 hover:bg-amber-800">
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Customer
           </Button>
@@ -178,7 +178,7 @@ export default async function CustomersPage({
           </p>
         </div>
         <Link href="/customers/new">
-          <Button className="bg-orange-500 hover:bg-orange-600">
+          <Button className="bg-amber-500 hover:bg-amber-800">
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Customer
           </Button>
@@ -196,7 +196,7 @@ export default async function CustomersPage({
                 name="search"
                 placeholder="Search by name, email, or mobile..."
                 defaultValue={searchTerm}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
             <Button type="submit" variant="outline">

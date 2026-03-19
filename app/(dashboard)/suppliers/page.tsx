@@ -26,7 +26,7 @@ async function SuppliersList() {
             Create your first supplier to start managing purchases
           </p>
           <Link href="/suppliers/new">
-            <Button className="bg-orange-500 hover:bg-orange-600">
+            <Button className="bg-amber-500 hover:bg-amber-800">
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Supplier
             </Button>
@@ -60,7 +60,7 @@ async function SuppliersList() {
                 <TableCell className="font-medium">
                   <Link
                     href={`/suppliers/${supplier.id}`}
-                    className="text-orange-600 hover:text-orange-700"
+                    className="text-amber-800 hover:text-amber-900"
                   >
                     {supplier.name}
                   </Link>
@@ -150,7 +150,7 @@ export default function SuppliersPage() {
           </p>
         </div>
         <Link href="/suppliers/new">
-          <Button className="bg-orange-500 hover:bg-orange-600">
+          <Button className="bg-amber-500 hover:bg-amber-800">
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Supplier
           </Button>

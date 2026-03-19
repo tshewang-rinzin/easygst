@@ -77,7 +77,7 @@ export default function NewSubscriptionPage() {
                 id="customerId"
                 name="customerId"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               >
                 <option value="">Choose a customer...</option>
                 {customers && Array.isArray(customers) && customers.map((c: any) => (
@@ -103,7 +103,7 @@ export default function NewSubscriptionPage() {
                   required
                   value={selectedProductId}
                   onChange={(e) => setSelectedProductId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                 >
                   <option value="">Choose a package...</option>
                   {packageProducts.map((p: any) => (
@@ -115,7 +115,7 @@ export default function NewSubscriptionPage() {
                 {packageProducts.length === 0 && (
                   <p className="text-xs text-gray-500 mt-1">
                     No service products with recurring billing found.{' '}
-                    <Link href="/products/new" className="text-orange-600 hover:underline">
+                    <Link href="/products/new" className="text-amber-800 hover:underline">
                       Create one first
                     </Link>
                   </p>
@@ -132,7 +132,7 @@ export default function NewSubscriptionPage() {
                     name="billingCycle"
                     required
                     defaultValue={selectedProduct?.billingCycle || 'monthly'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                   >
                     <option value="monthly">Monthly</option>
                     <option value="quarterly">Quarterly</option>
@@ -213,7 +213,7 @@ export default function NewSubscriptionPage() {
             <Link href="/subscriptions">
               <Button type="button" variant="outline">Cancel</Button>
             </Link>
-            <Button type="submit" disabled={isPending} className="bg-orange-500 hover:bg-orange-600">
+            <Button type="submit" disabled={isPending} className="bg-amber-500 hover:bg-amber-800">
               {isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />

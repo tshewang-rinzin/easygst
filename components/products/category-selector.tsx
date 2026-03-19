@@ -51,7 +51,7 @@ export function CategorySelector({ defaultCategoryId, defaultCategoryName }: Cat
             type="button"
             variant="ghost"
             size="sm"
-            className="text-orange-600 hover:text-orange-700 h-auto p-0"
+            className="text-amber-800 hover:text-amber-900 h-auto p-0"
           >
             <PlusCircle className="h-4 w-4 mr-1" />
             Add New
@@ -62,7 +62,7 @@ export function CategorySelector({ defaultCategoryId, defaultCategoryName }: Cat
       <select
         id="categoryId"
         name="categoryId"
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
         value={selectedCategoryId}
         onChange={(e) => handleCategoryChange(e.target.value)}
       >

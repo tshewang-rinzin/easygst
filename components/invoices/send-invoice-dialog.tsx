@@ -266,7 +266,7 @@ export function SendInvoiceDialog({
             type="button"
             onClick={handleSend}
             disabled={isPending || (needsPhone && !phoneNumber)}
-            className="bg-orange-500 hover:bg-orange-600"
+            className="bg-amber-500 hover:bg-amber-800"
           >
             {isPending ? 'Sending...' : 'Send Invoice'}
           </Button>

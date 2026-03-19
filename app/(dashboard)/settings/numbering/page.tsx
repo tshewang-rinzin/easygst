@@ -96,8 +96,8 @@ export default function DocumentNumberingPage() {
       setter: setSupplierAdvancePrefix,
       default: 'ADV-S',
       description: 'Prefix for prepayments made to suppliers',
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-100',
+      color: 'text-amber-800',
+      bgColor: 'bg-amber-100',
     },
   ];
 
@@ -135,8 +135,8 @@ export default function DocumentNumberingPage() {
       format: `${supplierAdvancePrefix || 'ADV-S'}-YYYY-NNNN`,
       example: `${supplierAdvancePrefix || 'ADV-S'}-2026-0001`,
       description: 'Prepayments made to suppliers',
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-100',
+      color: 'text-amber-800',
+      bgColor: 'bg-amber-100',
     },
   ];
 

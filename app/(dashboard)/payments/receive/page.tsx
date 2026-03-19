@@ -144,7 +144,7 @@ export default function ReceivePaymentPage() {
     <section className="flex-1 p-4 lg:p-8">
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-2">
-          <Wallet className="h-6 w-6 text-orange-500" />
+          <Wallet className="h-6 w-6 text-amber-500" />
           <h1 className="text-lg lg:text-2xl font-medium text-gray-900">Receive Payment</h1>
         </div>
         <p className="text-sm text-gray-500">Record customer payments and allocate to invoices</p>
@@ -213,7 +213,7 @@ export default function ReceivePaymentPage() {
                       id="currency"
                       name="currency"
                       required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                     >
                       <option value="BTN">BTN - Bhutanese Ngultrum</option>
                       <option value="INR">INR - Indian Rupee</option>
@@ -247,7 +247,7 @@ export default function ReceivePaymentPage() {
                       onChange={(e) => setPaymentMethod(e.target.value)}
                       required
                       disabled={loadingMethods}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                     >
                       {loadingMethods ? (
                         <option>Loading...</option>
@@ -317,7 +317,7 @@ export default function ReceivePaymentPage() {
                     size="sm"
                     onClick={handleAddAllocation}
                     disabled={allocations.length >= outstandingInvoices.length}
-                    className="bg-orange-500 hover:bg-orange-600"
+                    className="bg-amber-500 hover:bg-amber-800"
                   >
                     <Plus className="h-4 w-4 mr-1" />
                     Add Invoice
@@ -392,7 +392,7 @@ export default function ReceivePaymentPage() {
                   <div className="pt-4 border-t">
                     <div className="flex justify-between items-center text-lg font-semibold">
                       <span>Total Allocation:</span>
-                      <span className="text-orange-600">
+                      <span className="text-amber-800">
                         {selectedCustomer?.currency || 'BTN'} {getTotalAllocation().toFixed(2)}
                       </span>
                     </div>
@@ -410,7 +410,7 @@ export default function ReceivePaymentPage() {
             <div className="flex gap-4">
               <Button
                 type="submit"
-                className="bg-orange-500 hover:bg-orange-600"
+                className="bg-amber-500 hover:bg-amber-800"
                 disabled={allocations.length === 0 || isSubmitting}
               >
                 <Check className="mr-2 h-4 w-4" />

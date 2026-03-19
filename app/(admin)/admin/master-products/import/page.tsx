@@ -192,7 +192,7 @@ export default function ImportMasterProductsPage() {
                 <Button 
                   onClick={handleImport}
                   disabled={!selectedBusinessType || !csvData.trim() || isImporting}
-                  className="bg-orange-500 hover:bg-orange-600"
+                  className="bg-amber-500 hover:bg-amber-800"
                 >
                   <Upload className="h-4 w-4 mr-2" />
                   {isImporting ? 'Importing...' : 'Import Products'}
@@ -286,31 +286,31 @@ export default function ImportMasterProductsPage() {
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div className="flex gap-3">
-                <div className="bg-orange-100 text-orange-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">1</div>
+                <div className="bg-amber-100 text-amber-800 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">1</div>
                 <div>
                   <strong>Select Business Type:</strong> Choose the business category for these products
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="bg-orange-100 text-orange-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">2</div>
+                <div className="bg-amber-100 text-amber-800 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">2</div>
                 <div>
                   <strong>Prepare CSV:</strong> Use the template or format your data with required headers
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="bg-orange-100 text-orange-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">3</div>
+                <div className="bg-amber-100 text-amber-800 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">3</div>
                 <div>
                   <strong>Paste Data:</strong> Copy and paste your CSV content into the text area
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="bg-orange-100 text-orange-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">4</div>
+                <div className="bg-amber-100 text-amber-800 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">4</div>
                 <div>
                   <strong>Preview:</strong> Check the preview to ensure data looks correct
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="bg-orange-100 text-orange-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">5</div>
+                <div className="bg-amber-100 text-amber-800 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">5</div>
                 <div>
                   <strong>Import:</strong> Click import to add products to the catalog
                 </div>

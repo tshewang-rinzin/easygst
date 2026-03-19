@@ -157,7 +157,7 @@ export function QuickAddProductDialog({
                   id="unit"
                   name="unit"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                 >
                   {units && units.length > 0 ? (
                     units.map((unit) => (
@@ -188,7 +188,7 @@ export function QuickAddProductDialog({
                 id="gstClassification"
                 name="gstClassification"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               >
                 {taxClassifications && taxClassifications.length > 0 ? (
                   taxClassifications.map((classification) => (
@@ -217,7 +217,7 @@ export function QuickAddProductDialog({
                   name="defaultTaxRate"
                   disabled={isTaxExempt}
                   defaultValue={defaultGstRate}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-gray-100"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:bg-gray-100"
                 >
                   <option value="0">0%</option>
                   <option value="5">5%</option>
@@ -235,7 +235,7 @@ export function QuickAddProductDialog({
                     name="isTaxExempt"
                     checked={isTaxExempt}
                     onChange={(e) => setIsTaxExempt(e.target.checked)}
-                    className="h-4 w-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+                    className="h-4 w-4 text-amber-500 border-gray-300 rounded focus:ring-amber-500"
                   />
                   <Label htmlFor="isTaxExempt" className="text-sm font-medium cursor-pointer">
                     Tax Exempt
@@ -260,7 +260,7 @@ export function QuickAddProductDialog({
             <Button
               type="submit"
               disabled={isPending}
-              className="bg-orange-500 hover:bg-orange-600"
+              className="bg-amber-500 hover:bg-amber-800"
             >
               {isPending ? 'Creating...' : 'Create Product'}
             </Button>

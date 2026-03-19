@@ -77,7 +77,7 @@ function BulkAction({ label, onApply }: { label: string; onApply: (value: string
       <Button
         type="button"
         size="sm"
-        className="h-7 text-xs bg-orange-500 hover:bg-orange-600"
+        className="h-7 text-xs bg-amber-500 hover:bg-amber-800"
         onClick={() => { onApply(value); setOpen(false); setValue(''); }}
       >
         Apply
@@ -191,7 +191,7 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
               onClick={() => setProductType('product')}
               className={`flex items-center gap-2 px-4 py-3 rounded-lg border-2 transition-colors ${
                 productType === 'product'
-                  ? 'border-orange-500 bg-orange-50 text-orange-700'
+                  ? 'border-amber-500 bg-amber-50 text-amber-900'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
             >
@@ -206,7 +206,7 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
               onClick={() => { setProductType('service'); setTrackInventory(false); setHasVariants(false); }}
               className={`flex items-center gap-2 px-4 py-3 rounded-lg border-2 transition-colors ${
                 productType === 'service'
-                  ? 'border-orange-500 bg-orange-50 text-orange-700'
+                  ? 'border-amber-500 bg-amber-50 text-amber-900'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
             >
@@ -375,7 +375,7 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
                   <span>Unit of Measurement</span>
                   <Link
                     href="/settings/units"
-                    className="text-xs text-orange-600 hover:text-orange-700 flex items-center gap-1"
+                    className="text-xs text-amber-800 hover:text-amber-900 flex items-center gap-1"
                   >
                     <Settings className="h-3 w-3" />
                     Manage Units
@@ -384,7 +384,7 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
                 <select
                   id="unit"
                   name="unit"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                   defaultValue={product?.unit || (units?.[0]?.name || 'piece')}
                 >
                   {units && units.length > 0 ? (
@@ -427,7 +427,7 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
                 </select>
                 {(!units || units.length === 0) && (
                   <p className="text-xs text-gray-500 mt-1">
-                    <Link href="/settings/units" className="text-orange-600 hover:underline">
+                    <Link href="/settings/units" className="text-amber-800 hover:underline">
                       Add custom units
                     </Link> in settings
                   </p>
@@ -452,7 +452,7 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
                   <span>Unit of Measurement</span>
                   <Link
                     href="/settings/units"
-                    className="text-xs text-orange-600 hover:text-orange-700 flex items-center gap-1"
+                    className="text-xs text-amber-800 hover:text-amber-900 flex items-center gap-1"
                   >
                     <Settings className="h-3 w-3" />
                     Manage Units
@@ -461,7 +461,7 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
                 <select
                   id="unit"
                   name="unit"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                   defaultValue={product?.unit || (units?.[0]?.name || 'piece')}
                 >
                   {units && units.length > 0 ? (
@@ -630,7 +630,7 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
                     id="billingCycleSelect"
                     value={billingCycle}
                     onChange={(e) => setBillingCycle(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                   >
                     <option value="monthly">Monthly</option>
                     <option value="quarterly">Quarterly</option>
@@ -771,7 +771,7 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
                 <Button
                   type="button"
                   onClick={generateVariants}
-                  className="bg-orange-500 hover:bg-orange-600"
+                  className="bg-amber-500 hover:bg-amber-800"
                   size="sm"
                 >
                   Generate Variants ({variantCount})
@@ -896,7 +896,7 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
             <div className="flex gap-2">
               <Link
                 href="/settings/tax-classifications"
-                className="text-sm text-orange-600 hover:text-orange-700 flex items-center gap-1"
+                className="text-sm text-amber-800 hover:text-amber-900 flex items-center gap-1"
               >
                 <Settings className="h-4 w-4" />
                 Tax Classifications
@@ -904,7 +904,7 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
               <span className="text-gray-300">|</span>
               <Link
                 href="/settings/tax"
-                className="text-sm text-orange-600 hover:text-orange-700 flex items-center gap-1"
+                className="text-sm text-amber-800 hover:text-amber-900 flex items-center gap-1"
               >
                 <Settings className="h-4 w-4" />
                 Default Rate
@@ -923,7 +923,7 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
             <select
               id="gstClassification"
               name="gstClassification"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               defaultValue={product?.gstClassification || 'STANDARD'}
               required
             >
@@ -946,7 +946,7 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
             </p>
             {(!taxClassifications || taxClassifications.length === 0) && (
               <p className="text-xs text-gray-500 mt-1">
-                <Link href="/settings/tax-classifications" className="text-orange-600 hover:underline">
+                <Link href="/settings/tax-classifications" className="text-amber-800 hover:underline">
                   Configure tax classifications
                 </Link> in settings
               </p>
@@ -1001,7 +1001,7 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
                 <select
                   id="defaultTaxRate"
                   name="defaultTaxRate"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                   defaultValue={
                     product?.defaultTaxRate
                       ? parseFloat(product.defaultTaxRate).toString()

@@ -60,7 +60,7 @@ export function NewProductForm({ defaultGstRate }: NewProductFormProps) {
           <Button
             type="submit"
             disabled={pending}
-            className="bg-orange-500 hover:bg-orange-600"
+            className="bg-amber-500 hover:bg-amber-800"
           >
             {pending ? 'Creating...' : 'Create Product'}
           </Button>

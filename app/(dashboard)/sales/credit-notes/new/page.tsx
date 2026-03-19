@@ -500,7 +500,7 @@ function NewCreditNoteContent() {
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="bg-orange-500 hover:bg-orange-600"
+            className="bg-amber-500 hover:bg-amber-800"
           >
             {isSubmitting ? (
               <>

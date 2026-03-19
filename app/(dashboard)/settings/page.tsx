@@ -92,8 +92,8 @@ export default function SettingsPage() {
                 <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
                   <CardHeader>
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-orange-100 rounded-lg">
-                        <Icon className="h-6 w-6 text-orange-600" />
+                      <div className="p-2 bg-amber-100 rounded-lg">
+                        <Icon className="h-6 w-6 text-amber-800" />
                       </div>
                       <CardTitle className="text-lg">{page.title}</CardTitle>
                     </div>

@@ -44,8 +44,8 @@ function ForgotPasswordForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center space-y-2">
-        <div className="mx-auto w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-          <Mail className="h-6 w-6 text-orange-600" />
+        <div className="mx-auto w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+          <Mail className="h-6 w-6 text-amber-800" />
         </div>
         <CardTitle className="text-2xl font-bold">Forgot Password?</CardTitle>
         <CardDescription>
@@ -76,7 +76,7 @@ function ForgotPasswordForm() {
 
           <Button
             type="submit"
-            className="w-full bg-orange-500 hover:bg-orange-600 rounded-full"
+            className="w-full bg-amber-500 hover:bg-amber-800 rounded-full"
             disabled={isPending}
           >
             {isPending ? (
@@ -106,7 +106,7 @@ function LoadingFallback() {
     <Card className="w-full max-w-md">
       <CardContent className="py-12">
         <div className="flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
         </div>
       </CardContent>
     </Card>

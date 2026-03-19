@@ -425,7 +425,7 @@ export function SupplierBillForm({
                   <select
                     id="currency"
                     name="currency"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                     value={currency}
                     onChange={(e) => setCurrency(e.target.value)}
                   >
@@ -518,7 +518,7 @@ export function SupplierBillForm({
                           onChange={(e) =>
                             updateLineItem(item.id, 'unit', e.target.value)
                           }
-                          className="h-9 w-full px-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                          className="h-9 w-full px-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
                         >
                           {availableUnits.map((unit) => (
                             <option key={unit.name} value={unit.name}>
@@ -566,7 +566,7 @@ export function SupplierBillForm({
                               }
                             }}
                             disabled={item.isTaxExempt}
-                            className="w-full h-9 px-2 py-1 border border-gray-300 rounded-md text-sm bg-white disabled:bg-gray-100 disabled:text-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            className="w-full h-9 px-2 py-1 border border-gray-300 rounded-md text-sm bg-white disabled:bg-gray-100 disabled:text-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
                           >
                             {taxClassifications && taxClassifications.length > 0 ? (
                               taxClassifications
@@ -721,7 +721,7 @@ export function SupplierBillForm({
             type="submit"
             disabled={isSubmitting}
             size="lg"
-            className="bg-orange-500 hover:bg-orange-600 min-w-[160px]"
+            className="bg-amber-500 hover:bg-amber-800 min-w-[160px]"
           >
             {isSubmitting
               ? editMode

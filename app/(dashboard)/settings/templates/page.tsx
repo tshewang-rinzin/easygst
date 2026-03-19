@@ -218,7 +218,7 @@ export default function TemplatesPage() {
       <div className="max-w-4xl">
         <div className="mb-6">
           <h1 className="text-lg lg:text-2xl font-medium text-gray-900 flex items-center gap-2">
-            <Layout className="h-6 w-6 text-orange-500" />
+            <Layout className="h-6 w-6 text-amber-500" />
             Document Templates
           </h1>
           <p className="text-sm text-gray-500 mt-1">
@@ -228,15 +228,15 @@ export default function TemplatesPage() {
 
         <Tabs defaultValue="pdf" className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="pdf" className="flex items-center gap-2 data-[state=active]:text-orange-600">
+            <TabsTrigger value="pdf" className="flex items-center gap-2 data-[state=active]:text-amber-800">
               <FileText className="h-4 w-4" />
               Invoice PDF
             </TabsTrigger>
-            <TabsTrigger value="email" className="flex items-center gap-2 data-[state=active]:text-orange-600">
+            <TabsTrigger value="email" className="flex items-center gap-2 data-[state=active]:text-amber-800">
               <Mail className="h-4 w-4" />
               Email
             </TabsTrigger>
-            <TabsTrigger value="sms" className="flex items-center gap-2 data-[state=active]:text-orange-600">
+            <TabsTrigger value="sms" className="flex items-center gap-2 data-[state=active]:text-amber-800">
               <MessageSquare className="h-4 w-4" />
               SMS / WhatsApp
             </TabsTrigger>
@@ -253,7 +253,7 @@ export default function TemplatesPage() {
                     key={tmpl.id}
                     className={`cursor-pointer transition-all hover:shadow-md ${
                       selectedTemplate === tmpl.id
-                        ? 'ring-2 ring-orange-500 shadow-md'
+                        ? 'ring-2 ring-amber-500 shadow-md'
                         : 'hover:ring-1 hover:ring-gray-300'
                     }`}
                     onClick={() => setSelectedTemplate(tmpl.id)}
@@ -266,7 +266,7 @@ export default function TemplatesPage() {
                           <p className="text-xs text-gray-500 mt-0.5">{tmpl.description}</p>
                         </div>
                         {selectedTemplate === tmpl.id && (
-                          <div className="bg-orange-500 text-white rounded-full p-1">
+                          <div className="bg-amber-500 text-white rounded-full p-1">
                             <Check className="h-3 w-3" />
                           </div>
                         )}
@@ -290,7 +290,7 @@ export default function TemplatesPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Palette className="h-4 w-4 text-orange-500" />
+                  <Palette className="h-4 w-4 text-amber-500" />
                   Template Settings
                 </CardTitle>
                 <CardDescription>Customize your invoice appearance</CardDescription>
@@ -353,7 +353,7 @@ export default function TemplatesPage() {
                     value={footerText}
                     onChange={(e) => setFooterText(e.target.value)}
                     rows={3}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                     placeholder="e.g. Thank you for your business!"
                   />
                 </div>
@@ -363,7 +363,7 @@ export default function TemplatesPage() {
                   <Button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="bg-orange-500 hover:bg-orange-600 text-white"
+                    className="bg-amber-500 hover:bg-amber-800 text-white"
                   >
                     <Save className="h-4 w-4 mr-2" />
                     {isSaving ? 'Saving...' : 'Save Settings'}
@@ -393,7 +393,7 @@ export default function TemplatesPage() {
                 <Card key={tmpl.name}>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-orange-500" />
+                      <Mail className="h-4 w-4 text-amber-500" />
                       {tmpl.name}
                     </CardTitle>
                     <CardDescription className="text-xs">{tmpl.description}</CardDescription>
@@ -413,7 +413,7 @@ export default function TemplatesPage() {
                         <div className="space-y-2 mt-4">
                           {tmpl.structure.map((section, i) => (
                             <div key={i} className="flex items-center gap-3 text-sm text-gray-600">
-                              <div className="w-6 h-6 rounded bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-medium">
+                              <div className="w-6 h-6 rounded bg-amber-100 text-amber-800 flex items-center justify-center text-xs font-medium">
                                 {i + 1}
                               </div>
                               {section}
@@ -445,7 +445,7 @@ export default function TemplatesPage() {
                 <Card key={tmpl.name}>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm flex items-center gap-2">
-                      <MessageSquare className="h-4 w-4 text-orange-500" />
+                      <MessageSquare className="h-4 w-4 text-amber-500" />
                       {tmpl.name}
                     </CardTitle>
                   </CardHeader>

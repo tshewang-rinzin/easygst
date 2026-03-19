@@ -199,7 +199,7 @@ export default function ExemptZeroRatedReportPage() {
               </div>
               <div className="border-t pt-4">
                 <div className="text-sm text-muted-foreground">Total Exempt</div>
-                <div className="text-2xl font-bold text-orange-600">
+                <div className="text-2xl font-bold text-amber-800">
                   {formatCurrency(data.summary.exempt.totalAmount, 'BTN')}
                 </div>
               </div>
@@ -250,7 +250,7 @@ export default function ExemptZeroRatedReportPage() {
                       <td className="p-2">{new Date(tx.documentDate).toLocaleDateString()}</td>
                       <td className="p-2">{tx.itemDescription}</td>
                       <td className="p-2">
-                        <span className={`text-xs px-2 py-1 rounded ${tx.classification === 'ZERO_RATED' ? 'bg-purple-100' : 'bg-orange-100'}`}>
+                        <span className={`text-xs px-2 py-1 rounded ${tx.classification === 'ZERO_RATED' ? 'bg-purple-100' : 'bg-amber-100'}`}>
                           {tx.classification}
                         </span>
                       </td>

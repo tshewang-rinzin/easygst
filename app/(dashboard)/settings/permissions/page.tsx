@@ -126,10 +126,10 @@ const roleConfig = [
     label: 'Owner',
     description: 'Full access. Can manage business settings, users, GST filing, and all operations.',
     icon: Crown,
-    color: 'bg-orange-500',
-    borderColor: 'border-orange-200',
-    bgLight: 'bg-orange-50',
-    textColor: 'text-orange-700',
+    color: 'bg-amber-500',
+    borderColor: 'border-amber-200',
+    bgLight: 'bg-amber-50',
+    textColor: 'text-amber-900',
   },
   {
     key: 'admin' as const,
@@ -187,7 +187,7 @@ export default function PermissionsPage() {
     <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-orange-500 text-white">
+        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-amber-500 text-white">
           <Shield className="h-5 w-5" />
         </div>
         <div>

@@ -505,7 +505,7 @@ export default function EditContractPage() {
               disabled={hasInvoicedMilestones || hasInvoicedBilling}
               className={`flex-1 p-4 rounded-lg border-2 text-left transition-all ${
                 contractType === 'amc'
-                  ? 'border-orange-500 bg-orange-50'
+                  ? 'border-amber-500 bg-amber-50'
                   : 'border-gray-200 hover:border-gray-300'
               } ${(hasInvoicedMilestones || hasInvoicedBilling) ? 'opacity-60 cursor-not-allowed' : ''}`}
             >
@@ -650,7 +650,7 @@ export default function EditContractPage() {
                       type="checkbox"
                       checked={isGstInclusive}
                       onChange={(e) => setIsGstInclusive(e.target.checked)}
-                      className="h-4 w-4 text-orange-500 focus:ring-orange-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-amber-500 focus:ring-amber-500 border-gray-300 rounded"
                     />
                     <span className="text-sm text-gray-700">Amount is GST inclusive</span>
                   </label>
@@ -691,7 +691,7 @@ export default function EditContractPage() {
                         </div>
                         <div className="flex justify-between font-bold border-t border-gray-300 pt-2">
                           <span>Total Contract Value (incl. GST)</span>
-                          <span className="text-orange-600">{fmt(totalWithGst)}</span>
+                          <span className="text-amber-800">{fmt(totalWithGst)}</span>
                         </div>
                         {!isGstInclusive && (
                           <p className="text-xs text-gray-400 mt-1">
@@ -1030,7 +1030,7 @@ export default function EditContractPage() {
           <Button
             type="submit"
             disabled={isSubmitting || !selectedCustomer}
-            className="bg-orange-500 hover:bg-orange-600"
+            className="bg-amber-500 hover:bg-amber-800"
           >
             {isSubmitting ? 'Saving...' : 'Save Changes'}
           </Button>

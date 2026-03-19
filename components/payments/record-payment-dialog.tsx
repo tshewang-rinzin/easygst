@@ -111,7 +111,7 @@ export function RecordPaymentDialog({
                 id="paymentMethod"
                 name="paymentMethod"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                 defaultValue={paymentMethods && paymentMethods.length > 0 ? paymentMethods[0].code : 'cash'}
               >
                 {paymentMethods && paymentMethods.length > 0 ? (
@@ -194,7 +194,7 @@ export function RecordPaymentDialog({
                   <select
                     id="adjustmentReason"
                     name="adjustmentReason"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
                   >
                     <option value="">None</option>
                     <option value="discount">Discount</option>

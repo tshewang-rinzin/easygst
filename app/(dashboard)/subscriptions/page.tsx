@@ -72,7 +72,7 @@ export default function SubscriptionsPage() {
           </p>
         </div>
         <Link href="/subscriptions/new">
-          <Button className="bg-orange-500 hover:bg-orange-600">
+          <Button className="bg-amber-500 hover:bg-amber-800">
             <Plus className="h-4 w-4 mr-2" />
             New Subscription
           </Button>
@@ -131,7 +131,7 @@ export default function SubscriptionsPage() {
                     <p className="text-gray-500 font-medium">No subscriptions found</p>
                     <p className="text-gray-400 text-sm mt-1">Create your first subscription to get started</p>
                     <Link href="/subscriptions/new">
-                      <Button className="mt-4 bg-orange-500 hover:bg-orange-600" size="sm">
+                      <Button className="mt-4 bg-amber-500 hover:bg-amber-800" size="sm">
                         <Plus className="h-4 w-4 mr-1" />
                         New Subscription
                       </Button>
@@ -144,7 +144,7 @@ export default function SubscriptionsPage() {
                     <td className="px-4 py-3">
                       <Link
                         href={`/subscriptions/${item.subscription.id}`}
-                        className="text-orange-600 hover:text-orange-700 font-medium text-sm"
+                        className="text-amber-800 hover:text-amber-900 font-medium text-sm"
                       >
                         {item.subscription.subscriptionNumber}
                       </Link>

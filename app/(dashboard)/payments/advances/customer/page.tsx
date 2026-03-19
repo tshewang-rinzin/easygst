@@ -72,7 +72,7 @@ export default function CustomerAdvancesPage() {
           </p>
         </div>
         <Link href="/payments/advances/customer/new">
-          <Button className="bg-orange-500 hover:bg-orange-600">
+          <Button className="bg-amber-500 hover:bg-amber-800">
             <Plus className="mr-2 h-4 w-4" />
             Record Advance
           </Button>
@@ -82,7 +82,7 @@ export default function CustomerAdvancesPage() {
       <Card>
         <CardHeader className="border-b bg-gray-50/50">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Wallet className="h-5 w-5 text-orange-500" />
+            <Wallet className="h-5 w-5 text-amber-500" />
             Advance Payments
           </CardTitle>
         </CardHeader>
@@ -145,7 +145,7 @@ export default function CustomerAdvancesPage() {
                           {formatCurrency(advance.amount, advance.currency)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <span className={unallocated > 0 ? 'text-orange-600 font-medium' : 'text-gray-500'}>
+                          <span className={unallocated > 0 ? 'text-amber-800 font-medium' : 'text-gray-500'}>
                             {formatCurrency(advance.unallocatedAmount, advance.currency)}
                           </span>
                         </td>
@@ -164,7 +164,7 @@ export default function CustomerAdvancesPage() {
                             </Link>
                             {unallocated > 0 && (
                               <Link href={`/payments/advances/customer/${advance.id}/allocate`}>
-                                <Button size="sm" variant="outline" className="text-orange-600 border-orange-200 hover:bg-orange-50">
+                                <Button size="sm" variant="outline" className="text-amber-800 border-amber-200 hover:bg-amber-50">
                                   <ArrowRightLeft className="h-4 w-4 mr-1" />
                                   Allocate
                                 </Button>
