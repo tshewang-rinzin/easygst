@@ -59,7 +59,7 @@ export default function UnitsSettingsPage() {
         </p>
       </div>
 
-      <div className="max-w-4xl space-y-6">
+      <div className="space-y-6">
         {/* Add New Unit and Reset Buttons */}
         {!isAdding && (
           <div className="flex gap-3">
