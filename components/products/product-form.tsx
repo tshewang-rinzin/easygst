@@ -20,7 +20,7 @@ import {
 import { Product } from '@/lib/db/schema';
 import { CategorySelector } from './category-selector';
 import Link from 'next/link';
-import { Settings, Package, Briefcase, PlusCircle, Trash2, X } from 'lucide-react';
+import { Settings, Package, Briefcase, Monitor, PlusCircle, Trash2, X } from 'lucide-react';
 import useSWR from 'swr';
 import type { TaxClassification, UnitOfMeasure } from '@/lib/db/schema';
 import { getUnitsOfMeasure } from '@/lib/products/unit-actions';
@@ -102,8 +102,8 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
   const [loadingUnits, setLoadingUnits] = useState(true);
   const { data: taxClassifications } = useSWR<TaxClassification[]>('/api/tax-classifications', fetcher);
 
-  const [productType, setProductType] = useState<'product' | 'service'>(
-    (product?.productType as 'product' | 'service') || 'product'
+  const [productType, setProductType] = useState<'product' | 'service' | 'digital'>(
+    (product?.productType as 'product' | 'service' | 'digital') || 'product'
   );
   const [trackInventory, setTrackInventory] = useState(product?.trackInventory ?? false);
   const [hasVariants, setHasVariants] = useState(false);
@@ -238,6 +238,21 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
                 <div className="text-xs text-gray-500">Consulting, labor, etc.</div>
               </div>
             </button>
+            <button
+              type="button"
+              onClick={() => { setProductType('digital'); setTrackInventory(false); setHasVariants(false); }}
+              className={`flex items-center gap-2 px-4 py-3 rounded-lg border-2 transition-colors ${
+                productType === 'digital'
+                  ? 'border-amber-500 bg-amber-50 text-amber-900'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <Monitor className="h-5 w-5" />
+              <div className="text-left">
+                <div className="font-medium">Digital</div>
+                <div className="text-xs text-gray-500">Software, licenses, e-books</div>
+              </div>
+            </button>
           </div>
           <input type="hidden" name="productType" value={productType} />
         </CardContent>
@@ -258,6 +273,8 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
               name="name"
               placeholder={productType === 'service'
                 ? 'e.g., Monthly Consulting Service, Website Development'
+                : productType === 'digital'
+                ? 'e.g., Software License, E-book, Online Course'
                 : 'e.g., Wireless Mouse, Block Cheese, Cement Bag'}
               defaultValue={product?.name || ''}
               required
@@ -273,6 +290,8 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
               name="description"
               placeholder={productType === 'service'
                 ? 'Describe the service offered, scope, deliverables, etc.'
+                : productType === 'digital'
+                ? 'Describe the digital product — features, access details, license terms, etc.'
                 : 'Describe the product — features, specifications, materials, etc.'}
               defaultValue={product?.description || ''}
               rows={3}
@@ -288,7 +307,7 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
                 <Input
                   id="sku"
                   name="sku"
-                  placeholder={productType === 'service' ? 'e.g., SVC-001' : 'e.g., PROD-001'}
+                  placeholder={productType === 'service' ? 'e.g., SVC-001' : productType === 'digital' ? 'e.g., DIG-001' : 'e.g., PROD-001'}
                   defaultValue={product?.sku || ''}
                   onChange={(e) => setParentSku(e.target.value)}
                 />
@@ -559,7 +578,7 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
         </>
       )}
 
-      {productType === 'service' && (
+      {(productType === 'service' || productType === 'digital') && (
         <>
           <input type="hidden" name="trackInventory" value="false" />
           <input type="hidden" name="stockQuantity" value="0" />

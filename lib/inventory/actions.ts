@@ -108,7 +108,7 @@ export async function deductInventoryForInvoice(
       .where(and(eq(products.id, item.productId), eq(products.teamId, teamId)))
       .limit(1);
 
-    if (!product || !product.trackInventory || product.productType === 'service') continue;
+    if (!product || !product.trackInventory || product.productType === 'service' || product.productType === 'digital') continue;
 
     const quantity = Math.abs(item.quantity);
 

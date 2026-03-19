@@ -220,7 +220,7 @@ export function InvoiceFormEdit({ invoice, defaultGstRate }: InvoiceFormEditProp
   };
 
   const handleProductSelect = (id: string, product: Product) => {
-    const isService = product.productType === 'service';
+    const isService = product.productType === 'service' || product.productType === 'digital';
     setLineItems(
       lineItems.map((item) =>
         item.id === id

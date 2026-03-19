@@ -7,7 +7,7 @@ export const productSchema = z.object({
   description: z.string().max(1000).optional(),
   sku: z.string().max(100).optional(),
   unit: z.string().max(50).default('piece'),
-  productType: z.enum(['product', 'service']).default('product'),
+  productType: z.enum(['product', 'service', 'digital']).default('product'),
   unitPrice: z.coerce
     .number()
     .min(0, 'Price cannot be negative')

@@ -430,7 +430,7 @@ export const products = pgTable('products', {
   unit: varchar('unit', { length: 50 }).default('piece'), // piece, kg, liter, hour, etc.
 
   // Product Type
-  productType: varchar('product_type', { length: 20 }).notNull().default('product'), // 'product' | 'service'
+  productType: varchar('product_type', { length: 20 }).notNull().default('product'), // 'product' | 'service' | 'digital'
 
   // Pricing (stored in team's default currency)
   unitPrice: numeric('unit_price', { precision: 15, scale: 2 }).notNull(),

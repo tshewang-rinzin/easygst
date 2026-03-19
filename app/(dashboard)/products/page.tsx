@@ -11,7 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { PlusCircle, Search, Tag, Eye, Edit, Package, Briefcase } from 'lucide-react';
+import { PlusCircle, Search, Tag, Eye, Edit, Package, Briefcase, Monitor } from 'lucide-react';
 import { getProducts } from '@/lib/products/queries';
 import { getGSTClassificationLabel, getGSTClassificationColor } from '@/lib/invoices/gst-classification';
 
@@ -83,6 +83,11 @@ async function ProductList({ searchTerm }: { searchTerm?: string }) {
                     <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                       <Briefcase className="h-3 w-3 mr-1" />
                       Service
+                    </Badge>
+                  ) : product.productType === 'digital' ? (
+                    <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                      <Monitor className="h-3 w-3 mr-1" />
+                      Digital
                     </Badge>
                   ) : (
                     <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
