@@ -1,25 +1,15 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  CardFooter
 } from '@/components/ui/card';
-import { useActionState } from 'react';
-import { TeamDataWithMembers, User } from '@/lib/db/schema';
-import { removeTeamMember, inviteTeamMember } from '@/app/(login)/actions';
 import useSWR from 'swr';
 import { Suspense } from 'react';
-import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
 import {
-  Loader2,
-  PlusCircle,
   FileText,
   DollarSign,
   ShoppingCart,
@@ -31,13 +21,23 @@ import {
   ArrowRight,
   CheckCircle2,
   Circle,
+  Calendar,
+  Users,
 } from 'lucide-react';
 import Link from 'next/link';
-
-type ActionState = {
-  error?: string;
-  success?: string;
-};
+import {
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
 
 interface DashboardMetrics {
   taxInvoices: { count: number; revenue: string };
@@ -46,6 +46,35 @@ interface DashboardMetrics {
   outstanding: { total: string; count: number };
   overdue: { count: number; amount: string };
   gst: { output: string; input: string; net: string };
+  currency: string;
+}
+
+interface RevenueData {
+  month: string;
+  revenue: number;
+  invoiceCount: number;
+}
+
+interface TopCustomer {
+  name: string;
+  revenue: number;
+  invoiceCount: number;
+}
+
+interface InvoiceStatusData {
+  name: string;
+  value: number;
+  amount: number;
+}
+
+interface RecentInvoice {
+  id: string;
+  number: string;
+  customerName: string;
+  amount: number;
+  status: string;
+  paymentStatus: string;
+  date: string;
   currency: string;
 }
 
@@ -141,6 +170,262 @@ function SetupProgressCard() {
               )}
             </Link>
           ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Chart Components
+function RevenueTrendChart() {
+  const { data: revenueData } = useSWR<RevenueData[]>('/api/dashboard/revenue-trend', fetcher);
+
+  if (!revenueData) {
+    return (
+      <Card className="animate-pulse">
+        <CardHeader>
+          <div className="h-6 bg-gray-200 rounded w-32"></div>
+        </CardHeader>
+        <CardContent>
+          <div className="h-80 bg-gray-200 rounded"></div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="border-amber-200">
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <TrendingUp className="h-5 w-5 text-amber-800" />
+          <CardTitle className="text-base">Revenue Trend (6 Months)</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={revenueData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip 
+              formatter={(value: any) => [`BTN ${Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, 'Revenue']}
+            />
+            <Line 
+              type="monotone" 
+              dataKey="revenue" 
+              stroke="#b45309" 
+              strokeWidth={3}
+              dot={{ fill: '#b45309', strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
+  );
+}
+
+function TopCustomersChart() {
+  const { data: customersData } = useSWR<TopCustomer[]>('/api/dashboard/top-customers', fetcher);
+
+  if (!customersData) {
+    return (
+      <Card className="animate-pulse">
+        <CardHeader>
+          <div className="h-6 bg-gray-200 rounded w-32"></div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-8 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const maxRevenue = Math.max(...customersData.map(c => c.revenue));
+
+  return (
+    <Card className="border-blue-200">
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Users className="h-5 w-5 text-blue-600" />
+          <CardTitle className="text-base">Top 5 Customers</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {customersData.length === 0 ? (
+            <p className="text-gray-500 text-sm text-center py-8">No customer data available</p>
+          ) : (
+            customersData.map((customer, index) => (
+              <div key={customer.name} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">{customer.name}</span>
+                  <div className="text-right">
+                    <div className="text-sm font-semibold">
+                      BTN {customer.revenue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {customer.invoiceCount} invoice{customer.invoiceCount !== 1 ? 's' : ''}
+                    </div>
+                  </div>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-blue-500 h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${(customer.revenue / maxRevenue) * 100}%` }}
+                  />
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function InvoiceStatusChart() {
+  const { data: statusData } = useSWR<InvoiceStatusData[]>('/api/dashboard/invoice-status', fetcher);
+
+  if (!statusData) {
+    return (
+      <Card className="animate-pulse">
+        <CardHeader>
+          <div className="h-6 bg-gray-200 rounded w-32"></div>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64 bg-gray-200 rounded"></div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const COLORS = {
+    'Paid': '#10b981', // green
+    'Draft': '#94a3b8', // gray
+    'Sent': '#3b82f6', // blue
+    'Overdue': '#ef4444', // red
+    'Viewed': '#8b5cf6', // purple
+    'Partial': '#f59e0b', // amber
+    'Cancelled': '#6b7280', // dark gray
+  };
+
+  return (
+    <Card className="border-purple-200">
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <FileText className="h-5 w-5 text-purple-600" />
+          <CardTitle className="text-base">Invoice Status</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {statusData.length === 0 || statusData.every(item => item.value === 0) ? (
+          <p className="text-gray-500 text-sm text-center py-16">No invoice data available</p>
+        ) : (
+          <ResponsiveContainer width="100%" height={240}>
+            <PieChart>
+              <Pie
+                data={statusData}
+                cx="50%"
+                cy="50%"
+                innerRadius={40}
+                outerRadius={90}
+                paddingAngle={2}
+                dataKey="value"
+              >
+                {statusData.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={COLORS[entry.name as keyof typeof COLORS] || '#9ca3af'} 
+                  />
+                ))}
+              </Pie>
+              <Tooltip formatter={(value: any) => [Number(value), 'Invoices']} />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function RecentInvoicesTable() {
+  const { data: recentData } = useSWR<RecentInvoice[]>('/api/dashboard/recent-invoices', fetcher);
+
+  if (!recentData) {
+    return (
+      <Card className="animate-pulse">
+        <CardHeader>
+          <div className="h-6 bg-gray-200 rounded w-32"></div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-6 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'paid': return 'bg-green-100 text-green-800';
+      case 'draft': return 'bg-gray-100 text-gray-800';
+      case 'sent': return 'bg-blue-100 text-blue-800';
+      case 'overdue': return 'bg-red-100 text-red-800';
+      case 'viewed': return 'bg-purple-100 text-purple-800';
+      case 'partial': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  return (
+    <Card className="border-green-200">
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-green-600" />
+          <CardTitle className="text-base">Recent Invoices</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {recentData.length === 0 ? (
+          <p className="text-gray-500 text-sm text-center py-8">No recent invoices</p>
+        ) : (
+          <div className="space-y-3">
+            {recentData.map((invoice) => (
+              <div key={invoice.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">{invoice.number}</span>
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(invoice.status)}`}>
+                      {invoice.status}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 truncate">{invoice.customerName}</p>
+                  <p className="text-xs text-gray-500">{invoice.date}</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-semibold">
+                    {invoice.currency} {invoice.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="pt-4 border-t">
+          <Link href="/sales/invoices">
+            <Button variant="link" className="text-green-600 hover:text-green-700 p-0">
+              View all invoices <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
+          </Link>
         </div>
       </CardContent>
     </Card>
@@ -395,6 +680,27 @@ function DashboardOverview() {
         </div>
       </div>
 
+      {/* Analytics Charts */}
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Analytics</h2>
+        
+        {/* Row 1: Revenue Trend + Invoice Status */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="lg:col-span-2">
+            <RevenueTrendChart />
+          </div>
+          <div>
+            <InvoiceStatusChart />
+          </div>
+        </div>
+
+        {/* Row 2: Top Customers + Recent Invoices */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TopCustomersChart />
+          <RecentInvoicesTable />
+        </div>
+      </div>
+
       {/* Quick Actions */}
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
@@ -444,194 +750,6 @@ function DashboardOverview() {
   );
 }
 
-function TeamMembersSkeleton() {
-  return (
-    <Card className="mb-8 h-[140px]">
-      <CardHeader>
-        <CardTitle>Team Members</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="animate-pulse space-y-4 mt-1">
-          <div className="flex items-center space-x-4">
-            <div className="size-8 rounded-full bg-gray-200"></div>
-            <div className="space-y-2">
-              <div className="h-4 w-32 bg-gray-200 rounded"></div>
-              <div className="h-3 w-14 bg-gray-200 rounded"></div>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function TeamMembers() {
-  const { data: teamData } = useSWR<TeamDataWithMembers>('/api/team', fetcher);
-  const [removeState, removeAction, isRemovePending] = useActionState<
-    ActionState,
-    FormData
-  >(removeTeamMember, {});
-
-  const getUserDisplayName = (user: Pick<User, 'id' | 'name' | 'email'>) => {
-    return user.name || user.email || 'Unknown User';
-  };
-
-  if (!teamData?.teamMembers?.length) {
-    return (
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Team Members</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">No team members yet.</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <Card className="mb-8">
-      <CardHeader>
-        <CardTitle>Team Members</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ul className="space-y-4">
-          {teamData.teamMembers.map((member, index) => (
-            <li key={member.id} className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Avatar>
-                  <AvatarFallback>
-                    {getUserDisplayName(member.user)
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-medium">
-                    {getUserDisplayName(member.user)}
-                  </p>
-                  <p className="text-sm text-muted-foreground capitalize">
-                    {member.role}
-                  </p>
-                </div>
-              </div>
-              {index > 1 ? (
-                <form action={removeAction}>
-                  <input type="hidden" name="memberId" value={member.id} />
-                  <Button
-                    type="submit"
-                    variant="outline"
-                    size="sm"
-                    disabled={isRemovePending}
-                  >
-                    {isRemovePending ? 'Removing...' : 'Remove'}
-                  </Button>
-                </form>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-        {removeState?.error && (
-          <p className="text-red-500 mt-4">{removeState.error}</p>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function InviteTeamMemberSkeleton() {
-  return (
-    <Card className="h-[260px]">
-      <CardHeader>
-        <CardTitle>Invite Team Member</CardTitle>
-      </CardHeader>
-    </Card>
-  );
-}
-
-function InviteTeamMember() {
-  const { data: user } = useSWR<User>('/api/user', fetcher);
-  const isOwner = user?.role === 'owner';
-  const [inviteState, inviteAction, isInvitePending] = useActionState<
-    ActionState,
-    FormData
-  >(inviteTeamMember, {});
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Invite Team Member</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form action={inviteAction} className="space-y-4">
-          <div>
-            <Label htmlFor="email" className="mb-2">
-              Email
-            </Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="Enter email"
-              required
-              disabled={!isOwner}
-            />
-          </div>
-          <div>
-            <Label>Role</Label>
-            <RadioGroup
-              defaultValue="member"
-              name="role"
-              className="flex space-x-4"
-              disabled={!isOwner}
-            >
-              <div className="flex items-center space-x-2 mt-2">
-                <RadioGroupItem value="member" id="member" />
-                <Label htmlFor="member">Member</Label>
-              </div>
-              <div className="flex items-center space-x-2 mt-2">
-                <RadioGroupItem value="owner" id="owner" />
-                <Label htmlFor="owner">Owner</Label>
-              </div>
-            </RadioGroup>
-          </div>
-          {inviteState?.error && (
-            <p className="text-red-500">{inviteState.error}</p>
-          )}
-          {inviteState?.success && (
-            <p className="text-green-500">{inviteState.success}</p>
-          )}
-          <Button
-            type="submit"
-            className="bg-amber-500 hover:bg-amber-800 text-white"
-            disabled={isInvitePending || !isOwner}
-          >
-            {isInvitePending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Inviting...
-              </>
-            ) : (
-              <>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Invite Member
-              </>
-            )}
-          </Button>
-        </form>
-      </CardContent>
-      {!isOwner && (
-        <CardFooter>
-          <p className="text-sm text-muted-foreground">
-            You must be a team owner to invite new members.
-          </p>
-        </CardFooter>
-      )}
-    </Card>
-  );
-}
-
 export default function DashboardPage() {
   return (
     <section className="flex-1 p-4 lg:p-8">
@@ -654,16 +772,6 @@ export default function DashboardPage() {
         <DashboardOverview />
       </Suspense>
 
-      {/* Team Management Section */}
-      <div className="mt-12">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Team Management</h2>
-        <Suspense fallback={<TeamMembersSkeleton />}>
-          <TeamMembers />
-        </Suspense>
-        <Suspense fallback={<InviteTeamMemberSkeleton />}>
-          <InviteTeamMember />
-        </Suspense>
-      </div>
     </section>
   );
 }
