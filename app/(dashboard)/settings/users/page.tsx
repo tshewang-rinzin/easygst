@@ -144,7 +144,7 @@ export default function UsersRolesPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6 max-w-5xl">
+    <section className="flex-1 p-4 lg:p-8 space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Users & Roles</h1>
@@ -385,6 +385,6 @@ export default function UsersRolesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </section>
   );
 }
