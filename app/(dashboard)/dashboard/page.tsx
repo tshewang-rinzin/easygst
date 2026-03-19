@@ -133,13 +133,13 @@ function SetupProgressCard() {
         </div>
         <div className="space-y-2">
           {incompleteSteps.map((step) => (
-            <div key={step.id} className="flex items-center gap-2 text-sm">
+            <Link key={step.id} href={step.href} className="flex items-center gap-2 text-sm group">
               <Circle className="w-3 h-3 text-gray-300 flex-shrink-0" />
-              <span className="text-gray-600">{step.label}</span>
+              <span className="text-gray-600 group-hover:text-amber-700 transition-colors">{step.label}</span>
               {step.required && (
                 <span className="text-xs text-red-500">(required)</span>
               )}
-            </div>
+            </Link>
           ))}
         </div>
       </CardContent>

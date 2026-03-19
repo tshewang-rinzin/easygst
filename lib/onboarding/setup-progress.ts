@@ -30,7 +30,7 @@ export function getSetupProgress(
       description: 'Set your registered business name',
       completed: !!team.businessName && team.businessName.trim().length > 0,
       required: true,
-      href: '/onboarding?step=1',
+      href: '/settings/business',
     },
     {
       id: 'tpn',
@@ -38,7 +38,7 @@ export function getSetupProgress(
       description: 'Add your Tax Payer Number',
       completed: !!team.tpn && team.tpn.trim().length > 0,
       required: true,
-      href: '/onboarding?step=1',
+      href: '/settings/business',
     },
     {
       id: 'address',
@@ -46,7 +46,7 @@ export function getSetupProgress(
       description: 'Set your business address',
       completed: !!team.address && team.address.trim().length > 0,
       required: true,
-      href: '/onboarding?step=2',
+      href: '/settings/business',
     },
     {
       id: 'business_type',
@@ -54,7 +54,7 @@ export function getSetupProgress(
       description: 'Select your business category',
       completed: !!team.businessTypeId,
       required: true,
-      href: '/onboarding?step=1',
+      href: '/settings/business',
     },
     {
       id: 'logo',
@@ -62,7 +62,7 @@ export function getSetupProgress(
       description: 'Upload your business logo',
       completed: !!team.logoUrl,
       required: false,
-      href: '/onboarding?step=3',
+      href: '/settings/business',
     },
     {
       id: 'bank_account',
@@ -70,7 +70,7 @@ export function getSetupProgress(
       description: 'Add at least one bank account',
       completed: bankAccountCount > 0,
       required: true,
-      href: '/onboarding?step=4',
+      href: '/settings/bank-accounts',
     },
     {
       id: 'invoice_settings',
@@ -80,7 +80,7 @@ export function getSetupProgress(
         (!!team.invoicePrefix && team.invoicePrefix !== 'INV') ||
         !!team.invoiceTerms,
       required: false,
-      href: '/onboarding?step=5',
+      href: '/settings/numbering',
     },
   ];
 
