@@ -71,9 +71,11 @@ async function UnitsPageContent() {
 
 export default function UnitsPage() {
   return (
-    <Suspense fallback={<UnitsPageSkeleton />}>
-      <UnitsPageContent />
-    </Suspense>
+    <section className="flex-1 p-4 lg:p-8">
+      <Suspense fallback={<UnitsPageSkeleton />}>
+        <UnitsPageContent />
+      </Suspense>
+    </section>
   );
 }
 
