@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,12 +17,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Product, Unit } from '@/lib/db/schema';
+import { Product } from '@/lib/db/schema';
 import { CategorySelector } from './category-selector';
 import Link from 'next/link';
 import { Settings, Package, Briefcase, PlusCircle, Trash2, X } from 'lucide-react';
 import useSWR from 'swr';
-import type { TaxClassification } from '@/lib/db/schema';
+import type { TaxClassification, UnitOfMeasure } from '@/lib/db/schema';
+import { getUnitsOfMeasure } from '@/lib/products/unit-actions';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -97,7 +98,8 @@ interface ProductFormProps {
 export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps) {
   const [useDefaultGst, setUseDefaultGst] = useState(!product || !product.defaultTaxRate);
   const defaultRate = parseFloat(defaultGstRate || '0');
-  const { data: units } = useSWR<Unit[]>('/api/units', fetcher);
+  const [unitsOfMeasure, setUnitsOfMeasure] = useState<UnitOfMeasure[]>([]);
+  const [loadingUnits, setLoadingUnits] = useState(true);
   const { data: taxClassifications } = useSWR<TaxClassification[]>('/api/tax-classifications', fetcher);
 
   const [productType, setProductType] = useState<'product' | 'service'>(
@@ -109,6 +111,26 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
   const [billingCycle, setBillingCycle] = useState(product?.billingCycle || 'monthly');
   const [features, setFeatures] = useState<string[]>(product?.features || []);
   const [newFeature, setNewFeature] = useState('');
+
+  // Load units of measure
+  useEffect(() => {
+    const loadUnits = async () => {
+      setLoadingUnits(true);
+      try {
+        const result = await getUnitsOfMeasure();
+        if (result.success && result.data) {
+          setUnitsOfMeasure(result.data);
+        } else {
+          console.error('Failed to load units:', result.error);
+        }
+      } catch (error) {
+        console.error('Failed to load units:', error);
+      }
+      setLoadingUnits(false);
+    };
+
+    loadUnits();
+  }, []);
 
   // Inline variant builder state
   const [attributes, setAttributes] = useState<InlineAttribute[]>([]);
@@ -374,7 +396,7 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
                 <Label htmlFor="unit" className="mb-2 flex items-center justify-between">
                   <span>Unit of Measurement</span>
                   <Link
-                    href="/settings/units"
+                    href="/products/units"
                     className="text-xs text-amber-800 hover:text-amber-900 flex items-center gap-1"
                   >
                     <Settings className="h-3 w-3" />
@@ -385,31 +407,31 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
                   id="unit"
                   name="unit"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  defaultValue={product?.unit || (units?.[0]?.name || 'piece')}
+                  defaultValue={product?.unit || (unitsOfMeasure?.[0]?.name || 'piece')}
+                  disabled={loadingUnits}
                 >
-                  {units && units.length > 0 ? (
+                  {unitsOfMeasure && unitsOfMeasure.length > 0 ? (
                     (() => {
-                      const categoryLabels: Record<string, string> = {
-                        common: 'Common',
-                        time: 'Time',
+                      const typeLabels: Record<string, string> = {
                         quantity: 'Quantity',
                         weight: 'Weight',
                         volume: 'Volume',
-                        length: 'Length / Area',
-                        other: 'Other',
+                        length: 'Length',
+                        area: 'Area',
+                        time: 'Time',
                       };
-                      const categoryOrder = ['common', 'time', 'quantity', 'weight', 'volume', 'length', 'other'];
-                      const grouped = units.reduce<Record<string, typeof units>>((acc, unit) => {
-                        const cat = (unit as any).category || 'other';
-                        if (!acc[cat]) acc[cat] = [];
-                        acc[cat].push(unit);
+                      const typeOrder = ['quantity', 'weight', 'volume', 'length', 'area', 'time'];
+                      const grouped = unitsOfMeasure.reduce<Record<string, typeof unitsOfMeasure>>((acc, unit) => {
+                        const type = unit.type || 'quantity';
+                        if (!acc[type]) acc[type] = [];
+                        acc[type].push(unit);
                         return acc;
                       }, {});
-                      return categoryOrder
-                        .filter((cat) => grouped[cat]?.length)
-                        .map((cat) => (
-                          <optgroup key={cat} label={categoryLabels[cat] || cat}>
-                            {grouped[cat].map((unit) => (
+                      return typeOrder
+                        .filter((type) => grouped[type]?.length)
+                        .map((type) => (
+                          <optgroup key={type} label={typeLabels[type] || type}>
+                            {grouped[type].map((unit) => (
                               <option key={unit.id} value={unit.name}>
                                 {unit.name} ({unit.abbreviation})
                               </option>
@@ -419,18 +441,21 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
                     })()
                   ) : (
                     <>
-                      <option value="piece">Piece (pcs)</option>
+                      <option value="piece">Piece (pc)</option>
                       <option value="hour">Hour (hr)</option>
                       <option value="service">Service (svc)</option>
                     </>
                   )}
                 </select>
-                {(!units || units.length === 0) && (
+                {(!unitsOfMeasure || unitsOfMeasure.length === 0) && !loadingUnits && (
                   <p className="text-xs text-gray-500 mt-1">
-                    <Link href="/settings/units" className="text-amber-800 hover:underline">
+                    <Link href="/products/units" className="text-amber-800 hover:underline">
                       Add custom units
-                    </Link> in settings
+                    </Link> in UOM management
                   </p>
+                )}
+                {loadingUnits && (
+                  <p className="text-xs text-gray-500 mt-1">Loading units...</p>
                 )}
               </div>
             </div>
@@ -451,7 +476,7 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
                 <Label htmlFor="unit" className="mb-2 flex items-center justify-between">
                   <span>Unit of Measurement</span>
                   <Link
-                    href="/settings/units"
+                    href="/products/units"
                     className="text-xs text-amber-800 hover:text-amber-900 flex items-center gap-1"
                   >
                     <Settings className="h-3 w-3" />
@@ -462,31 +487,31 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
                   id="unit"
                   name="unit"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  defaultValue={product?.unit || (units?.[0]?.name || 'piece')}
+                  defaultValue={product?.unit || (unitsOfMeasure?.[0]?.name || 'piece')}
+                  disabled={loadingUnits}
                 >
-                  {units && units.length > 0 ? (
+                  {unitsOfMeasure && unitsOfMeasure.length > 0 ? (
                     (() => {
-                      const categoryLabels: Record<string, string> = {
-                        common: 'Common',
-                        time: 'Time',
+                      const typeLabels: Record<string, string> = {
                         quantity: 'Quantity',
                         weight: 'Weight',
                         volume: 'Volume',
-                        length: 'Length / Area',
-                        other: 'Other',
+                        length: 'Length',
+                        area: 'Area',
+                        time: 'Time',
                       };
-                      const categoryOrder = ['common', 'time', 'quantity', 'weight', 'volume', 'length', 'other'];
-                      const grouped = units.reduce<Record<string, typeof units>>((acc, unit) => {
-                        const cat = (unit as any).category || 'other';
-                        if (!acc[cat]) acc[cat] = [];
-                        acc[cat].push(unit);
+                      const typeOrder = ['quantity', 'weight', 'volume', 'length', 'area', 'time'];
+                      const grouped = unitsOfMeasure.reduce<Record<string, typeof unitsOfMeasure>>((acc, unit) => {
+                        const type = unit.type || 'quantity';
+                        if (!acc[type]) acc[type] = [];
+                        acc[type].push(unit);
                         return acc;
                       }, {});
-                      return categoryOrder
-                        .filter((cat) => grouped[cat]?.length)
-                        .map((cat) => (
-                          <optgroup key={cat} label={categoryLabels[cat] || cat}>
-                            {grouped[cat].map((unit) => (
+                      return typeOrder
+                        .filter((type) => grouped[type]?.length)
+                        .map((type) => (
+                          <optgroup key={type} label={typeLabels[type] || type}>
+                            {grouped[type].map((unit) => (
                               <option key={unit.id} value={unit.name}>
                                 {unit.name} ({unit.abbreviation})
                               </option>
@@ -496,12 +521,22 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
                     })()
                   ) : (
                     <>
-                      <option value="piece">Piece (pcs)</option>
+                      <option value="piece">Piece (pc)</option>
                       <option value="hour">Hour (hr)</option>
                       <option value="service">Service (svc)</option>
                     </>
                   )}
                 </select>
+                {(!unitsOfMeasure || unitsOfMeasure.length === 0) && !loadingUnits && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    <Link href="/products/units" className="text-amber-800 hover:underline">
+                      Add custom units
+                    </Link> in UOM management
+                  </p>
+                )}
+                {loadingUnits && (
+                  <p className="text-xs text-gray-500 mt-1">Loading units...</p>
+                )}
               </div>
             </CardContent>
           </Card>
