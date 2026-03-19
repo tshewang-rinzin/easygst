@@ -163,6 +163,7 @@ export default function EditProductPage({
         </div>
       )}
 
+      {/* Product Details Form */}
       <form action={updateAction}>
         <input type="hidden" name="id" value={id} />
         <ProductForm
@@ -192,7 +193,7 @@ export default function EditProductPage({
         </div>
       </form>
 
-      {/* Product Units Section - only for saved products */}
+      {/* Selling Units — how this product can be sold (per piece, carton, kg, etc.) */}
       <div className="mt-8">
         <ProductUnitsSection
           productId={id}
@@ -200,11 +201,14 @@ export default function EditProductPage({
         />
       </div>
 
-      {/* Variant Builder - only for saved products of type 'product' */}
+      {/* Product Variants — attribute-based variations (color, size, etc.) */}
       {product.productType !== 'service' && (
         <FeatureGate feature="product_variants">
           <div className="mt-8">
             <h2 className="text-lg font-medium text-gray-900 mb-4">Product Variants</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Create variations based on attributes like color, size, or material — each with its own SKU and pricing.
+            </p>
             <VariantBuilder
               productId={id}
               productSku={product.sku || ''}
