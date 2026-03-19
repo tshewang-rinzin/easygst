@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import path from 'path';
 import { uploadFile } from '@/lib/storage/r2';
 import { withAuth } from '@/lib/auth/with-auth';
 import { db } from '@/lib/db/drizzle';
@@ -19,6 +20,33 @@ const ALLOWED_TYPES = [
   'text/csv',
 ];
 
+// Allowed upload folders — prevents directory traversal
+const ALLOWED_FOLDERS = ['uploads', 'invoices', 'logos', 'attachments', 'receipts', 'contracts'];
+
+// File signature magic bytes for content validation
+const FILE_SIGNATURES: Record<string, number[][]> = {
+  'image/jpeg': [[0xFF, 0xD8, 0xFF]],
+  'image/png': [[0x89, 0x50, 0x4E, 0x47]],
+  'image/gif': [[0x47, 0x49, 0x46, 0x38]],
+  'image/webp': [[0x52, 0x49, 0x46, 0x46]], // RIFF header
+  'application/pdf': [[0x25, 0x50, 0x44, 0x46]], // %PDF
+};
+
+function validateFileSignature(buffer: Buffer, mimeType: string): boolean {
+  const signatures = FILE_SIGNATURES[mimeType];
+  if (!signatures) return true; // Skip check for types without known signatures (office docs, csv)
+  return signatures.some(sig =>
+    sig.every((byte, i) => buffer[i] === byte)
+  );
+}
+
+function sanitizeFilename(filename: string): string {
+  // Extract basename to prevent directory traversal
+  const base = path.basename(filename);
+  // Remove dangerous characters, keep alphanumeric, dots, hyphens, underscores
+  return base.replace(/[^a-zA-Z0-9.\-_]/g, '_').substring(0, 255);
+}
+
 export const POST = withAuth(async (request: NextRequest, { team, user }: any) => {
   const teamId = team.id;
   try {
@@ -28,10 +56,13 @@ export const POST = withAuth(async (request: NextRequest, { team, user }: any) =
     }
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
-    const folder = (formData.get('folder') as string) || 'uploads';
+    const rawFolder = (formData.get('folder') as string) || 'uploads';
     const entityType = (formData.get('entityType') as string) || 'general';
     const entityId = formData.get('entityId') as string | null;
     const description = formData.get('description') as string | null;
+
+    // Validate folder — prevent directory traversal
+    const folder = ALLOWED_FOLDERS.includes(rawFolder) ? rawFolder : 'uploads';
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -46,15 +77,26 @@ export const POST = withAuth(async (request: NextRequest, { team, user }: any) =
 
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { error: `File type "${file.type}" not allowed` },
+        { error: `File type not allowed` },
         { status: 400 }
       );
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
+    // Validate file content matches declared MIME type
+    if (!validateFileSignature(buffer, file.type)) {
+      return NextResponse.json(
+        { error: 'File content does not match declared type' },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize filename
+    const safeFilename = sanitizeFilename(file.name);
+
     const result = await uploadFile(buffer, {
-      filename: file.name,
+      filename: safeFilename,
       contentType: file.type,
       folder,
       teamId,
@@ -66,7 +108,7 @@ export const POST = withAuth(async (request: NextRequest, { team, user }: any) =
       .values({
         teamId,
         storageKey: result.key,
-        filename: file.name,
+        filename: safeFilename,
         contentType: file.type,
         fileSize: result.size,
         folder,
@@ -80,7 +122,7 @@ export const POST = withAuth(async (request: NextRequest, { team, user }: any) =
     return NextResponse.json({
       id: attachment.id,
       key: result.key,
-      filename: file.name,
+      filename: safeFilename,
       size: result.size,
       contentType: file.type,
     });
