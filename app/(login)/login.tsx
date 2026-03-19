@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
+  ArrowLeft,
   CheckCircle, 
   FileText, 
   Users, 
@@ -117,7 +118,18 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
       </div>
 
       {/* Right Panel - Form */}
-      <div className="flex-1 flex flex-col justify-center py-12 px-6 sm:px-12 lg:px-16 bg-white">
+      <div className="flex-1 flex flex-col justify-center py-12 px-6 sm:px-12 lg:px-16 bg-white relative">
+        {/* Back to Home */}
+        <div className="absolute top-6 left-6 sm:left-12 lg:left-16">
+          <Link
+            href="/"
+            className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back to Home
+          </Link>
+        </div>
+
         <div className="w-full max-w-md mx-auto">
           {/* Mobile logo (shown only on small screens) */}
           <div className="lg:hidden mb-8 text-center">
