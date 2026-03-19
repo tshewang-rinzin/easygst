@@ -2,7 +2,7 @@
 
 import { useActionState, use } from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, Trash2 } from 'lucide-react';
+import { Loader2, ArrowLeft, Trash2, FileText } from 'lucide-react';
 import { updateCustomer, deleteCustomer } from '@/lib/customers/actions';
 import { CustomerForm } from '@/components/customers/customer-form';
 import { Customer } from '@/lib/db/schema';
@@ -168,10 +168,24 @@ export default function CustomerDetailPage({
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Customers
         </Link>
-        <h1 className="text-lg lg:text-2xl font-medium text-gray-900">
-          {customer.name}
-        </h1>
-        <p className="text-sm text-gray-500">Edit customer information</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-lg lg:text-2xl font-medium text-gray-900">
+              {customer.name}
+            </h1>
+            <p className="text-sm text-gray-500">Edit customer information</p>
+          </div>
+          
+          <Link href={`/customers/${customer.id}/statement`}>
+            <Button 
+              variant="outline"
+              className="bg-amber-500 hover:bg-amber-600 text-white border-amber-500"
+            >
+              <FileText className="mr-2 h-4 w-4" />
+              View Statement
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <CustomerEditForm customer={customer} />
