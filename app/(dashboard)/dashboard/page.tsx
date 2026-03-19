@@ -135,7 +135,7 @@ function SetupProgressCard() {
           {incompleteSteps.map((step) => (
             <Link key={step.id} href={step.href} className="flex items-center gap-2 text-sm group">
               <Circle className="w-3 h-3 text-gray-300 flex-shrink-0" />
-              <span className="text-gray-600 group-hover:text-amber-700 transition-colors">{step.label}</span>
+              <span className="text-amber-700 underline underline-offset-2 group-hover:text-amber-900 transition-colors">{step.label}</span>
               {step.required && (
                 <span className="text-xs text-red-500">(required)</span>
               )}
