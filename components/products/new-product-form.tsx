@@ -56,7 +56,7 @@ export function NewProductForm({ defaultGstRate }: NewProductFormProps) {
           </div>
         )}
 
-        <div className="mt-6 flex gap-4">
+        <div className="mt-8 flex gap-4">
           <Button
             type="submit"
             disabled={pending}
