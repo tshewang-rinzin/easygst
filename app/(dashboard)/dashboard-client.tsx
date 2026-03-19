@@ -23,6 +23,7 @@ import {
   Warehouse,
   Plane,
   RefreshCw,
+  Receipt,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -146,9 +147,17 @@ const navigation = [
     icon: ShoppingBag,
     children: [
       { name: 'Supplier Bills', href: '/purchases/bills' },
-      { name: 'Expenses', href: '/expenses' },
       { name: 'Suppliers', href: '/suppliers' },
       { name: 'Purchase Register', href: '/purchases/register' },
+    ]
+  },
+  {
+    name: 'Expenses',
+    icon: Receipt,
+    children: [
+      { name: 'All Expenses', href: '/expenses' },
+      { name: 'New Expense', href: '/expenses/new' },
+      { name: 'Categories', href: '/expenses/categories' },
     ]
   },
   {
