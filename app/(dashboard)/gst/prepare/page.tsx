@@ -64,7 +64,7 @@ export default function PrepareGstReturnPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <section className="flex-1 p-4 lg:p-8 space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/gst/summary">
           <Button variant="ghost" size="icon">
@@ -213,6 +213,6 @@ export default function PrepareGstReturnPage() {
           </Card>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

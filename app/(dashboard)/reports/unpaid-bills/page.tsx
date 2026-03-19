@@ -77,7 +77,7 @@ export default function UnpaidBillsReportPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <section className="flex-1 p-4 lg:p-8 space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Unpaid Bills Report</h1>
@@ -250,6 +250,6 @@ export default function UnpaidBillsReportPage() {
           <p>• Use supplier advances for better terms on future purchases</p>
         </CardContent>
       </Card>
-    </div>
+    </section>
   );
 }

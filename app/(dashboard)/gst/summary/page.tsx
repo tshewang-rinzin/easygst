@@ -33,7 +33,7 @@ export default function GstSummaryPage() {
   const periodEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <section className="flex-1 p-4 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">GST Summary</h1>
@@ -266,6 +266,6 @@ export default function GstSummaryPage() {
           </div>
         </>
       )}
-    </div>
+    </section>
   );
 }

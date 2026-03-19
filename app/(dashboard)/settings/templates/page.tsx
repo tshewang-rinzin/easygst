@@ -215,7 +215,7 @@ export default function TemplatesPage() {
 
   return (
     <section className="flex-1 p-4 lg:p-8">
-      <div className="max-w-4xl">
+      <div>
         <div className="mb-6">
           <h1 className="text-lg lg:text-2xl font-medium text-gray-900 flex items-center gap-2">
             <Layout className="h-6 w-6 text-amber-500" />

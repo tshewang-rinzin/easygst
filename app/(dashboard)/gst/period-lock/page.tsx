@@ -74,7 +74,7 @@ export default function PeriodLockPage() {
 
   return (
     <FeatureGate feature="period_lock">
-    <div className="container mx-auto py-6 space-y-6">
+    <section className="flex-1 p-4 lg:p-8 space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">GST Period Locks</h1>
@@ -278,7 +278,7 @@ export default function PeriodLockPage() {
           </p>
         </CardContent>
       </Card>
-    </div>
+    </section>
     </FeatureGate>
   );
 }

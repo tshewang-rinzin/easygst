@@ -325,7 +325,7 @@ export default function NewContractPage() {
         <h1 className="text-2xl font-semibold text-gray-900">Create New Contract</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="max-w-4xl space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-8">
         {/* Contract Type Toggle */}
         <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
           <h2 className="text-base font-semibold text-gray-900 mb-4">Contract Type</h2>
