@@ -4,7 +4,6 @@ import { useActionState, useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ProductForm } from '@/components/products/product-form';
-import { ProductUnitsSection } from '@/components/products/product-units-section';
 import { VariantBuilder } from '@/components/products/variant-builder';
 import { FeatureGate } from '@/components/feature-gate';
 import { updateProduct, deleteProduct, duplicateProduct } from '@/lib/products/actions';
@@ -176,14 +175,6 @@ export default function EditProductPage({
             <p className="text-sm text-red-600">{updateState.error}</p>
           </div>
         )}
-
-        {/* Selling Units — how this product can be sold (per piece, carton, kg, etc.) */}
-        <div className="mt-8">
-          <ProductUnitsSection
-            productId={id}
-            defaultPrice={product.unitPrice ? parseFloat(product.unitPrice) : 0}
-          />
-        </div>
 
         {/* Product Variants — attribute-based variations (color, size, etc.) */}
         {product.productType !== 'service' && (

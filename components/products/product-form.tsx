@@ -24,6 +24,7 @@ import { Settings, Package, Briefcase, Monitor, PlusCircle, Trash2, X } from 'lu
 import useSWR from 'swr';
 import type { TaxClassification, UnitOfMeasure } from '@/lib/db/schema';
 import { getUnitsOfMeasure } from '@/lib/products/unit-actions';
+import { ProductUnitsSection } from './product-units-section';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -483,16 +484,16 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
               </div>
             </div>
 
-            {/* Multi-unit pricing note for new products */}
-            {!product && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-                <p className="text-sm text-blue-800">
-                  💡 Need to sell this product in multiple units (e.g., piece, carton, kg) with different pricing? Save the product first, then configure additional units in the edit page.
-                </p>
-              </div>
-            )}
           </CardContent>
         </Card>
+      )}
+
+      {/* Multi-unit pricing section */}
+      {!hasVariants && (
+        <ProductUnitsSection
+          productId={product?.id}
+          defaultPrice={product?.unitPrice ? parseFloat(product.unitPrice) : 0}
+        />
       )}
 
       {/* When hasVariants, still need unitPrice and unit as hidden defaults */}
