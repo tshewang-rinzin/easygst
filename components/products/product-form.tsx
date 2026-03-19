@@ -482,6 +482,15 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
                 )}
               </div>
             </div>
+
+            {/* Multi-unit pricing note for new products */}
+            {!product && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-sm text-blue-800">
+                  💡 Need to sell this product in multiple units (e.g., piece, carton, kg) with different pricing? Save the product first, then configure additional units in the edit page.
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

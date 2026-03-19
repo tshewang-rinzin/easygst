@@ -20,9 +20,9 @@ export function NewProductForm({ defaultGstRate }: NewProductFormProps) {
 
   useEffect(() => {
     if ('success' in state && state.success) {
-      // If product was created with variants, redirect to edit page to manage them
-      if ('hasVariants' in state && state.hasVariants && 'productId' in state && state.productId) {
-        router.push(`/products/${state.productId}`);
+      // Always redirect to edit page so user can configure units, variants, etc.
+      if ('productId' in state && state.productId) {
+        router.push(`/products/${state.productId}/edit`);
       } else {
         router.push('/products');
       }
