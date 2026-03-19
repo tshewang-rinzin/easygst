@@ -36,7 +36,7 @@ export default function NewSupplierPage() {
         </p>
       </div>
 
-      <form action={formAction} className="max-w-4xl">
+      <form action={formAction}>
         <SupplierForm />
 
         {'error' in state && state.error && (

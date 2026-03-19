@@ -81,7 +81,7 @@ export default function EmailSettingsPage() {
 
   return (
     <section className="flex-1 p-4 lg:p-8">
-      <div className="max-w-4xl">
+      <div>
         <div className="mb-6">
           <Link
             href="/settings"

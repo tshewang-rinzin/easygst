@@ -107,7 +107,7 @@ export default function AllocateSupplierAdvancePage({
 
   if (isLoading) {
     return (
-      <div className="container mx-auto py-6">
+      <div className="flex-1 p-4 lg:p-8">
         <div className="text-center py-12 text-muted-foreground">
           Loading...
         </div>
@@ -117,7 +117,7 @@ export default function AllocateSupplierAdvancePage({
 
   if (!advance) {
     return (
-      <div className="container mx-auto py-6">
+      <div className="flex-1 p-4 lg:p-8">
         <div className="text-center py-12 text-muted-foreground">
           Advance not found
         </div>
@@ -126,7 +126,7 @@ export default function AllocateSupplierAdvancePage({
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="flex-1 p-4 lg:p-8 space-y-6">
       <div className="flex items-center gap-4">
         <Link href={`/payments/advances/supplier/${id}`}>
           <Button variant="ghost" size="icon">

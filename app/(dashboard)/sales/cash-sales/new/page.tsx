@@ -240,7 +240,7 @@ export default function NewCashSalePage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="max-w-5xl space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-8">
         {/* Sale Details */}
         <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
           <h2 className="text-base font-semibold text-gray-900 mb-6">Sale Details</h2>

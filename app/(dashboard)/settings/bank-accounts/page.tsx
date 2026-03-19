@@ -6,7 +6,7 @@ export default async function BankAccountsPage() {
 
   return (
     <section className="flex-1 p-4 lg:p-8">
-      <div className="max-w-6xl">
+      <div>
         <div className="mb-6">
           <h1 className="text-lg lg:text-2xl font-medium text-gray-900">
             Bank Accounts

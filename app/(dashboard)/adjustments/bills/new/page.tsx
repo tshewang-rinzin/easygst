@@ -65,7 +65,7 @@ export default function NewBillAdjustmentPage() {
         </p>
       </div>
 
-      <form action={formAction} className="max-w-2xl space-y-6">
+      <form action={formAction} className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>Adjustment Details</CardTitle>

@@ -3,7 +3,7 @@ import { CategoryForm } from '@/components/categories/category-form';
 export default function NewCategoryPage() {
   return (
     <section className="flex-1 p-4 lg:p-8">
-      <div className="max-w-2xl mx-auto">
+      <div>
         <div className="mb-6">
           <h1 className="text-lg lg:text-2xl font-medium text-gray-900">
             Create Product Category

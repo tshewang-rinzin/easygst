@@ -140,7 +140,7 @@ export default function EditSupplierPage() {
         </div>
       </div>
 
-      <form action={formAction} className="max-w-4xl">
+      <form action={formAction}>
         <input type="hidden" name="id" value={supplierId} />
         <SupplierForm supplier={supplier} />
 

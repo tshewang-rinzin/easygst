@@ -42,7 +42,7 @@ export default function SupplierAdvanceDetailPage({
 
   if (isLoading) {
     return (
-      <div className="container mx-auto py-6">
+      <div className="flex-1 p-4 lg:p-8">
         <div className="text-center py-12 text-muted-foreground">
           Loading advance details...
         </div>
@@ -52,7 +52,7 @@ export default function SupplierAdvanceDetailPage({
 
   if (!advance) {
     return (
-      <div className="container mx-auto py-6">
+      <div className="flex-1 p-4 lg:p-8">
         <div className="text-center py-12 text-muted-foreground">
           Advance not found
         </div>
@@ -64,7 +64,7 @@ export default function SupplierAdvanceDetailPage({
   const hasUnallocated = parseFloat(advance.unallocatedAmount) > 0;
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="flex-1 p-4 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href="/payments/advances/supplier">

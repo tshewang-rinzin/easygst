@@ -150,7 +150,7 @@ export default function ReceivePaymentPage() {
         <p className="text-sm text-gray-500">Record customer payments and allocate to invoices</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="max-w-4xl space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Customer Selection */}
         <Card>
           <CardHeader>
