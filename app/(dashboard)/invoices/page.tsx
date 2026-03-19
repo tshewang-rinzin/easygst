@@ -10,9 +10,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { PlusCircle, Search, FileText, Eye, Edit } from 'lucide-react';
+import { PlusCircle, Search, FileText } from 'lucide-react';
 import { getInvoices } from '@/lib/invoices/queries';
-import { Badge } from '@/components/ui/badge';
+import { InvoiceTable } from '@/components/invoices/invoice-table';
 
 async function InvoiceList({
   searchTerm,
@@ -45,99 +45,7 @@ async function InvoiceList({
     );
   }
 
-  return (
-    <Card>
-      <CardContent className="p-0">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Invoice #</TableHead>
-              <TableHead>Customer</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Due Date</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-              <TableHead className="text-right">Amount Due</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {invoices.map(({ invoice, customer }) => (
-              <TableRow key={invoice.id}>
-                <TableCell className="font-medium">
-                  {invoice.invoiceNumber}
-                </TableCell>
-                <TableCell>{customer?.name || 'N/A'}</TableCell>
-                <TableCell>
-                  {new Date(invoice.invoiceDate).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  {invoice.dueDate
-                    ? new Date(invoice.dueDate).toLocaleDateString()
-                    : '-'}
-                </TableCell>
-                <TableCell className="text-right">
-                  {invoice.currency} {parseFloat(invoice.totalAmount).toFixed(2)}
-                </TableCell>
-                <TableCell className="text-right">
-                  <span
-                    className={
-                      parseFloat(invoice.amountDue) > 0
-                        ? 'text-red-600 font-medium'
-                        : 'text-gray-600'
-                    }
-                  >
-                    {invoice.currency} {parseFloat(invoice.amountDue).toFixed(2)}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant={
-                      invoice.status === 'paid'
-                        ? 'default'
-                        : invoice.status === 'draft'
-                        ? 'secondary'
-                        : invoice.status === 'overdue'
-                        ? 'destructive'
-                        : 'outline'
-                    }
-                    className={
-                      invoice.status === 'sent'
-                        ? 'bg-blue-100 text-blue-700 hover:bg-blue-100'
-                        : invoice.status === 'viewed'
-                        ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100'
-                        : invoice.status === 'paid'
-                        ? 'bg-green-100 text-green-700 hover:bg-green-100'
-                        : ''
-                    }
-                  >
-                    {invoice.status.charAt(0).toUpperCase() +
-                      invoice.status.slice(1)}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Link href={`/invoices/${invoice.id}`}>
-                      <Button variant="ghost" size="sm">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                    {invoice.status === 'draft' && (
-                      <Link href={`/invoices/${invoice.id}/edit`}>
-                        <Button variant="ghost" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
-  );
+  return <InvoiceTable invoices={invoices} />;
 }
 
 function InvoiceListSkeleton() {

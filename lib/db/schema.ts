@@ -3199,4 +3199,135 @@ export enum ActivityType {
   CREATE_PAYMENT_METHOD = 'CREATE_PAYMENT_METHOD',
   UPDATE_PAYMENT_METHOD = 'UPDATE_PAYMENT_METHOD',
   DELETE_PAYMENT_METHOD = 'DELETE_PAYMENT_METHOD',
+
+  // Expense Operations
+  CREATE_EXPENSE = 'CREATE_EXPENSE',
+  UPDATE_EXPENSE = 'UPDATE_EXPENSE',
+  DELETE_EXPENSE = 'DELETE_EXPENSE',
+  APPROVE_EXPENSE = 'APPROVE_EXPENSE',
 }
+
+// ─── Expense Categories ─────────────────────────────────────────────────────
+
+export const expenseCategories = pgTable('expense_categories', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 100 }).notNull(),
+  code: varchar('code', { length: 20 }).notNull(),
+  description: text('description'),
+  gstClaimable: varchar('gst_claimable', { length: 20 }).notNull().default('full'),
+  defaultGstRate: numeric('default_gst_rate', { precision: 5, scale: 2 }).notNull().default('0'),
+  claimablePercentage: numeric('claimable_percentage', { precision: 5, scale: 2 }).notNull().default('100'),
+  accountCode: varchar('account_code', { length: 20 }),
+  isSystem: boolean('is_system').notNull().default(false),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  teamCodeIdx: uniqueIndex('expense_cat_team_code_idx').on(table.teamId, table.code),
+  teamIdx: index('expense_cat_team_idx').on(table.teamId),
+}));
+
+export const expenseCategoriesRelations = relations(expenseCategories, ({ one, many }) => ({
+  team: one(teams, {
+    fields: [expenseCategories.teamId],
+    references: [teams.id],
+  }),
+  expenses: many(expenses),
+}));
+
+// ─── Expenses ───────────────────────────────────────────────────────────────
+
+export const expenses = pgTable('expenses', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' }),
+  expenseCategoryId: uuid('expense_category_id')
+    .notNull()
+    .references(() => expenseCategories.id),
+  supplierId: uuid('supplier_id')
+    .references(() => suppliers.id),
+  expenseNumber: varchar('expense_number', { length: 50 }).notNull(),
+  expenseDate: timestamp('expense_date').notNull(),
+  description: text('description').notNull(),
+  referenceNumber: varchar('reference_number', { length: 100 }),
+
+  currency: varchar('currency', { length: 3 }).notNull().default('BTN'),
+  amount: numeric('amount', { precision: 15, scale: 2 }).notNull(),
+  gstRate: numeric('gst_rate', { precision: 5, scale: 2 }).notNull().default('0'),
+  gstAmount: numeric('gst_amount', { precision: 15, scale: 2 }).notNull().default('0'),
+  totalAmount: numeric('total_amount', { precision: 15, scale: 2 }).notNull(),
+  claimableGstAmount: numeric('claimable_gst_amount', { precision: 15, scale: 2 }).notNull().default('0'),
+
+  paymentMethod: varchar('payment_method', { length: 50 }),
+  paymentDate: timestamp('payment_date'),
+  isPaid: boolean('is_paid').notNull().default(false),
+  paidFromAccount: varchar('paid_from_account', { length: 100 }),
+
+  isRecurring: boolean('is_recurring').notNull().default(false),
+  recurringFrequency: varchar('recurring_frequency', { length: 20 }),
+
+  status: varchar('status', { length: 20 }).notNull().default('draft'),
+  approvedBy: uuid('approved_by').references(() => users.id),
+  approvedAt: timestamp('approved_at'),
+
+  notes: text('notes'),
+  gstReturnId: uuid('gst_return_id'),
+  journalEntryId: uuid('journal_entry_id'),
+  fiscalYear: integer('fiscal_year'),
+  fiscalMonth: integer('fiscal_month'),
+
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdBy: uuid('created_by')
+    .notNull()
+    .references(() => users.id),
+}, (table) => ({
+  teamExpNumIdx: uniqueIndex('expense_team_num_idx').on(table.teamId, table.expenseNumber),
+  teamIdx: index('expense_team_idx').on(table.teamId),
+  categoryIdx: index('expense_category_idx').on(table.expenseCategoryId),
+  dateIdx: index('expense_date_idx').on(table.expenseDate),
+  statusIdx: index('expense_status_idx').on(table.status),
+}));
+
+export const expensesRelations = relations(expenses, ({ one }) => ({
+  team: one(teams, {
+    fields: [expenses.teamId],
+    references: [teams.id],
+  }),
+  category: one(expenseCategories, {
+    fields: [expenses.expenseCategoryId],
+    references: [expenseCategories.id],
+  }),
+  supplier: one(suppliers, {
+    fields: [expenses.supplierId],
+    references: [suppliers.id],
+  }),
+  creator: one(users, {
+    fields: [expenses.createdBy],
+    references: [users.id],
+  }),
+}));
+
+// ─── Expense Sequences ──────────────────────────────────────────────────────
+
+export const expenseSequences = pgTable('expense_sequences', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  teamId: uuid('team_id')
+    .notNull()
+    .references(() => teams.id, { onDelete: 'cascade' })
+    .unique(),
+  lastNumber: integer('last_number').notNull().default(0),
+  prefix: varchar('prefix', { length: 10 }).notNull().default('EXP'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// Expense types
+export type ExpenseCategory = typeof expenseCategories.$inferSelect;
+export type NewExpenseCategory = typeof expenseCategories.$inferInsert;
+export type Expense = typeof expenses.$inferSelect;
+export type NewExpense = typeof expenses.$inferInsert;

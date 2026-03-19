@@ -183,6 +183,13 @@
       "when": 1771754759406,
       "tag": "0025_quiet_jubilee",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1773955965550,
+      "tag": "0026_friendly_lord_hawal",
+      "breakpoints": true
     }
   ]
 }

@@ -146,6 +146,7 @@ const navigation = [
     icon: ShoppingBag,
     children: [
       { name: 'Supplier Bills', href: '/purchases/bills' },
+      { name: 'Expenses', href: '/expenses' },
       { name: 'Suppliers', href: '/suppliers' },
       { name: 'Purchase Register', href: '/purchases/register' },
     ]
