@@ -141,7 +141,7 @@ export default function DocumentNumberingPage() {
   ];
 
   return (
-    <div className="container mx-auto py-6 space-y-6 max-w-4xl">
+    <section className="flex-1 p-4 lg:p-8 space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Document Numbering</h1>
         <p className="text-muted-foreground">
@@ -300,6 +300,6 @@ export default function DocumentNumberingPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </section>
   );
 }
