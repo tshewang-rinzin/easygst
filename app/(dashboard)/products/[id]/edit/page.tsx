@@ -177,7 +177,33 @@ export default function EditProductPage({
           </div>
         )}
 
-        <div className="mt-6 flex gap-4">
+        {/* Selling Units — how this product can be sold (per piece, carton, kg, etc.) */}
+        <div className="mt-8">
+          <ProductUnitsSection
+            productId={id}
+            defaultPrice={product.unitPrice ? parseFloat(product.unitPrice) : 0}
+          />
+        </div>
+
+        {/* Product Variants — attribute-based variations (color, size, etc.) */}
+        {product.productType !== 'service' && (
+          <FeatureGate feature="product_variants">
+            <div className="mt-8">
+              <h2 className="text-lg font-medium text-gray-900 mb-4">Product Variants</h2>
+              <p className="text-sm text-gray-500 mb-4">
+                Create variations based on attributes like color, size, or material — each with its own SKU and pricing.
+              </p>
+              <VariantBuilder
+                productId={id}
+                productSku={product.sku || ''}
+                trackInventory={product.trackInventory}
+              />
+            </div>
+          </FeatureGate>
+        )}
+
+        {/* Update / Cancel buttons at the very bottom */}
+        <div className="mt-8 flex gap-4">
           <Button
             type="submit"
             disabled={updatePending}
@@ -192,31 +218,6 @@ export default function EditProductPage({
           </Link>
         </div>
       </form>
-
-      {/* Selling Units — how this product can be sold (per piece, carton, kg, etc.) */}
-      <div className="mt-8">
-        <ProductUnitsSection
-          productId={id}
-          defaultPrice={product.unitPrice ? parseFloat(product.unitPrice) : 0}
-        />
-      </div>
-
-      {/* Product Variants — attribute-based variations (color, size, etc.) */}
-      {product.productType !== 'service' && (
-        <FeatureGate feature="product_variants">
-          <div className="mt-8">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Product Variants</h2>
-            <p className="text-sm text-gray-500 mb-4">
-              Create variations based on attributes like color, size, or material — each with its own SKU and pricing.
-            </p>
-            <VariantBuilder
-              productId={id}
-              productSku={product.sku || ''}
-              trackInventory={product.trackInventory}
-            />
-          </div>
-        </FeatureGate>
-      )}
     </section>
   );
 }
