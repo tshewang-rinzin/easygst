@@ -158,10 +158,10 @@ export function ProductUnitsSection({
         units: productUnits.filter(u => u.unitId), // Only save units with selected unit
       });
       
-      if (result.success) {
+      if ('success' in result && result.success) {
         toast.success('Product units updated successfully');
       } else {
-        toast.error(result.error || 'Failed to save units');
+        toast.error(('error' in result && result.error) || 'Failed to save units');
       }
     } catch (error) {
       toast.error('Failed to save units');

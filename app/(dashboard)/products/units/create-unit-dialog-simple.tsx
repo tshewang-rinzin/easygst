@@ -29,11 +29,13 @@ interface CreateUnitDialogProps {
 
 export function CreateUnitDialog({ children }: CreateUnitDialogProps) {
   const [open, setOpen] = useState(false);
-  const [state, formAction, pending] = useActionState(createUnit, {});
+  const [state, formAction, pending] = useActionState(createUnit, {
+    error: '',
+  });
   const router = useRouter();
 
   // Close dialog and refresh on success
-  if (state.success) {
+  if ('success' in state && state.success) {
     if (open) {
       setOpen(false);
       router.refresh();
@@ -116,7 +118,7 @@ export function CreateUnitDialog({ children }: CreateUnitDialogProps) {
             </p>
           </div>
 
-          {state.error && (
+          {'error' in state && state.error && (
             <div className="p-4 bg-red-50 border border-red-200 rounded-md">
               <p className="text-sm text-red-600">{state.error}</p>
             </div>

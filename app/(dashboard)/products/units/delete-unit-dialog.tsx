@@ -34,12 +34,12 @@ export function DeleteUnitDialog({ unit, open, onOpenChange }: DeleteUnitDialogP
     try {
       const result = await deleteUnit({ id: unit.id });
       
-      if (result.success) {
+      if ('success' in result && result.success) {
         toast.success(result.success);
         onOpenChange(false);
         router.refresh();
       } else {
-        toast.error(result.error || 'Failed to delete unit');
+        toast.error(('error' in result && result.error) || 'Failed to delete unit');
       }
     } catch (error) {
       toast.error('Failed to delete unit');

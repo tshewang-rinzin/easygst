@@ -1,10 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useActionState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import {
   Dialog,
   DialogContent,
@@ -12,17 +9,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormDescription,
-} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -32,18 +21,7 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { createUnit } from '@/lib/products/unit-actions';
-import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
-
-const formSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(50, 'Name must be 50 characters or less'),
-  abbreviation: z.string().min(1, 'Abbreviation is required').max(10, 'Abbreviation must be 10 characters or less'),
-  type: z.enum(['quantity', 'weight', 'volume', 'length', 'area', 'time']),
-  isBaseUnit: z.boolean().default(false),
-  conversionToBase: z.number().min(0, 'Conversion factor must be positive').default(1),
-});
-
-type FormData = z.infer<typeof formSchema>;
 
 interface CreateUnitDialogProps {
   children: React.ReactNode;
@@ -51,41 +29,23 @@ interface CreateUnitDialogProps {
 
 export function CreateUnitDialog({ children }: CreateUnitDialogProps) {
   const [open, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [state, formAction, pending] = useActionState(createUnit, {
+    error: '',
+  });
   const router = useRouter();
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: '',
-      abbreviation: '',
-      type: 'quantity',
-      isBaseUnit: false,
-      conversionToBase: 1,
-    },
-  });
+  // Local state for form fields
+  const [isBaseUnit, setIsBaseUnit] = useState(false);
 
-  const isBaseUnit = form.watch('isBaseUnit');
-
-  const onSubmit = async (data: FormData) => {
-    setIsLoading(true);
-    try {
-      const result = await createUnit(data);
-      
-      if (result.success) {
-        toast.success(result.success);
-        form.reset();
-        setOpen(false);
-        router.refresh();
-      } else {
-        toast.error(result.error || 'Failed to create unit');
-      }
-    } catch (error) {
-      toast.error('Failed to create unit');
-    } finally {
-      setIsLoading(false);
+  // Close dialog and refresh on success
+  if ('success' in state && state.success) {
+    if (open) {
+      setOpen(false);
+      router.refresh();
+      // Reset local state
+      setIsBaseUnit(false);
     }
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -97,135 +57,108 @@ export function CreateUnitDialog({ children }: CreateUnitDialogProps) {
           <DialogTitle>Create Unit of Measure</DialogTitle>
         </DialogHeader>
         
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
+        <form action={formAction} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
                 name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g., Kilogram"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                placeholder="e.g., Kilogram"
+                required
+                maxLength={50}
               />
-              
-              <FormField
-                control={form.control}
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="abbreviation">Abbreviation</Label>
+              <Input
+                id="abbreviation"
                 name="abbreviation"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Abbreviation</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g., kg"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                placeholder="e.g., kg"
+                required
+                maxLength={10}
               />
             </div>
+          </div>
 
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select unit type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="quantity">Quantity (pieces, dozens, etc.)</SelectItem>
-                      <SelectItem value="weight">Weight (grams, kilograms, etc.)</SelectItem>
-                      <SelectItem value="volume">Volume (liters, milliliters, etc.)</SelectItem>
-                      <SelectItem value="length">Length (meters, centimeters, etc.)</SelectItem>
-                      <SelectItem value="area">Area (square meters, etc.)</SelectItem>
-                      <SelectItem value="time">Time (hours, days, etc.)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+          <div className="space-y-2">
+            <Label htmlFor="type">Type</Label>
+            <Select name="type" required defaultValue="quantity">
+              <SelectTrigger>
+                <SelectValue placeholder="Select unit type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="quantity">Quantity (pieces, dozens, etc.)</SelectItem>
+                <SelectItem value="weight">Weight (grams, kilograms, etc.)</SelectItem>
+                <SelectItem value="volume">Volume (liters, milliliters, etc.)</SelectItem>
+                <SelectItem value="length">Length (meters, centimeters, etc.)</SelectItem>
+                <SelectItem value="area">Area (square meters, etc.)</SelectItem>
+                <SelectItem value="time">Time (hours, days, etc.)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+            <Checkbox 
+              id="isBaseUnit" 
+              checked={isBaseUnit}
+              onCheckedChange={(checked) => setIsBaseUnit(!!checked)}
             />
-
-            <FormField
-              control={form.control}
-              name="isBaseUnit"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>
-                      Base Unit
-                    </FormLabel>
-                    <FormDescription>
-                      Mark this as the base unit for this type. Other units will be converted relative to this one.
-                    </FormDescription>
-                  </div>
-                </FormItem>
-              )}
+            <input 
+              type="hidden" 
+              name="isBaseUnit" 
+              value={isBaseUnit.toString()} 
             />
+            <div className="space-y-1 leading-none">
+              <Label htmlFor="isBaseUnit">
+                Base Unit
+              </Label>
+              <p className="text-sm text-gray-500">
+                Mark this as the base unit for this type. Other units will be converted relative to this one.
+              </p>
+            </div>
+          </div>
 
-            {!isBaseUnit && (
-              <FormField
-                control={form.control}
+          {!isBaseUnit && (
+            <div className="space-y-2">
+              <Label htmlFor="conversionToBase">Conversion Factor to Base Unit</Label>
+              <Input
+                id="conversionToBase"
                 name="conversionToBase"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Conversion Factor to Base Unit</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.000001"
-                        min="0"
-                        placeholder="e.g., 1000 (if 1kg = 1000g)"
-                        {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 1)}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      How many base units equal 1 of this unit. For example, if this is "kilogram" and the base unit is "gram", enter 1000.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                type="number"
+                step="0.000001"
+                min="0"
+                placeholder="e.g., 1000 (if 1kg = 1000g)"
+                defaultValue="1"
               />
-            )}
-
-            <div className="flex justify-end gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-                disabled={isLoading}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Unit
-              </Button>
+              <p className="text-sm text-gray-500">
+                How many base units equal 1 of this unit. For example, if this is "kilogram" and the base unit is "gram", enter 1000.
+              </p>
             </div>
-          </form>
-        </Form>
+          )}
+
+          {'error' in state && state.error && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-600">{state.error}</p>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={pending}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={pending}>
+              {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Unit
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
