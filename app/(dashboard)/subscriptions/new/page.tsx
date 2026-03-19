@@ -43,7 +43,7 @@ export default function NewSubscriptionPage() {
   );
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <section className="flex-1 p-4 lg:p-8">
       <div className="flex items-center gap-3 mb-6">
         <Link href="/subscriptions">
           <Button variant="ghost" size="sm">
@@ -226,6 +226,6 @@ export default function NewSubscriptionPage() {
           </div>
         </div>
       </form>
-    </div>
+    </section>
   );
 }
