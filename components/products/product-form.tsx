@@ -256,7 +256,9 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
             <Input
               id="name"
               name="name"
-              placeholder="e.g., Monthly Consulting Service, Widget A"
+              placeholder={productType === 'service'
+                ? 'e.g., Monthly Consulting Service, Website Development'
+                : 'e.g., Wireless Mouse, Block Cheese, Cement Bag'}
               defaultValue={product?.name || ''}
               required
             />
@@ -269,7 +271,9 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
             <Textarea
               id="description"
               name="description"
-              placeholder="Detailed description of the product or service..."
+              placeholder={productType === 'service'
+                ? 'Describe the service offered, scope, deliverables, etc.'
+                : 'Describe the product — features, specifications, materials, etc.'}
               defaultValue={product?.description || ''}
               rows={3}
             />
@@ -284,7 +288,7 @@ export function ProductForm({ product, defaultGstRate = '0' }: ProductFormProps)
                 <Input
                   id="sku"
                   name="sku"
-                  placeholder="e.g., PROD-001"
+                  placeholder={productType === 'service' ? 'e.g., SVC-001' : 'e.g., PROD-001'}
                   defaultValue={product?.sku || ''}
                   onChange={(e) => setParentSku(e.target.value)}
                 />
